@@ -1,0 +1,23 @@
+This document highlights how to implement Role-Based Access Control (RBAC) logic in code.
+
+**User Roles:** Refer to the `role` column on the authenticated user object: 'super_admin', 'registered_user', 'subscriber', 'free_user'.
+
+**Permission Enforcement Layers:**
+
+1. **RLS (Database):** Primary data security (handled as per `supabase-data-rls.mdc`).
+2. **Backend (API/Server Actions):** Always check user role before performing sensitive operations. Return errors for unauthorized access.
+3. **Frontend (Conditional Rendering):** Hide/show UI elements (menu items, buttons, sections) based on user role for a better user experience. DO NOT rely on this for security.
+
+**Specific Role Permissions Context (Refer also to RBAC Structure Canvas):**
+
+- **Super Admin:** Full access. Can see/do everything.
+- **Registered User (MVP):** Can access the merchant panel and configure *their own* instance (countries, currencies, methods, linking). Can use the checkout flow. Limited analytics view. Cannot manage users, blog, audit logs.
+- **Subscriber (Post-MVP):** Full feature access (including advanced analytics, webhooks, unlimited links, etc.).
+- **Free User (Post-MVP):** Very limited access. Primarily view-only on configuration sections. Restricted payment links (3/month). Cannot create/modify configurations, access advanced features, or see webhook logs.
+
+**Implementation Directives for AI:**
+
+- When building admin features, include checks to ensure the authenticated user has the necessary role (e.g., check `user.role === 'super_admin'` or `user.role === 'registered_user'` depending on the feature in MVP).
+- When building public pages or checkout flow (user side), ensure they handle authenticated vs. unauthenticated users appropriately, but core payment *process* is generally accessible.
+- For features with tiered access (mostly Post-MVP, but prepare for it), implement frontend conditional rendering based on roles.
+- Ensure backend API endpoints for sensitive operations explicitly check the user's role obtained from the authenticated session.

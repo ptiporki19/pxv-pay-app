@@ -1,0 +1,27 @@
+# PXV Pay UI, Shadcn, and Tailwind Guidelines
+
+This document covers frontend UI development.
+
+**UI Library:** Shadcn UI.
+- Use Shadcn UI components as the default for common UI elements (buttons, forms, tables, dialogs, cards, etc.).
+- Prefer composing Shadcn components over building custom ones from scratch unless necessary.
+
+**Styling:** TailwindCSS.
+- Use Tailwind utility classes for styling whenever possible.
+- Avoid writing custom CSS unless it's for global styles or overriding Shadcn/Tailwind where utilities are insufficient.
+- Ensure responsiveness using Tailwind's responsive prefixes (sm:, md:, lg:, etc.).
+
+**Theming:**
+- The application uses a theme defined by CSS variables (refer to global styles).
+- Shadcn components and Tailwind classes should automatically use these variables.
+- Ensure dark mode is supported and styles are correct when the `.dark` class is active.
+
+**Responsiveness:**
+- All pages and components must be responsive and look good on desktop, tablet, and mobile screen sizes.
+
+**Key Directives for AI:**
+- Generate UI code using Shadcn UI components.
+- Apply styling using TailwindCSS utility classes.
+- Ensure the generated UI is responsive.
+- Assume the global theme variables are available and will style the components.
+- When building forms, use Shadcn form components integrated with React Hook Form and Zod. 
