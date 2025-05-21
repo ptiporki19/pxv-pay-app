@@ -31,7 +31,4 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.ts
-
-# nested project
-/pxv-pay/ 
+next-env.d.ts 
