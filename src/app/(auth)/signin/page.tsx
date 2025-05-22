@@ -60,12 +60,17 @@ export default function SignInPage() {
         throw error
       }
       
+      // Check email to determine if super admin
+      const userEmail = data.user.email || ''
+      const isSuperAdmin = userEmail === 'dev-admin@pxvpay.com' || userEmail === 'superadmin@pxvpay.com'
+      const redirectPath = isSuperAdmin ? '/super-admin' : '/dashboard'
+
       toast.success('Signed in successfully', {
-        description: 'Redirecting to your dashboard...',
+        description: `Redirecting to your ${isSuperAdmin ? 'super admin ' : ''}dashboard...`,
       })
 
       // Redirect to the appropriate dashboard based on the user's role
-      router.push('/dashboard')
+      router.push(redirectPath)
       router.refresh()
     } catch (error: any) {
       toast.error('Sign in failed', {

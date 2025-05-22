@@ -12,14 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { createClient } from '@/lib/supabase/server'
+import { SimpleUserActions } from '@/components/SimpleUserActions'
 import { formatDistanceToNow } from 'date-fns'
+import { createClient } from '@supabase/supabase-js'
 
 export const metadata: Metadata = {
   title: 'Users - PXV Pay',
@@ -27,31 +22,61 @@ export const metadata: Metadata = {
 }
 
 export default async function UsersPage() {
-  const supabase = createClient()
+  // Create a simple array to hold user data
+  let userData: any[] = []
   
-  // Fetch users and their profiles
-  const { data: users, error } = await supabase
-    .from('auth.users')
-    .select(`
-      *,
-      profiles(*)
-    `)
-    .order('created_at', { ascending: false })
-    .limit(100)
-  
-  // Prepare user data with necessary information
-  const userData = users?.map(user => {
-    return {
-      id: user.id,
-      name: user.profiles?.full_name || user.email?.split('@')[0] || 'Unknown User',
-      email: user.email,
-      role: user.profiles?.user_type || 'customer',
-      status: user.is_banned ? 'banned' : user.confirmed_at ? 'active' : 'pending',
-      lastActive: user.last_sign_in_at 
-        ? formatDistanceToNow(new Date(user.last_sign_in_at), { addSuffix: true })
-        : 'Never'
+  try {
+    // Create the admin client inside the component function
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    )
+    
+    // Simply query all users directly with admin privileges
+    const { data: users, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    console.log("Users query result:", { count: users?.length, error })
+    
+    if (error) {
+      console.error("Error fetching users:", error)
+    } else if (users && users.length > 0) {
+      // Also get auth user data for more information like last sign in
+      const { data: authUsers, error: authError } = await supabaseAdmin.auth.admin.listUsers()
+      
+      if (authError) {
+        console.error("Error fetching auth users:", authError)
+      }
+      
+      // Create a lookup map for auth users
+      const authUserMap = new Map()
+      if (authUsers && authUsers.users) {
+        authUsers.users.forEach((user: any) => {
+          authUserMap.set(user.id, user)
+        })
+      }
+      
+      // Map users to a simpler format
+      userData = users.map((user: any) => {
+        const authUser = authUserMap.get(user.id)
+        
+        return {
+          id: user.id,
+          name: user.email?.split('@')[0] || 'Unknown User',
+          email: user.email,
+          role: user.role || 'registered_user',
+          status: user.active === false ? 'inactive' : 'active',
+          lastActive: authUser?.last_sign_in_at 
+            ? formatDistanceToNow(new Date(authUser.last_sign_in_at), { addSuffix: true })
+            : 'Never'
+        }
+      })
     }
-  }) || []
+  } catch (error) {
+    console.error("Error in UsersPage:", error)
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -90,7 +115,7 @@ export default async function UsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {userData.length > 0 ? (
+            {userData && userData.length > 0 ? (
               userData.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">
@@ -101,8 +126,9 @@ export default async function UsersPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
-                      {user.role === 'super_admin' || user.role === 'admin' ? 'Admin' : 
-                      user.role === 'merchant' ? 'Merchant' : 'User'}
+                      {user.role === 'super_admin' ? 'Super Admin' : 
+                       user.role === 'admin' ? 'Admin' : 
+                       user.role === 'registered_user' ? 'Merchant' : 'User'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -113,43 +139,29 @@ export default async function UsersPage() {
                       {user.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{user.lastActive}</TableCell>
+                  <TableCell>{user.lastActive || 'Never'}</TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Open menu</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-horizontal">
-                            <circle cx="12" cy="12" r="1"></circle>
-                            <circle cx="19" cy="12" r="1"></circle>
-                            <circle cx="5" cy="12" r="1"></circle>
-                          </svg>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                          <Link href={`/users/${user.id}`} className="w-full">View details</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        {user.status === 'active' ? (
-                          <DropdownMenuItem className="text-red-600">Deactivate</DropdownMenuItem>
-                        ) : (
-                          <DropdownMenuItem className="text-green-600">Activate</DropdownMenuItem>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <SimpleUserActions
+                      userId={user.id}
+                      currentStatus={user.status as 'active' | 'inactive'}
+                      currentRole={user.role}
+                      userEmail={user.email}
+                    />
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
-                  No users found.
+                  No users found. Please check database connection or user permissions.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="mt-2 text-sm text-muted-foreground">
+        Total Users: {userData.length}
       </div>
     </div>
   )

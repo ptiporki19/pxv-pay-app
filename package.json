@@ -9,7 +9,9 @@
     "lint": "next lint",
     "supabase:start": "npx supabase start",
     "supabase:stop": "npx supabase stop",
-    "supabase:status": "npx supabase status"
+    "supabase:status": "npx supabase status",
+    "migrate": "node scripts/apply-migrations.js",
+    "test:payment-methods": "node scripts/test-payment-methods.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -48,6 +50,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.5.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.2",
     "supabase": "^2.23.4",

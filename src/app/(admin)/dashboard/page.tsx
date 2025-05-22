@@ -26,50 +26,74 @@ interface PaymentStatus {
 
 export default async function DashboardPage() {
   // Initialize Supabase client
-  const supabase = createClient()
+  const supabase = await createClient()
   
-  // Get user session and profile
-  const { data: { session } } = await supabase.auth.getSession()
-  const userId = session?.user?.id
+  // Default values in case fetch fails
+  let session = null
+  let userData = null
+  let userCount = 0
+  let totalPayments = 0
+  let pendingPayments = 0
+  let formattedPayments: any[] = []
   
-  // Fetch user data
-  const { data: userData } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .single()
-
-  // Fetch user count
-  const { count: userCount } = await supabase
-    .from('users')
-    .select('*', { count: 'exact', head: true })
-  
-  // Fetch payment statistics
-  const { count: totalPayments } = await supabase
-    .from('payments')
-    .select('*', { count: 'exact', head: true })
+  try {
+    // Get user session and profile
+    const { data } = await supabase.auth.getSession()
+    session = data.session
+    const userId = session?.user?.id
     
-  const { count: pendingPayments } = await supabase
-    .from('payments')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending')
-  
-  // Fetch recent payments
-  const { data: recentPayments } = await supabase
-    .from('payments')
-    .select('*, user:users(email)')
-    .order('created_at', { ascending: false })
-    .limit(4)
-  
-  // Format payment data
-  const formattedPayments = recentPayments?.map(payment => ({
-    id: payment.id,
-    date: new Date(payment.created_at).toISOString().split('T')[0],
-    customer: payment.user?.email?.split('@')[0] || 'Customer',
-    amount: `$${parseFloat(payment.amount).toFixed(2)}`,
-    method: payment.payment_method || 'N/A',
-    status: payment.status as PaymentStatus[keyof PaymentStatus]
-  })) || []
+    if (userId) {
+      // Fetch user data
+      const { data: userResult } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      
+      userData = userResult
+    
+      // Fetch user count
+      const { count: userCountResult } = await supabase
+        .from('users')
+        .select('*', { count: 'exact', head: true })
+      
+      userCount = userCountResult || 0
+      
+      // Fetch payment statistics
+      const { count: totalPaymentsResult } = await supabase
+        .from('payments')
+        .select('*', { count: 'exact', head: true })
+      
+      totalPayments = totalPaymentsResult || 0
+      
+      const { count: pendingPaymentsResult } = await supabase
+        .from('payments')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'pending')
+      
+      pendingPayments = pendingPaymentsResult || 0
+      
+      // Fetch recent payments
+      const { data: recentPayments } = await supabase
+        .from('payments')
+        .select('*, user:users(email)')
+        .order('created_at', { ascending: false })
+        .limit(4)
+      
+      // Format payment data
+      formattedPayments = recentPayments?.map(payment => ({
+        id: payment.id,
+        date: new Date(payment.created_at).toISOString().split('T')[0],
+        customer: payment.user?.email?.split('@')[0] || 'Customer',
+        amount: `$${parseFloat(payment.amount).toFixed(2)}`,
+        method: payment.payment_method || 'N/A',
+        status: payment.status as PaymentStatus[keyof PaymentStatus]
+      })) || []
+    }
+  } catch (error) {
+    console.error("Error loading dashboard data:", error)
+    // The default values set at the beginning will be used
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -108,7 +132,7 @@ export default async function DashboardPage() {
             <Users className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{userCount || 0}</div>
+            <div className="text-2xl font-bold">{userCount}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Registered users on the platform
             </p>
@@ -122,7 +146,7 @@ export default async function DashboardPage() {
             <CreditCard className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalPayments || 0}</div>
+            <div className="text-2xl font-bold">{totalPayments}</div>
             <p className="text-xs text-muted-foreground mt-1">
               All-time payment transactions
             </p>
@@ -136,7 +160,7 @@ export default async function DashboardPage() {
             <Clock className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingPayments || 0}</div>
+            <div className="text-2xl font-bold">{pendingPayments}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Payments awaiting verification
             </p>
@@ -150,7 +174,7 @@ export default async function DashboardPage() {
             <CheckCircle2 className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingPayments || 0}</div>
+            <div className="text-2xl font-bold">{pendingPayments}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Review and approve payments
             </p>
