@@ -32,7 +32,61 @@ export interface Database {
           active?: boolean
         }
       }
-      // We will add more tables as we build the application
+      payments: {
+        Row: {
+          id: string
+          created_at: string
+          amount: string
+          payment_method: string
+          status: 'pending' | 'completed' | 'failed' | 'refunded'
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          amount: string
+          payment_method: string
+          status?: 'pending' | 'completed' | 'failed' | 'refunded'
+          user_id: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          amount?: string
+          payment_method?: string
+          status?: 'pending' | 'completed' | 'failed' | 'refunded'
+          user_id?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          created_at: string
+          title: string
+          description: string
+          read: boolean
+          type: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          title: string
+          description: string
+          read?: boolean
+          type: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          title?: string
+          description?: string
+          read?: boolean
+          type?: string
+          user_id?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -42,6 +96,7 @@ export interface Database {
     }
     Enums: {
       user_role: 'super_admin' | 'registered_user' | 'subscriber' | 'free_user'
+      payment_status: 'pending' | 'completed' | 'failed' | 'refunded'
     }
   }
 } 

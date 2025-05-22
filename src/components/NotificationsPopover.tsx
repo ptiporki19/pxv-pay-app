@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Bell, CheckCircle2, Clock, CreditCard, Info, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,68 +11,156 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
-// Mock notifications data - this would be fetched from API in a real application
-const mockNotifications = [
-  {
-    id: '1',
-    title: 'New payment received',
-    description: 'You received a payment of $240.00',
-    time: '2 minutes ago',
-    read: false,
-    type: 'payment',
-  },
-  {
-    id: '2',
-    title: 'New user signed up',
-    description: 'john.doe@example.com has created an account',
-    time: '1 hour ago',
-    read: false,
-    type: 'user',
-  },
-  {
-    id: '3',
-    title: 'System update',
-    description: 'PXV Pay system was updated to version 1.2.0',
-    time: '3 hours ago',
-    read: true,
-    type: 'system',
-  },
-  {
-    id: '4',
-    title: 'Payment method added',
-    description: 'New payment method "Bank Transfer" was added',
-    time: 'Yesterday',
-    read: true,
-    type: 'system',
-  },
-  {
-    id: '5',
-    title: 'Failed transaction',
-    description: 'Transaction #TX123458 has failed',
-    time: 'Yesterday',
-    read: true,
-    type: 'payment',
-  },
-]
+interface Notification {
+  id: string
+  title: string
+  description: string
+  time: string
+  read: boolean
+  type: string
+  created_at: string
+  user_id: string
+}
 
 export function NotificationsPopover() {
-  const [notifications, setNotifications] = useState(mockNotifications)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
   
   const unreadCount = notifications.filter(notification => !notification.read).length
+  const supabase = createClient()
   
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(notification => ({
-      ...notification,
-      read: true
-    })))
+  // Fetch notifications from Supabase
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true)
+      
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userId = sessionData?.session?.user?.id
+      
+      if (!userId) return
+      
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(10)
+      
+      if (error) throw error
+      
+      if (data) {
+        setNotifications(data.map(notification => ({
+          ...notification,
+          time: getRelativeTime(notification.created_at)
+        })))
+      }
+    } catch (error: any) {
+      console.error('Error fetching notifications:', error.message)
+    } finally {
+      setLoading(false)
+    }
   }
   
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map(notification => 
-      notification.id === id ? { ...notification, read: true } : notification
-    ))
+  // Set up real-time subscription for new notifications
+  useEffect(() => {
+    fetchNotifications()
+    
+    // Subscribe to new notifications
+    const subscription = supabase
+      .channel('notifications-channel')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+      }, (payload) => {
+        // Add the new notification to the list
+        const newNotification = payload.new as Notification
+        setNotifications(prev => [
+          {
+            ...newNotification,
+            time: getRelativeTime(newNotification.created_at)
+          },
+          ...prev
+        ])
+        
+        // Show toast notification
+        toast.info(newNotification.title, {
+          description: newNotification.description,
+        })
+      })
+      .subscribe()
+    
+    return () => {
+      supabase.removeChannel(subscription)
+    }
+  }, [])
+  
+  // Convert timestamp to relative time
+  const getRelativeTime = (timestamp: string) => {
+    const now = new Date()
+    const date = new Date(timestamp)
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+    
+    if (diffInSeconds < 60) return 'Just now'
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} days ago`
+    
+    return date.toLocaleDateString()
+  }
+  
+  const markAllAsRead = async () => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userId = sessionData?.session?.user?.id
+      
+      if (!userId) return
+      
+      // Update all unread notifications in Supabase
+      const unreadIds = notifications
+        .filter(notification => !notification.read)
+        .map(notification => notification.id)
+      
+      if (unreadIds.length > 0) {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .in('id', unreadIds)
+        
+        if (error) throw error
+      }
+      
+      // Update local state
+      setNotifications(notifications.map(notification => ({
+        ...notification,
+        read: true
+      })))
+    } catch (error: any) {
+      console.error('Error marking notifications as read:', error.message)
+    }
+  }
+  
+  const markAsRead = async (id: string) => {
+    try {
+      // Update notification in Supabase
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id)
+      
+      if (error) throw error
+      
+      // Update local state
+      setNotifications(notifications.map(notification => 
+        notification.id === id ? { ...notification, read: true } : notification
+      ))
+    } catch (error: any) {
+      console.error('Error marking notification as read:', error.message)
+    }
   }
 
   // Get icon based on notification type
@@ -125,7 +213,11 @@ export function NotificationsPopover() {
             </Button>
           )}
         </div>
-        {notifications.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center h-[100px]">
+            <p className="text-sm text-muted-foreground">Loading notifications...</p>
+          </div>
+        ) : notifications.length > 0 ? (
           <ScrollArea className="h-[320px]">
             <div className="flex flex-col">
               {notifications.map((notification) => (

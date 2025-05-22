@@ -24,31 +24,145 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Search } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/server"
 
 export const metadata: Metadata = {
   title: 'Audit Logs - PXV Pay',
   description: 'View system audit logs',
 }
 
-export default function AuditLogsPage() {
-  // In a real application, this data would come from Supabase
-  const auditLogs = [
-    { id: '1', userId: 'michael.c@example.com', action: 'user.update', details: 'Changed role for user sarah.j@example.com', timestamp: '2023-06-15T10:30:45Z', ipAddress: '192.168.1.1' },
-    { id: '2', userId: 'michael.c@example.com', action: 'user.create', details: 'Created new user james.w@example.com', timestamp: '2023-06-14T14:15:30Z', ipAddress: '192.168.1.1' },
-    { id: '3', userId: 'sarah.j@example.com', action: 'payment_method.create', details: 'Added new payment method "Bank Transfer"', timestamp: '2023-06-13T09:45:22Z', ipAddress: '192.168.1.2' },
-    { id: '4', userId: 'system', action: 'system.update', details: 'System updated to version 1.2.0', timestamp: '2023-06-12T23:00:00Z', ipAddress: '127.0.0.1' },
-    { id: '5', userId: 'michael.c@example.com', action: 'user.deactivate', details: 'Deactivated user olivia.t@example.com', timestamp: '2023-06-11T16:20:10Z', ipAddress: '192.168.1.1' },
-  ]
+interface AuditLog {
+  id: string
+  user_id: string
+  action: string
+  entity_type: string
+  entity_id: string
+  old_data: any
+  new_data: any
+  created_at: string
+}
+
+export default async function AuditLogsPage() {
+  const supabase = createClient()
+  
+  // Fetch audit logs from Supabase with user information
+  const { data: logs, error } = await supabase
+    .from('audit_logs')
+    .select(`
+      *,
+      profiles:user_id (
+        full_name,
+        id
+      )
+    `)
+    .order('created_at', { ascending: false })
+    .limit(50)
+  
+  const auditLogs = logs || []
+
+  // If there are no logs yet, add some sample logs
+  if (auditLogs.length === 0) {
+    const { data: { session } } = await supabase.auth.getSession()
+    const currentUserId = session?.user?.id
+    
+    if (currentUserId) {
+      // Insert sample audit logs
+      await supabase.from('audit_logs').insert([
+        {
+          user_id: currentUserId,
+          action: 'INSERT',
+          entity_type: 'users',
+          entity_id: '11111111-1111-1111-1111-111111111111',
+          new_data: { email: 'user@example.com', role: 'customer' }
+        },
+        {
+          user_id: currentUserId,
+          action: 'UPDATE',
+          entity_type: 'payment_methods',
+          entity_id: '22222222-2222-2222-2222-222222222222',
+          old_data: { name: 'Bank Transfer', status: 'inactive' },
+          new_data: { name: 'Bank Transfer', status: 'active' }
+        },
+        {
+          user_id: currentUserId,
+          action: 'UPDATE',
+          entity_type: 'payments',
+          entity_id: '33333333-3333-3333-3333-333333333333',
+          old_data: { status: 'pending' },
+          new_data: { status: 'completed' }
+        }
+      ])
+      
+      // Fetch the logs again
+      const { data: refreshedLogs } = await supabase
+        .from('audit_logs')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            id
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(50)
+      
+      if (refreshedLogs) {
+        auditLogs.push(...refreshedLogs)
+      }
+    }
+  }
 
   const actionTypes = {
-    'user.update': { label: 'User Update', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' },
-    'user.create': { label: 'User Create', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' },
-    'user.deactivate': { label: 'User Deactivate', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100' },
-    'payment_method.create': { label: 'Payment Method Create', color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100' },
-    'system.update': { label: 'System Update', color: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100' },
+    'INSERT': { label: 'Create', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' },
+    'UPDATE': { label: 'Update', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100' },
+    'DELETE': { label: 'Delete', color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100' },
+  }
+
+  const entityTypes = {
+    'users': 'User',
+    'profiles': 'Profile',
+    'merchants': 'Merchant',
+    'payments': 'Payment',
+    'payment_methods': 'Payment Method',
+    'countries': 'Country',
+    'currencies': 'Currency',
+  }
+
+  // Function to generate a human-readable description of the change
+  const getChangeDescription = (log: AuditLog) => {
+    const entity = entityTypes[log.entity_type as keyof typeof entityTypes] || log.entity_type
+    
+    if (log.action === 'INSERT') {
+      return `Created new ${entity.toLowerCase()}`
+    }
+    
+    if (log.action === 'DELETE') {
+      return `Deleted ${entity.toLowerCase()}`
+    }
+    
+    if (log.action === 'UPDATE') {
+      let changedFields: string[] = []
+      
+      if (log.old_data && log.new_data) {
+        // Find what fields changed
+        Object.keys(log.new_data).forEach(key => {
+          if (JSON.stringify(log.old_data[key]) !== JSON.stringify(log.new_data[key])) {
+            changedFields.push(key)
+          }
+        })
+      }
+      
+      if (changedFields.length > 0) {
+        return `Updated ${entity.toLowerCase()} fields: ${changedFields.join(', ')}`
+      }
+      
+      return `Updated ${entity.toLowerCase()}`
+    }
+    
+    return `${log.action} on ${entity.toLowerCase()}`
   }
 
   return (
@@ -65,19 +179,34 @@ export default function AuditLogsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-        <Input
-          placeholder="Search logs..."
-          className="w-full sm:max-w-xs"
-        />
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search logs..."
+            className="w-full pl-8"
+          />
+        </div>
+        <Select defaultValue="all">
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Entity type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Entities</SelectItem>
+            <SelectItem value="users">Users</SelectItem>
+            <SelectItem value="merchants">Merchants</SelectItem>
+            <SelectItem value="payments">Payments</SelectItem>
+            <SelectItem value="payment_methods">Payment Methods</SelectItem>
+          </SelectContent>
+        </Select>
         <Select defaultValue="all">
           <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Action type" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Actions</SelectItem>
-            <SelectItem value="user">User Actions</SelectItem>
-            <SelectItem value="payment">Payment Actions</SelectItem>
-            <SelectItem value="system">System Actions</SelectItem>
+            <SelectItem value="INSERT">Create</SelectItem>
+            <SelectItem value="UPDATE">Update</SelectItem>
+            <SelectItem value="DELETE">Delete</SelectItem>
           </SelectContent>
         </Select>
         <Popover>
@@ -111,36 +240,48 @@ export default function AuditLogsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[200px]">Timestamp</TableHead>
+                <TableHead className="w-[180px]">Timestamp</TableHead>
                 <TableHead>User</TableHead>
                 <TableHead>Action</TableHead>
+                <TableHead>Entity</TableHead>
                 <TableHead className="max-w-[300px]">Details</TableHead>
-                <TableHead>IP Address</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {auditLogs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell className="font-medium">
-                    {new Date(log.timestamp).toLocaleString()}
+              {auditLogs.length > 0 ? (
+                auditLogs.map((log: any) => (
+                  <TableRow key={log.id}>
+                    <TableCell className="font-medium">
+                      {new Date(log.created_at).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      {log.profiles?.full_name || `User ${log.user_id.slice(0, 8)}`}
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant="outline" 
+                        className={cn(
+                          actionTypes[log.action as keyof typeof actionTypes]?.color || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
+                        )}
+                      >
+                        {actionTypes[log.action as keyof typeof actionTypes]?.label || log.action}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {entityTypes[log.entity_type as keyof typeof entityTypes] || log.entity_type}
+                    </TableCell>
+                    <TableCell className="max-w-[300px] truncate">
+                      {getChangeDescription(log)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    No audit logs found
                   </TableCell>
-                  <TableCell>{log.userId}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="outline" 
-                      className={cn(
-                        actionTypes[log.action as keyof typeof actionTypes]?.color || 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100'
-                      )}
-                    >
-                      {actionTypes[log.action as keyof typeof actionTypes]?.label || log.action}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="max-w-[300px] truncate">
-                    {log.details}
-                  </TableCell>
-                  <TableCell>{log.ipAddress}</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </CardContent>

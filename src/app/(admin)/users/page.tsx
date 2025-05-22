@@ -1,8 +1,9 @@
 import { Metadata } from 'next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import Link from 'next/link'
+import { PlusCircle, Search } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -10,121 +11,146 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from '@/components/ui/table'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { createClient } from '@/lib/supabase/server'
+import { formatDistanceToNow } from 'date-fns'
 
 export const metadata: Metadata = {
-  title: 'User Management - PXV Pay',
-  description: 'Manage users and roles',
+  title: 'Users - PXV Pay',
+  description: 'Manage users in your payment system',
 }
 
-export default function UsersPage() {
-  // In a real application, this data would come from Supabase
-  const users = [
-    { id: '1', name: 'Sarah Johnson', email: 'sarah.j@example.com', role: 'registered_user', status: 'active', lastActive: '2 hours ago' },
-    { id: '2', name: 'Michael Chen', email: 'michael.c@example.com', role: 'super_admin', status: 'active', lastActive: '5 minutes ago' },
-    { id: '3', name: 'Olivia Taylor', email: 'olivia.t@example.com', role: 'registered_user', status: 'inactive', lastActive: '3 days ago' },
-    { id: '4', name: 'James Wilson', email: 'james.w@example.com', role: 'registered_user', status: 'active', lastActive: '1 day ago' },
-    { id: '5', name: 'Emily Brown', email: 'emily.b@example.com', role: 'registered_user', status: 'active', lastActive: '12 hours ago' },
-  ]
+export default async function UsersPage() {
+  const supabase = createClient()
+  
+  // Fetch users and their profiles
+  const { data: users, error } = await supabase
+    .from('auth.users')
+    .select(`
+      *,
+      profiles(*)
+    `)
+    .order('created_at', { ascending: false })
+    .limit(100)
+  
+  // Prepare user data with necessary information
+  const userData = users?.map(user => {
+    return {
+      id: user.id,
+      name: user.profiles?.full_name || user.email?.split('@')[0] || 'Unknown User',
+      email: user.email,
+      role: user.profiles?.user_type || 'customer',
+      status: user.is_banned ? 'banned' : user.confirmed_at ? 'active' : 'pending',
+      lastActive: user.last_sign_in_at 
+        ? formatDistanceToNow(new Date(user.last_sign_in_at), { addSuffix: true })
+        : 'Never'
+    }
+  }) || []
 
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-          <p className="text-muted-foreground">Manage user accounts and roles.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Users</h1>
+          <p className="text-muted-foreground">Manage user accounts and permissions</p>
         </div>
-        <Button>Add User</Button>
+        <Button asChild>
+          <Link href="/users/invite">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Invite User
+          </Link>
+        </Button>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Input
-          placeholder="Search users..."
-          className="max-w-sm"
-        />
-        <Select defaultValue="all">
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="super_admin">Super Admin</SelectItem>
-            <SelectItem value="registered_user">Registered User</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select defaultValue="all">
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex items-center py-4">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search users..."
+            className="w-full bg-white pl-8"
+          />
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Users</CardTitle>
-          <CardDescription>
-            List of all registered users in the system.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[250px]">Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last Active</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((user) => (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[300px]">Name</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Last active</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {userData.length > 0 ? (
+              userData.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">
                     <div>
-                      {user.name}
+                      <div>{user.name}</div>
                       <div className="text-sm text-muted-foreground">{user.email}</div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.role === 'super_admin' ? 'default' : 'outline'}>
-                      {user.role === 'super_admin' ? 'Super Admin' : 'User'}
+                    <Badge variant="outline">
+                      {user.role === 'super_admin' || user.role === 'admin' ? 'Admin' : 
+                      user.role === 'merchant' ? 'Merchant' : 'User'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.status === 'active' ? 'default' : 'secondary'} className={user.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 hover:bg-green-100 hover:text-green-800 dark:hover:bg-green-900 dark:hover:text-green-100' : ''}>
-                      {user.status === 'active' ? 'Active' : 'Inactive'}
+                    <Badge 
+                      variant={user.status === 'active' ? 'default' : 
+                              user.status === 'pending' ? 'secondary' : 'destructive'}
+                    >
+                      {user.status}
                     </Badge>
                   </TableCell>
                   <TableCell>{user.lastActive}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm">Edit</Button>
-                      {user.status === 'active' ? (
-                        <Button variant="destructive" size="sm">Deactivate</Button>
-                      ) : (
-                        <Button variant="outline" size="sm">Activate</Button>
-                      )}
-                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-horizontal">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="19" cy="12" r="1"></circle>
+                            <circle cx="5" cy="12" r="1"></circle>
+                          </svg>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>
+                          <Link href={`/users/${user.id}`} className="w-full">View details</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        {user.status === 'active' ? (
+                          <DropdownMenuItem className="text-red-600">Deactivate</DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem className="text-green-600">Activate</DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center">
+                  No users found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 } 

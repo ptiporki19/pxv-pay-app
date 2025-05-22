@@ -13,17 +13,63 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: 'Dashboard - PXV Pay',
   description: 'Your payment system dashboard',
 }
 
-export default function DashboardPage() {
-  // In a real app, this would be fetched from the API
-  const userData = {
-    email: 'petitporky0@gmail.com'
-  };
+interface PaymentStatus {
+  [key: string]: 'pending' | 'completed' | 'failed' | 'refunded'
+}
+
+export default async function DashboardPage() {
+  // Initialize Supabase client
+  const supabase = createClient()
+  
+  // Get user session and profile
+  const { data: { session } } = await supabase.auth.getSession()
+  const userId = session?.user?.id
+  
+  // Fetch user data
+  const { data: userData } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .single()
+
+  // Fetch user count
+  const { count: userCount } = await supabase
+    .from('users')
+    .select('*', { count: 'exact', head: true })
+  
+  // Fetch payment statistics
+  const { count: totalPayments } = await supabase
+    .from('payments')
+    .select('*', { count: 'exact', head: true })
+    
+  const { count: pendingPayments } = await supabase
+    .from('payments')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'pending')
+  
+  // Fetch recent payments
+  const { data: recentPayments } = await supabase
+    .from('payments')
+    .select('*, user:users(email)')
+    .order('created_at', { ascending: false })
+    .limit(4)
+  
+  // Format payment data
+  const formattedPayments = recentPayments?.map(payment => ({
+    id: payment.id,
+    date: new Date(payment.created_at).toISOString().split('T')[0],
+    customer: payment.user?.email?.split('@')[0] || 'Customer',
+    amount: `$${parseFloat(payment.amount).toFixed(2)}`,
+    method: payment.payment_method || 'N/A',
+    status: payment.status as PaymentStatus[keyof PaymentStatus]
+  })) || []
 
   return (
     <div className="flex flex-col gap-6">
@@ -31,7 +77,7 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back, {userData.email}</p>
+          <p className="text-muted-foreground">Welcome back, {userData?.email?.split('@')[0] || 'User'}</p>
         </div>
         <Button variant="outline" size="sm" className="gap-2">
           <Clock className="h-4 w-4" />
@@ -62,7 +108,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">69</div>
+            <div className="text-2xl font-bold">{userCount || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Registered users on the platform
             </p>
@@ -76,7 +122,7 @@ export default function DashboardPage() {
             <CreditCard className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">350</div>
+            <div className="text-2xl font-bold">{totalPayments || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
               All-time payment transactions
             </p>
@@ -90,7 +136,7 @@ export default function DashboardPage() {
             <Clock className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{pendingPayments || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Payments awaiting verification
             </p>
@@ -104,7 +150,7 @@ export default function DashboardPage() {
             <CheckCircle2 className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2</div>
+            <div className="text-2xl font-bold">{pendingPayments || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">
               Review and approve payments
             </p>
@@ -136,85 +182,39 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {/* Row 1 */}
-                <tr className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="px-4 py-3 font-medium">PAY-123</td>
-                  <td className="px-4 py-3">2023-08-15</td>
-                  <td className="px-4 py-3">John Doe</td>
-                  <td className="px-4 py-3 font-medium">$500</td>
-                  <td className="px-4 py-3">Bank Transfer</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-                      completed
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Info className="h-4 w-4" />
-                      <span className="sr-only">Details</span>
-                    </Button>
-                  </td>
-                </tr>
-                
-                {/* Row 2 */}
-                <tr className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="px-4 py-3 font-medium">PAY-124</td>
-                  <td className="px-4 py-3">2023-08-16</td>
-                  <td className="px-4 py-3">Jane Smith</td>
-                  <td className="px-4 py-3 font-medium">$350</td>
-                  <td className="px-4 py-3">Mobile Money</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800">
-                      pending
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Info className="h-4 w-4" />
-                      <span className="sr-only">Details</span>
-                    </Button>
-                  </td>
-                </tr>
-                
-                {/* Row 3 */}
-                <tr className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="px-4 py-3 font-medium">PAY-125</td>
-                  <td className="px-4 py-3">2023-08-17</td>
-                  <td className="px-4 py-3">Bob Johnson</td>
-                  <td className="px-4 py-3 font-medium">$1200</td>
-                  <td className="px-4 py-3">Crypto</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-                      completed
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Info className="h-4 w-4" />
-                      <span className="sr-only">Details</span>
-                    </Button>
-                  </td>
-                </tr>
-                
-                {/* Row 4 */}
-                <tr className="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="px-4 py-3 font-medium">PAY-126</td>
-                  <td className="px-4 py-3">2023-08-18</td>
-                  <td className="px-4 py-3">Customer 1</td>
-                  <td className="px-4 py-3 font-medium">$341</td>
-                  <td className="px-4 py-3">Bank Transfer</td>
-                  <td className="px-4 py-3">
-                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800">
-                      pending
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Info className="h-4 w-4" />
-                      <span className="sr-only">Details</span>
-                    </Button>
-                  </td>
-                </tr>
+                {formattedPayments.length > 0 ? (
+                  formattedPayments.map((payment) => (
+                    <tr key={payment.id} className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <td className="px-4 py-3 font-medium">{payment.id}</td>
+                      <td className="px-4 py-3">{payment.date}</td>
+                      <td className="px-4 py-3">{payment.customer}</td>
+                      <td className="px-4 py-3 font-medium">{payment.amount}</td>
+                      <td className="px-4 py-3">{payment.method}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={cn(
+                          payment.status === 'completed' && "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
+                          payment.status === 'pending' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
+                          payment.status === 'failed' && "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800",
+                          payment.status === 'refunded' && "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800"
+                        )}>
+                          {payment.status}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Info className="h-4 w-4" />
+                          <span className="sr-only">Details</span>
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
+                      No payments found. Payments will appear here once processed.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

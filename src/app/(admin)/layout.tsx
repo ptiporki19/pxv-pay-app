@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Home, Globe, DollarSign, CreditCard, Link2, Palette, FileText, Shield, X, User, Settings, LogOut } from 'lucide-react'
+import { Home, Globe, DollarSign, CreditCard, Link2, Palette, FileText, Shield, X, User, Settings, LogOut, Zap } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -35,6 +35,7 @@ const merchantNavItems = [
   { label: 'Theme Customization', path: '/theme', iconName: 'Palette' },
   { label: 'Content Customization', path: '/content', iconName: 'FileText' },
   { label: 'Payment Verification', path: '/verification', iconName: 'Shield' },
+  { label: 'Real-Time Test', path: '/test-realtime', iconName: 'Zap' },
 ]
 
 // Super admin only items

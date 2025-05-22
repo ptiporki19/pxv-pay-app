@@ -1,8 +1,54 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { createClient } from "@/lib/supabase/server"
+import { Search } from "lucide-react"
 
-export default function CurrenciesPage() {
+interface Currency {
+  id: string
+  name: string
+  code: string
+  symbol: string
+  status: 'active' | 'pending' | 'inactive'
+  created_at: string
+}
+
+export default async function CurrenciesPage() {
+  const supabase = createClient()
+  
+  // Fetch currencies from Supabase
+  let { data: currencies, error } = await supabase
+    .from('currencies')
+    .select('*')
+    .order('name', { ascending: true })
+  
+  // If currencies table doesn't exist or is empty, insert some default data
+  if (error || !currencies || currencies.length === 0) {
+    const defaultCurrencies = [
+      { name: "US Dollar", code: "USD", symbol: "$", status: "active" },
+      { name: "Euro", code: "EUR", symbol: "€", status: "active" },
+      { name: "British Pound", code: "GBP", symbol: "£", status: "active" },
+      { name: "Nigerian Naira", code: "NGN", symbol: "₦", status: "active" },
+      { name: "Brazilian Real", code: "BRL", symbol: "R$", status: "pending" },
+    ]
+    
+    // Insert default currencies
+    await supabase
+      .from('currencies')
+      .insert(defaultCurrencies)
+    
+    // Fetch currencies again after inserting defaults
+    const { data: refreshedCurrencies } = await supabase
+      .from('currencies')
+      .select('*')
+      .order('name', { ascending: true })
+    
+    // Use the refreshed data
+    if (refreshedCurrencies) {
+      currencies = refreshedCurrencies
+    }
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
@@ -14,10 +60,13 @@ export default function CurrenciesPage() {
       </div>
 
       <div className="flex items-center py-4">
-        <Input
-          placeholder="Search currencies..."
-          className="max-w-sm"
-        />
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search currencies..."
+            className="w-full bg-white pl-8"
+          />
+        </div>
       </div>
 
       <Card>
@@ -35,56 +84,29 @@ export default function CurrenciesPage() {
               <div className="w-1/4">Symbol</div>
               <div className="w-1/4 text-right">Status</div>
             </div>
-            <div className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <div className="w-1/4">US Dollar</div>
-              <div className="w-1/4">USD</div>
-              <div className="w-1/4">$</div>
-              <div className="w-1/4 text-right">
-                <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-100">
-                  Active
-                </span>
+            
+            {currencies && currencies.length > 0 ? (
+              currencies.map((currency) => (
+                <div key={currency.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <div className="w-1/4">{currency.name}</div>
+                  <div className="w-1/4">{currency.code}</div>
+                  <div className="w-1/4">{currency.symbol}</div>
+                  <div className="w-1/4 text-right">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                      ${currency.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' : 
+                        currency.status === 'pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' : 
+                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'}`}>
+                      {currency.status === 'active' ? 'Active' : 
+                       currency.status === 'pending' ? 'Pending' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-3 text-center text-muted-foreground">
+                No currencies found. Add one to get started.
               </div>
-            </div>
-            <div className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <div className="w-1/4">Euro</div>
-              <div className="w-1/4">EUR</div>
-              <div className="w-1/4">€</div>
-              <div className="w-1/4 text-right">
-                <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-100">
-                  Active
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <div className="w-1/4">British Pound</div>
-              <div className="w-1/4">GBP</div>
-              <div className="w-1/4">£</div>
-              <div className="w-1/4 text-right">
-                <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-100">
-                  Active
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <div className="w-1/4">Nigerian Naira</div>
-              <div className="w-1/4">NGN</div>
-              <div className="w-1/4">₦</div>
-              <div className="w-1/4 text-right">
-                <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-100">
-                  Active
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <div className="w-1/4">Brazilian Real</div>
-              <div className="w-1/4">BRL</div>
-              <div className="w-1/4">R$</div>
-              <div className="w-1/4 text-right">
-                <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100">
-                  Pending
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
