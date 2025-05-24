@@ -5,7 +5,6 @@ import { PlusCircle, Search, Edit, Trash2, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Currency, currenciesApi } from "@/lib/supabase/client-api"
-import { useAdminStore } from "@/lib/store/admin-store"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,24 +12,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "@/components/ui/use-toast"
+import Link from "next/link"
 
 export function CurrenciesList() {
   const [currencies, setCurrencies] = useState<Currency[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const { openModal, searchQuery, setSearchQuery, refreshFlag } = useAdminStore()
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Fetch currencies from the API
   useEffect(() => {
     const fetchCurrencies = async () => {
       setIsLoading(true)
       try {
-        let data
-        if (searchQuery.trim()) {
-          data = await currenciesApi.search(searchQuery)
-        } else {
-          data = await currenciesApi.getAll()
-        }
-        setCurrencies(data)
+        const data = await currenciesApi.getAll()
+        // Filter by search query if provided
+        const filteredData = searchQuery.trim() 
+          ? data.filter(currency => 
+              currency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              currency.code.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+          : data
+        setCurrencies(filteredData)
       } catch (error) {
         console.error("Error fetching currencies:", error)
         toast({ 
@@ -44,7 +46,7 @@ export function CurrenciesList() {
     }
 
     fetchCurrencies()
-  }, [searchQuery, refreshFlag])
+  }, [searchQuery])
 
   // Handle delete currency
   const handleDelete = async (id: string) => {
@@ -88,10 +90,12 @@ export function CurrenciesList() {
           <h1 className="text-3xl font-bold tracking-tight">Currencies</h1>
           <p className="text-muted-foreground">Manage supported currencies for payments.</p>
         </div>
-        <Button onClick={() => openModal('currency', 'create')}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Currency
-        </Button>
+        <Link href="/currencies/create">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Currency
+          </Button>
+        </Link>
       </div>
 
       <div className="flex items-center py-4">
@@ -140,9 +144,11 @@ export function CurrenciesList() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openModal('currency', 'edit', currency)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      <span>Edit</span>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/currencies/edit/${currency.id}`}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => currency.id && handleDelete(currency.id)}

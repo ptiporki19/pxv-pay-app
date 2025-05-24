@@ -5,7 +5,6 @@ import { PlusCircle, Search, Edit, Trash2, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Country, countriesApi } from "@/lib/supabase/client-api"
-import { useAdminStore } from "@/lib/store/admin-store"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,24 +12,27 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "@/components/ui/use-toast"
+import Link from "next/link"
 
 export function CountriesList() {
   const [countries, setCountries] = useState<Country[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const { openModal, searchQuery, setSearchQuery, refreshFlag } = useAdminStore()
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Fetch countries from the API
   useEffect(() => {
     const fetchCountries = async () => {
       setIsLoading(true)
       try {
-        let data
-        if (searchQuery.trim()) {
-          data = await countriesApi.search(searchQuery)
-        } else {
-          data = await countriesApi.getAll()
-        }
-        setCountries(data)
+        const data = await countriesApi.getAll()
+        // Filter by search query if provided
+        const filteredData = searchQuery.trim() 
+          ? data.filter(country => 
+              country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              country.code.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+          : data
+        setCountries(filteredData)
       } catch (error) {
         console.error("Error fetching countries:", error)
         toast({ 
@@ -44,7 +46,7 @@ export function CountriesList() {
     }
 
     fetchCountries()
-  }, [searchQuery, refreshFlag])
+  }, [searchQuery])
 
   // Handle delete country
   const handleDelete = async (id: string) => {
@@ -88,10 +90,12 @@ export function CountriesList() {
           <h1 className="text-3xl font-bold tracking-tight">Countries</h1>
           <p className="text-muted-foreground">Manage supported countries for payments.</p>
         </div>
-        <Button onClick={() => openModal('country', 'create')}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Country
-        </Button>
+        <Link href="/countries/create">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Country
+          </Button>
+        </Link>
       </div>
 
       <div className="flex items-center py-4">
@@ -110,7 +114,7 @@ export function CountriesList() {
         <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
           <div className="w-1/3">Country Name</div>
           <div className="w-1/3">Country Code</div>
-          <div className="w-1/4 text-center">Status</div>
+          <div className="w-1/6 text-center">Status</div>
           <div className="w-1/12 text-right">Actions</div>
         </div>
         
@@ -123,7 +127,7 @@ export function CountriesList() {
             <div key={country.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
               <div className="w-1/3">{country.name}</div>
               <div className="w-1/3">{country.code}</div>
-              <div className="w-1/4 text-center">
+              <div className="w-1/6 text-center">
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(country.status)}`}>
                   {country.status === 'active' ? 'Active' : 
                    country.status === 'pending' ? 'Pending' : 'Inactive'}
@@ -138,9 +142,11 @@ export function CountriesList() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openModal('country', 'edit', country)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      <span>Edit</span>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/countries/edit/${country.id}`}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => country.id && handleDelete(country.id)}
