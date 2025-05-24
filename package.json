@@ -11,7 +11,9 @@
     "supabase:stop": "npx supabase stop",
     "supabase:status": "npx supabase status",
     "migrate": "node scripts/apply-migrations.js",
-    "test:payment-methods": "node scripts/test-payment-methods.js"
+    "test:payment-methods": "node scripts/test-payment-methods.js",
+    "test:user-isolation": "node scripts/test-user-isolation.js",
+    "create:test-payment": "node scripts/create-test-payment.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -28,13 +30,14 @@
     "@radix-ui/react-tabs": "^1.1.12",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.49.6",
+    "@supabase/supabase-js": "^2.49.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
     "next-themes": "^0.4.6",
+    "pg": "^8.16.0",
     "react": "^19.0.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "^19.0.0",

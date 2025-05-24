@@ -60,9 +60,26 @@ export default function SignInPage() {
         throw error
       }
       
-      // Check email to determine if super admin
-      const userEmail = data.user.email || ''
-      const isSuperAdmin = userEmail === 'dev-admin@pxvpay.com' || userEmail === 'superadmin@pxvpay.com'
+      // Fetch user profile to check role
+      const { data: userProfile, error: profileError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+      
+      if (profileError) {
+        console.error('Error fetching user profile:', profileError)
+        // Fallback: redirect to regular dashboard if we can't determine role
+        toast.success('Signed in successfully', {
+          description: 'Redirecting to your dashboard...',
+        })
+        router.push('/dashboard')
+        router.refresh()
+        return
+      }
+
+      // Determine redirect path based on actual user role
+      const isSuperAdmin = userProfile.role === 'super_admin'
       const redirectPath = isSuperAdmin ? '/super-admin' : '/dashboard'
 
       toast.success('Signed in successfully', {

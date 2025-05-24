@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -22,14 +22,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
-import { Country, PaymentMethod, countriesApi, paymentMethodsApi } from "@/lib/supabase/client-api"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Country, PaymentMethod, CustomField, countriesApi, paymentMethodsApi } from "@/lib/supabase/client-api"
 import { useAdminStore } from "@/lib/store/admin-store"
 import { 
   paymentMethodFormSchema, 
   PaymentMethodFormValues,
-} from "@/lib/validations/admin-forms" // Only import the refined schema
-import { Check, ChevronsUpDown } from "lucide-react"
+  CustomFieldType
+} from "@/lib/validations/admin-forms"
+import { Check, ChevronsUpDown, Plus, Trash2, GripVertical } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Command,
@@ -43,13 +44,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Checkbox } from "@/components/ui/checkbox"
+import { useNotificationActions } from "@/providers/notification-provider"
 
 interface PaymentMethodFormProps {
   initialData?: PaymentMethod
   onSuccess?: () => void
 }
-
-// The form will now consistently use PaymentMethodFormValues
 
 export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormProps) {
   const [isLoading, setIsLoading] = useState(false)
@@ -57,6 +58,7 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
   const closeModal = useAdminStore((state) => state.closeModal)
   const setRefreshFlag = useAdminStore((state) => state.setRefreshFlag)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const { showSuccess, showError } = useNotificationActions()
   
   // Fetch countries
   useEffect(() => {
@@ -66,18 +68,14 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
         setCountries(countriesList)
       } catch (error) {
         console.error("Error fetching countries:", error)
-        toast({ 
-          title: "Error", 
-          description: "Failed to fetch countries list", 
-          variant: "destructive"
-        })
+        showError("Failed to fetch countries list")
       }
     }
     
     fetchCountries()
-  }, [])
+  }, [showError])
 
-  // Initialize the form using the single refined schema
+  // Initialize the form
   const form = useForm<PaymentMethodFormValues>({
     resolver: zodResolver(paymentMethodFormSchema),
     defaultValues: initialData ? {
@@ -86,26 +84,40 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
       countries: initialData.countries,
       status: initialData.status,
       instructions: initialData.instructions || "",
+      description: initialData.description || "",
+      custom_fields: initialData.custom_fields || [],
       icon: initialData.icon || null,
-      url: initialData.url || "", // url is now part of PaymentMethod and PaymentMethodFormValues
+      url: initialData.url || "",
     } : {
       name: "",
-      type: "bank", // Default type
+      type: "manual",
       countries: [],
       status: "inactive",
       instructions: "",
+      description: "",
+      custom_fields: [],
       icon: null,
       url: "",
     },
   })
 
-  // Watch the 'type' field to conditionally render the URL input
+  // Custom fields array management
+  const { fields, append, remove, move } = useFieldArray({
+    control: form.control,
+    name: "custom_fields"
+  })
+
+  // Watch the 'type' field to conditionally render sections
   const selectedType = form.watch("type")
 
   // Effect to clear URL when type is not 'payment-link'
   useEffect(() => {
     if (selectedType !== 'payment-link') {
-      form.setValue('url', '') // Clear the URL field
+      form.setValue('url', '')
+    }
+    // Clear custom fields when type is not 'manual'
+    if (selectedType !== 'manual') {
+      form.setValue('custom_fields', [])
     }
   }, [selectedType, form])
 
@@ -122,11 +134,7 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
     if (!file) return
 
     if (file.size > 2 * 1024 * 1024) {
-      toast({ 
-        title: "Error", 
-        description: "Icon must be less than 2MB", 
-        variant: "destructive" 
-      })
+      showError("Icon must be less than 2MB")
       return
     }
 
@@ -138,6 +146,19 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
       form.setValue("icon", result)
     }
     reader.readAsDataURL(file)
+  }
+
+  // Add new custom field
+  const addCustomField = () => {
+    const newField: CustomFieldType = {
+      id: `field_${Date.now()}`,
+      label: "",
+      type: "text",
+      placeholder: "",
+      required: false,
+      value: ""
+    }
+    append(newField)
   }
 
   // Handle form submission
@@ -152,19 +173,24 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
         submissionData.icon = previewUrl;
       }
 
-      // Ensure URL is null if not a payment-link (schema handles if it's required for payment-link)
+      // Ensure URL is null if not a payment-link
       if (submissionData.type !== 'payment-link') {
         submissionData.url = null;
+      }
+
+      // Ensure custom_fields is null if not a manual payment method
+      if (submissionData.type !== 'manual') {
+        submissionData.custom_fields = undefined;
       }
       
       if (initialData?.id) {
         // Update existing payment method
         await paymentMethodsApi.update(initialData.id, submissionData as PaymentMethod)
-        toast({ title: "Payment method updated", description: "The payment method was updated successfully" })
+        showSuccess(`Payment method "${submissionData.name}" updated successfully`)
       } else {
         // Create new payment method
         await paymentMethodsApi.create(submissionData as PaymentMethod)
-        toast({ title: "Payment method created", description: "The payment method was created successfully" })
+        showSuccess(`Payment method "${submissionData.name}" created successfully`)
       }
       
       // Trigger refresh and close the modal
@@ -185,11 +211,7 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
             errorMessage = "Please enter a valid URL for the payment link."
         }
       }
-      toast({ 
-        title: "Error", 
-        description: errorMessage,
-        variant: "destructive"
-      })
+      showError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -197,245 +219,408 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{selectedType === 'payment-link' ? 'Payment Link Name' : 'Method Name'}</FormLabel>
-              <FormControl>
-                <Input 
-                  placeholder={selectedType === 'payment-link' ? 'PayPal Checkout' : 'Bank Transfer (USD)'} 
-                  {...field} 
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Payment Type</FormLabel>
-              <Select 
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  // No need to call setSelectedType, form.watch handles it
-                }} 
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select payment type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="bank">Bank Transfer</SelectItem>
-                  <SelectItem value="mobile">Mobile Money</SelectItem>
-                  <SelectItem value="crypto">Cryptocurrency</SelectItem>
-                  <SelectItem value="payment-link">Payment Link</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* URL field for payment links */}
-        {selectedType === 'payment-link' && (
-          <FormField
-            control={form.control}
-            name="url" // URL field is always present in PaymentMethodFormValues
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Payment URL</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="https://paypal.me/yourlink" 
-                    {...field} 
-                    value={field.value || ''} // Ensure value is not null/undefined for input
-                  />
-                </FormControl>
-                <FormDescription>
-                  Enter the URL where customers will be redirected to complete payment.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        
-        <FormField
-          control={form.control}
-          name="countries"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Supported Countries</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {/* Basic Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Method Name</FormLabel>
                   <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        "w-full justify-between",
-                        !(field.value && field.value.length) && "text-muted-foreground"
-                      )}
-                    >
-                      {(field.value && field.value.length)
-                        ? `${field.value.length} countries selected`
-                        : "Select countries"}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
+                    <Input 
+                      placeholder={
+                        selectedType === 'payment-link' ? 'PayPal Checkout' : 
+                        selectedType === 'manual' ? 'Bank Transfer (USD)' :
+                        'Payment Method Name'
+                      } 
+                      {...field} 
+                    />
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Search countries..." />
-                    <CommandEmpty>No country found.</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
-                      {countries.map((country) => (
-                        <CommandItem
-                          key={country.code}
-                          value={country.code}
-                          onSelect={() => {
-                            const currentValue = field.value || [];
-                            const updatedValue = currentValue.includes(country.code)
-                              ? currentValue.filter((code) => code !== country.code)
-                              : [...currentValue, country.code]
-                            field.onChange(updatedValue)
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              (field.value && field.value.includes(country.code)) ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {country.name} ({country.code})
-                        </CommandItem>
-                      ))}
-                      <CommandItem
-                        value="Global"
-                        onSelect={() => {
-                          const currentValue = field.value || [];
-                          const updatedValue = currentValue.includes("Global")
-                            ? currentValue.filter((code) => code !== "Global")
-                            : ["Global"]
-                          field.onChange(updatedValue)
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            (field.value && field.value.includes("Global")) ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        Global (Available Everywhere)
-                      </CommandItem>
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select payment type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="manual">Manual Payment</SelectItem>
+                      <SelectItem value="payment-link">Payment Link</SelectItem>
+                      <SelectItem value="bank">Bank Transfer</SelectItem>
+                      <SelectItem value="mobile">Mobile Money</SelectItem>
+                      <SelectItem value="crypto">Cryptocurrency</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    {selectedType === 'manual' && "Create a custom payment method with your own fields"}
+                    {selectedType === 'payment-link' && "Redirect customers to an external payment URL"}
+                    {selectedType === 'bank' && "Traditional bank transfer method"}
+                    {selectedType === 'mobile' && "Mobile money payment method"}
+                    {selectedType === 'crypto' && "Cryptocurrency payment method"}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Describe what this payment method is for..."
+                      className="min-h-20"
+                      {...field} 
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    A brief description of this payment method for your reference.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Payment Link Configuration */}
+        {selectedType === 'payment-link' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Link Configuration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment URL</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://paypal.me/yourlink or https://stripe.com/payment-link" 
+                        {...field} 
+                        value={field.value || ''}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter the URL where customers will be redirected to complete payment.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Manual Payment Custom Fields */}
+        {selectedType === 'manual' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Custom Payment Fields</CardTitle>
               <FormDescription>
-                Select the countries where this payment method is available, or select "Global" if available everywhere.
+                Create custom fields that customers will fill out when using this payment method.
               </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Status</FormLabel>
-              <Select 
-                onValueChange={field.onChange} 
-                defaultValue={field.value}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="instructions"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                {selectedType === 'payment-link' ? 'Instructions for Customers' : 'Payment Instructions'}
-              </FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder={
-                    selectedType === 'payment-link' 
-                      ? 'Click the link above to complete your payment securely...'
-                      : 'Enter payment instructions here...'
-                  }
-                  className="min-h-24"
-                  {...field} 
-                  value={field.value || ''} // Ensure value is not null/undefined for textarea
-                />
-              </FormControl>
-              <FormDescription>
-                Provide instructions for customers on how to complete this payment method.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="icon"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Payment Method Icon</FormLabel>
-              <FormControl>
-                <div className="flex flex-col gap-4">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleIconChange}
-                    className="cursor-pointer"
-                  />
-                  {previewUrl && (
-                    <div className="mt-2">
-                      <p className="text-sm font-medium mb-2">Preview:</p>
-                      <img
-                        src={previewUrl}
-                        alt="Icon preview"
-                        className="w-16 h-16 object-contain border rounded"
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {fields.map((field, index) => (
+                <Card key={field.id} className="p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1 grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name={`custom_fields.${index}.label`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Field Label</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Account Number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name={`custom_fields.${index}.type`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Field Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="text">Text</SelectItem>
+                                <SelectItem value="number">Number</SelectItem>
+                                <SelectItem value="email">Email</SelectItem>
+                                <SelectItem value="tel">Phone</SelectItem>
+                                <SelectItem value="textarea">Long Text</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name={`custom_fields.${index}.placeholder`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Placeholder</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your account number..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name={`custom_fields.${index}.required`}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>Required Field</FormLabel>
+                              <FormDescription>
+                                Customer must fill this field
+                              </FormDescription>
+                            </div>
+                          </FormItem>
+                        )}
                       />
                     </div>
-                  )}
-                </div>
-              </FormControl>
-              <FormDescription>
-                Upload an icon for this payment method. Recommended size: 64x64px.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => remove(index)}
+                      className="mt-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+              
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addCustomField}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Custom Field
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="countries"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Supported Countries</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className={cn(
+                            "w-full justify-between",
+                            !(field.value && field.value.length) && "text-muted-foreground"
+                          )}
+                        >
+                          {(field.value && field.value.length)
+                            ? `${field.value.length} countries selected`
+                            : "Select countries"}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput placeholder="Search countries..." />
+                        <CommandEmpty>No country found.</CommandEmpty>
+                        <CommandGroup className="max-h-64 overflow-auto">
+                          {countries.map((country) => (
+                            <CommandItem
+                              key={country.code}
+                              value={country.code}
+                              onSelect={() => {
+                                const currentValue = field.value || [];
+                                const updatedValue = currentValue.includes(country.code)
+                                  ? currentValue.filter((code) => code !== country.code)
+                                  : [...currentValue, country.code]
+                                field.onChange(updatedValue)
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  (field.value && field.value.includes(country.code)) ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {country.name} ({country.code})
+                            </CommandItem>
+                          ))}
+                          <CommandItem
+                            value="Global"
+                            onSelect={() => {
+                              const currentValue = field.value || [];
+                              const updatedValue = currentValue.includes("Global")
+                                ? currentValue.filter((code) => code !== "Global")
+                                : ["Global"]
+                              field.onChange(updatedValue)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                (field.value && field.value.includes("Global")) ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            Global (Available Everywhere)
+                          </CommandItem>
+                        </CommandGroup>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormDescription>
+                    Select the countries where this payment method is available, or select "Global" if available everywhere.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="instructions"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Instructions</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder={
+                        selectedType === 'payment-link' 
+                          ? 'Click the link above to complete your payment securely...'
+                          : selectedType === 'manual'
+                          ? 'Please fill in all the required fields and follow the payment instructions...'
+                          : 'Enter payment instructions here...'
+                      }
+                      className="min-h-24"
+                      {...field} 
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Provide instructions for customers on how to complete this payment method.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="icon"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Method Icon</FormLabel>
+                  <FormControl>
+                    <div className="flex flex-col gap-4">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleIconChange}
+                        className="cursor-pointer"
+                      />
+                      {previewUrl && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium mb-2">Preview:</p>
+                          <img
+                            src={previewUrl}
+                            alt="Icon preview"
+                            className="w-16 h-16 object-contain border rounded"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Upload an icon for this payment method. Recommended size: 64x64px.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
         
         <div className="flex justify-end space-x-4 pt-4">
           <Button 

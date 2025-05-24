@@ -4,17 +4,16 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
 import { 
-  Users, 
   FileText, 
   Shield, 
   Settings, 
   ArrowRight,
   Crown,
-  Activity,
-  Database
+  Activity
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
+import { UserCountWidget } from '@/components/dashboard/user-count-widget'
 
 export const metadata: Metadata = {
   title: 'Super Admin Dashboard - PXV Pay',
@@ -41,32 +40,15 @@ export default async function SuperAdminDashboard() {
 
   // Check if user is super admin (using both role and direct email check)
   const userEmail = session.user.email || ''
-  const isSuperAdminEmail = userEmail === 'dev-admin@pxvpay.com' || userEmail === 'superadmin@pxvpay.com'
+  const isSuperAdminEmail = userEmail === 'admin@pxvpay.com' || 
+                            userEmail === 'dev-admin@pxvpay.com' || 
+                            userEmail === 'superadmin@pxvpay.com'
   const isSuperAdminRole = profile?.role === 'super_admin'
   
   if (!isSuperAdminRole && !isSuperAdminEmail) {
     // Let the RouteGuard component handle the redirect
     return null
   }
-
-  // Fetch platform statistics for super admin overview
-  const { count: totalUsers } = await supabase
-    .from('users')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: activeUsers } = await supabase
-    .from('users')
-    .select('*', { count: 'exact', head: true })
-    .eq('active', true)
-
-  const { count: totalPayments } = await supabase
-    .from('payments')
-    .select('*', { count: 'exact', head: true })
-
-  const { count: pendingPayments } = await supabase
-    .from('payments')
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending')
 
   const userName = profile?.email?.split('@')[0] || 'Super Admin'
 
@@ -98,59 +80,15 @@ export default async function SuperAdminDashboard() {
         </div>
       </div>
 
-      {/* Platform Overview Stats */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="shadow-sm border-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalUsers || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Registered platform users
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm border-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Activity className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{activeUsers || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Currently active accounts
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm border-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Payments</CardTitle>
-            <Database className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{totalPayments || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Platform transactions
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm border-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-            <Shield className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{pendingPayments || 0}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Require admin attention
-            </p>
-          </CardContent>
-        </Card>
+      {/* Test: Single User Count Widget */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Platform Stats (Testing)</h2>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <UserCountWidget />
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          Testing single widget with real data from Supabase
+        </p>
       </div>
 
       {/* Quick Actions Section */}
@@ -163,7 +101,7 @@ export default async function SuperAdminDashboard() {
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                  <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <CardTitle className="text-lg">User Management</CardTitle>

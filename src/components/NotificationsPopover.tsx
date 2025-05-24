@@ -17,9 +17,9 @@ import { toast } from 'sonner'
 interface Notification {
   id: string
   title: string
-  description: string
+  message: string
   time: string
-  read: boolean
+  is_read: boolean
   type: string
   created_at: string
   user_id: string
@@ -30,7 +30,7 @@ export function NotificationsPopover() {
   const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
   
-  const unreadCount = notifications.filter(notification => !notification.read).length
+  const unreadCount = notifications.filter(notification => !notification.is_read).length
   const supabase = createClient()
   
   // Fetch notifications from Supabase
@@ -89,7 +89,7 @@ export function NotificationsPopover() {
         
         // Show toast notification
         toast.info(newNotification.title, {
-          description: newNotification.description,
+          description: newNotification.message,
         })
       })
       .subscribe()
@@ -122,13 +122,13 @@ export function NotificationsPopover() {
       
       // Update all unread notifications in Supabase
       const unreadIds = notifications
-        .filter(notification => !notification.read)
+        .filter(notification => !notification.is_read)
         .map(notification => notification.id)
       
       if (unreadIds.length > 0) {
         const { error } = await supabase
           .from('notifications')
-          .update({ read: true })
+          .update({ is_read: true })
           .in('id', unreadIds)
         
         if (error) throw error
@@ -137,7 +137,7 @@ export function NotificationsPopover() {
       // Update local state
       setNotifications(notifications.map(notification => ({
         ...notification,
-        read: true
+        is_read: true
       })))
     } catch (error: any) {
       console.error('Error marking notifications as read:', error.message)
@@ -149,14 +149,14 @@ export function NotificationsPopover() {
       // Update notification in Supabase
       const { error } = await supabase
         .from('notifications')
-        .update({ read: true })
+        .update({ is_read: true })
         .eq('id', id)
       
       if (error) throw error
       
       // Update local state
       setNotifications(notifications.map(notification => 
-        notification.id === id ? { ...notification, read: true } : notification
+        notification.id === id ? { ...notification, is_read: true } : notification
       ))
     } catch (error: any) {
       console.error('Error marking notification as read:', error.message)
@@ -225,7 +225,7 @@ export function NotificationsPopover() {
                   key={notification.id}
                   className={cn(
                     "flex gap-3 p-3 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition-colors",
-                    notification.read 
+                    notification.is_read 
                       ? "hover:bg-gray-50 dark:hover:bg-gray-800/60" 
                       : "bg-black/[0.02] dark:bg-white/[0.02]"
                   )}
@@ -238,12 +238,12 @@ export function NotificationsPopover() {
                     <div className="flex items-start justify-between">
                       <p className={cn(
                         "text-sm",
-                        !notification.read && "font-medium"
+                        !notification.is_read && "font-medium"
                       )}>
                         {notification.title}
                       </p>
                       <div className="flex items-center gap-1">
-                        {!notification.read && (
+                        {!notification.is_read && (
                           <span className="h-2 w-2 rounded-full bg-black dark:bg-white"></span>
                         )}
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
@@ -252,7 +252,7 @@ export function NotificationsPopover() {
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {notification.description}
+                      {notification.message}
                     </p>
                   </div>
                 </div>

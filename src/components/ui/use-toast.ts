@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { notificationService } from '@/lib/notification-service'
 
 interface ToastProps {
   title: string
@@ -8,9 +8,19 @@ interface ToastProps {
   variant?: "default" | "destructive"
 }
 
-// Simple toast implementation for our needs
-export function toast(props: ToastProps) {
-  alert(`${props.title}: ${props.description || ""}`)
-  console.log(props)
-  return props
-} 
+// Updated toast implementation using our notification service
+export function toast(props: ToastProps): string {
+  const type = props.variant === 'destructive' ? 'error' : 'success'
+  return notificationService.showToast({
+    title: props.title,
+    description: props.description,
+    type
+  })
+}
+
+// Export additional helper functions for backwards compatibility
+export const useToast = () => ({
+  toast: (props: ToastProps) => toast(props),
+  dismiss: (toastId: string) => notificationService.dismissToast(toastId),
+  dismissAll: () => notificationService.dismissAll()
+}) 

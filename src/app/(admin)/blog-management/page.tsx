@@ -58,7 +58,9 @@ export default async function BlogManagementPage() {
 
   // Check if user is super admin (using both role and direct email check)
   const userEmail = session.user.email || ''
-  const isSuperAdminEmail = userEmail === 'dev-admin@pxvpay.com' || userEmail === 'superadmin@pxvpay.com'
+  const isSuperAdminEmail = userEmail === 'admin@pxvpay.com' || 
+                            userEmail === 'dev-admin@pxvpay.com' || 
+                            userEmail === 'superadmin@pxvpay.com'
   const isSuperAdminRole = profile?.role === 'super_admin'
   
   if (!isSuperAdminRole && !isSuperAdminEmail) {

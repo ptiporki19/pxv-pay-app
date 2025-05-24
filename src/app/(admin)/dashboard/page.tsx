@@ -1,19 +1,21 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import { 
-  Users, 
-  CreditCard,
-  Clock, 
-  CheckCircle2, 
   ExternalLink,
-  Info
+  Info,
+  CreditCard
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
+import { 
+  PendingVerificationWidget,
+  PaymentMethodsWidget,
+  CurrenciesWidget,
+  TotalPaymentsWidget
+} from '@/components/dashboard/merchant-stats-widgets'
 
 export const metadata: Metadata = {
   title: 'Dashboard - PXV Pay',
@@ -31,9 +33,6 @@ export default async function DashboardPage() {
   // Default values in case fetch fails
   let session = null
   let userData = null
-  let userCount = 0
-  let totalPayments = 0
-  let pendingPayments = 0
   let formattedPayments: any[] = []
   
   try {
@@ -51,27 +50,6 @@ export default async function DashboardPage() {
         .single()
       
       userData = userResult
-    
-      // Fetch user count
-      const { count: userCountResult } = await supabase
-        .from('users')
-        .select('*', { count: 'exact', head: true })
-      
-      userCount = userCountResult || 0
-      
-      // Fetch payment statistics
-      const { count: totalPaymentsResult } = await supabase
-        .from('payments')
-        .select('*', { count: 'exact', head: true })
-      
-      totalPayments = totalPaymentsResult || 0
-      
-      const { count: pendingPaymentsResult } = await supabase
-        .from('payments')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending')
-      
-      pendingPayments = pendingPaymentsResult || 0
       
       // Fetch recent payments
       const { data: recentPayments } = await supabase
@@ -103,9 +81,11 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {userData?.email?.split('@')[0] || 'User'}</p>
         </div>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Clock className="h-4 w-4" />
-          View Recent Activity
+        <Button variant="outline" size="sm" className="gap-2" asChild>
+          <Link href="/transactions">
+            <ExternalLink className="h-4 w-4" />
+            View Recent Activity
+          </Link>
         </Button>
       </div>
 
@@ -123,72 +103,35 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Users Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userCount}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Registered users on the platform
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Total Payments Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Payments</CardTitle>
-            <CreditCard className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalPayments}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              All-time payment transactions
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Pending Payments Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
-            <Clock className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingPayments}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Payments awaiting verification
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Verify Payments Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Verify Payments</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingPayments}</div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Review and approve payments
-            </p>
-          </CardContent>
-        </Card>
+      {/* Real-Time Dashboard Stats */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Dashboard Stats</h2>
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <PendingVerificationWidget />
+          <PaymentMethodsWidget />
+          <CurrenciesWidget />
+          <TotalPaymentsWidget />
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">
+          Real-time data updates automatically when changes are made
+        </p>
       </div>
 
       {/* Payment History */}
       <div>
-        <div className="mb-4">
-          <h2 className="text-xl font-semibold">Payment History</h2>
-          <p className="text-sm text-muted-foreground">
-            View all payment transactions and their status
-          </p>
+        <div className="mb-4 flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-semibold">Payment History</h2>
+            <p className="text-sm text-muted-foreground">
+              View all payment transactions and their status
+            </p>
+          </div>
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <Link href="/transactions">
+              <ExternalLink className="h-4 w-4" />
+              View All Transactions
+            </Link>
+          </Button>
         </div>
 
         <div className="rounded-md border shadow-sm">
@@ -225,9 +168,11 @@ export default async function DashboardPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Info className="h-4 w-4" />
-                          <span className="sr-only">Details</span>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                          <Link href={`/transactions/${payment.id}`}>
+                            <Info className="h-4 w-4" />
+                            <span className="sr-only">Details</span>
+                          </Link>
                         </Button>
                       </td>
                     </tr>
@@ -241,12 +186,6 @@ export default async function DashboardPage() {
                 )}
               </tbody>
             </table>
-          </div>
-          <div className="flex items-center justify-center p-4 border-t">
-            <Button variant="outline" size="sm" className="gap-2">
-              <ExternalLink className="h-4 w-4" />
-              View All Transactions
-            </Button>
           </div>
         </div>
       </div>

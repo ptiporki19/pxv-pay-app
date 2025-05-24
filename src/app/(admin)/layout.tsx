@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Home, Globe, DollarSign, CreditCard, Link2, Palette, FileText, Shield, X, User, Settings, LogOut, Zap, Crown } from 'lucide-react'
+import { Home, Globe, DollarSign, CreditCard, Link2, Palette, FileText, Shield, X, User, Settings, LogOut, Zap, Crown, Users } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { createClient } from '@/lib/supabase/server'
-import { hasPermission, UserRole } from '@/lib/rbac'
 import { MobileSidebarToggle } from '@/components/MobileSidebarToggle'
 import { ActiveNavLink } from '@/components/ActiveNavLink'
 import { LogoutButton } from '@/components/LogoutButton'
@@ -24,6 +23,9 @@ export const metadata: Metadata = {
   title: 'Merchant Dashboard - PXV Pay',
   description: 'Merchant Dashboard for PXV Pay',
 }
+
+// Define the user role type
+type UserRole = 'super_admin' | 'registered_user' | 'subscriber' | 'free_user'
 
 // Navigation items for merchants
 const merchantNavItems = [
@@ -76,7 +78,9 @@ export default async function MerchantDashboardLayout({
     
     // Check if super admin (use both DB role and email check)
     isSuperAdmin = userRole === 'super_admin' || 
-      (session.user.email === 'dev-admin@pxvpay.com' || session.user.email === 'superadmin@pxvpay.com')
+      (session.user.email === 'admin@pxvpay.com' || 
+       session.user.email === 'dev-admin@pxvpay.com' || 
+       session.user.email === 'superadmin@pxvpay.com')
     
     userName = profile?.email?.split('@')[0] || session.user.email?.split('@')[0] || 'User'
     userEmail = profile?.email || session.user.email || ''
@@ -85,10 +89,10 @@ export default async function MerchantDashboardLayout({
   // Filter navigation items based on permissions
   const navItems = merchantNavItems.filter(item => {
     if (item.label === 'Theme Customization') {
-      return isSuperAdmin || hasPermission(userRole, 'themeCustomization')
+      return true // Available to all users
     }
     if (item.label === 'Content Customization') {
-      return isSuperAdmin || hasPermission(userRole, 'contentManagement')
+      return true // Available to all users
     }
     return true
   })
@@ -114,7 +118,7 @@ export default async function MerchantDashboardLayout({
                   <ActiveNavLink
                     key={item.path}
                     href={item.path}
-                  iconName={item.iconName}
+                    iconName={item.iconName}
                   >
                     {item.label}
                   </ActiveNavLink>
@@ -154,7 +158,7 @@ export default async function MerchantDashboardLayout({
                     <ActiveNavLink
                       key={item.path}
                       href={item.path}
-                    iconName={item.iconName}
+                      iconName={item.iconName}
                     >
                       {item.label}
                     </ActiveNavLink>

@@ -37,12 +37,22 @@ export const currencyFormSchema = z.object({
 
 export type CurrencyFormValues = z.infer<typeof currencyFormSchema>
 
+// Custom field schema for manual payment methods
+const customFieldSchema = z.object({
+  id: z.string(),
+  label: z.string().min(1, "Field label is required"),
+  type: z.enum(['text', 'number', 'email', 'tel', 'textarea']),
+  placeholder: z.string().optional(),
+  required: z.boolean(),
+  value: z.string().optional(),
+})
+
 // Base schema for payment method fields
 const basePaymentMethodObjectSchema = z.object({
   name: z.string().min(2, {
     message: "Method name must be at least 2 characters",
   }),
-  type: z.enum(['bank', 'mobile', 'crypto', 'payment-link'], {
+  type: z.enum(['bank', 'mobile', 'crypto', 'payment-link', 'manual'], {
     required_error: "Please select a payment method type",
   }),
   countries: z.array(z.string()).min(1, {
@@ -52,6 +62,8 @@ const basePaymentMethodObjectSchema = z.object({
     required_error: "Please select a status",
   }),
   instructions: z.string().optional(),
+  description: z.string().optional(),
+  custom_fields: z.array(customFieldSchema).optional(),
   icon: z.union([
     z.string(),
     z.null(),
@@ -86,6 +98,7 @@ export const paymentMethodFormSchema = basePaymentMethodObjectSchema.refine(
 );
 
 export type PaymentMethodFormValues = z.infer<typeof paymentMethodFormSchema>
+export type CustomFieldType = z.infer<typeof customFieldSchema>
 
 // Specific schema for 'payment-link' type (mostly for type inference and clarity if needed)
 export const paymentLinkFormSchema = basePaymentMethodObjectSchema.extend({

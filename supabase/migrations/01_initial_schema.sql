@@ -4,9 +4,6 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Enable pgcrypto for generating secure random values
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Enable RLS (Row Level Security)
-ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-super-secret-jwt-key';
-
 -- Set up realtime
 DROP PUBLICATION IF EXISTS supabase_realtime;
 CREATE PUBLICATION supabase_realtime;
