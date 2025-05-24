@@ -1,0 +1,60 @@
+# Database Safety Rules - CRITICAL
+
+This document establishes strict rules for database operations to prevent accidental data loss and service disruption.
+
+## ABSOLUTE PROHIBITIONS
+
+**NEVER** perform the following operations unless explicitly requested by the user:
+
+- `npx supabase db reset` or any database reset commands
+- Deleting migration files from `supabase/migrations/`
+- Dropping tables or schemas
+- Disabling/enabling RLS globally
+- Modifying existing working RLS policies
+- Recreating triggers or functions that are working
+- Deleting user data or admin accounts
+
+## PERMITTED OPERATIONS FOR SIMPLE FIXES
+
+For simple bugs or feature additions, ONLY:
+
+- Add new columns to existing tables
+- Create new tables if needed
+- Add new RLS policies (without dropping existing ones)
+- Create new functions/triggers (without replacing working ones)
+- Update application code
+- Add new migration files (never delete existing ones)
+
+## BEFORE ANY DATABASE CHANGES
+
+1. **ALWAYS** ask the user to confirm if they want database-level changes
+2. **NEVER** assume database issues require full resets
+3. **FIRST** try application-level fixes
+4. **BACKUP** current state before any destructive operation
+
+## ESCALATION RULES
+
+If a simple fix requires database changes:
+1. Clearly explain what database change is needed
+2. Ask for explicit permission
+3. Provide alternatives that don't require database changes
+4. Only proceed with user's explicit approval
+
+## RECOVERY PROTOCOL
+
+If accidental damage occurs:
+1. Stop all database operations immediately
+2. Assess what was lost
+3. Create a restoration plan
+4. Get user approval before restoration
+5. Restore systematically with testing
+
+## KEY PRINCIPLE
+
+**A simple application bug should NEVER require a database reset or migration deletion.**
+
+## ENFORCEMENT
+
+- Any AI assistant violating these rules has caused critical damage
+- Recovery must be the immediate priority
+- User trust must be rebuilt through careful, measured actions 
