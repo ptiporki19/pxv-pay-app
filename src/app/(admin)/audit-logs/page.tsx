@@ -46,7 +46,7 @@ interface AuditLog {
 }
 
 export default async function AuditLogsPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   // Fetch audit logs from Supabase with user information
   const { data: logs, error } = await supabase
