@@ -478,7 +478,7 @@ export default function ThemeCustomizationPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {themes.map((theme) => (
-            <Card key={theme.id} className={`relative ${theme.is_active ? 'ring-2 ring-blue-500' : ''}`}>
+            <Card key={theme.id} className="relative">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
