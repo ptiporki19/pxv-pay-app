@@ -131,12 +131,12 @@ export const countriesApi = {
       throw new Error('User not authenticated')
     }
     
-    // Remove user_id from country object since trigger will set it automatically
-    const { user_id, ...countryData } = country
+    // Explicitly set user_id for the country
+    const countryWithUser = { ...country, user_id: user.id }
     
     const { data, error } = await supabase
       .from('countries')
-      .insert([countryData])
+      .insert([countryWithUser])
       .select()
       .single()
     

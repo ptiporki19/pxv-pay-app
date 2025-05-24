@@ -220,67 +220,65 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Primary Fields - Name and Type */}
-        <div className="grid grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-base font-semibold">Payment Method Name</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder={
-                      selectedType === 'payment-link' ? 'PayPal Checkout' : 
-                      selectedType === 'manual' ? 'Orange Money' :
-                      'Payment Method Name'
-                    } 
-                    {...field} 
-                    className="h-11"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-base font-semibold">Payment Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+        {/* Basic Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Basic Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Method Name</FormLabel>
                   <FormControl>
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Select payment type" />
-                    </SelectTrigger>
+                    <Input 
+                      placeholder={
+                        selectedType === 'payment-link' ? 'PayPal Checkout' : 
+                        selectedType === 'manual' ? 'Bank Transfer (USD)' :
+                        'Payment Method Name'
+                      } 
+                      {...field} 
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="manual">Manual Payment</SelectItem>
-                    <SelectItem value="payment-link">Payment Link</SelectItem>
-                    <SelectItem value="bank">Bank Transfer</SelectItem>
-                    <SelectItem value="mobile">Mobile Money</SelectItem>
-                    <SelectItem value="crypto">Cryptocurrency</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription className="text-xs">
-                  {selectedType === 'manual' && "Create a custom payment method with your own fields"}
-                  {selectedType === 'payment-link' && "Redirect customers to an external payment URL"}
-                  {selectedType === 'bank' && "Traditional bank transfer method"}
-                  {selectedType === 'mobile' && "Mobile money payment method"}
-                  {selectedType === 'crypto' && "Cryptocurrency payment method"}
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select payment type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="manual">Manual Payment</SelectItem>
+                      <SelectItem value="payment-link">Payment Link</SelectItem>
+                      <SelectItem value="bank">Bank Transfer</SelectItem>
+                      <SelectItem value="mobile">Mobile Money</SelectItem>
+                      <SelectItem value="crypto">Cryptocurrency</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    {selectedType === 'manual' && "Create a custom payment method with your own fields"}
+                    {selectedType === 'payment-link' && "Redirect customers to an external payment URL"}
+                    {selectedType === 'bank' && "Traditional bank transfer method"}
+                    {selectedType === 'mobile' && "Mobile money payment method"}
+                    {selectedType === 'crypto' && "Cryptocurrency payment method"}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        {/* Main Content Area - 3 Column Layout */}
-        <div className="grid grid-cols-3 gap-6">
-          {/* Left Column */}
-          <div className="space-y-4">
             <FormField
               control={form.control}
               name="description"
@@ -290,79 +288,173 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
                   <FormControl>
                     <Textarea 
                       placeholder="Describe what this payment method is for..."
-                      className="min-h-20 resize-none"
+                      className="min-h-20"
                       {...field} 
                       value={field.value || ''}
                     />
                   </FormControl>
-                  <FormDescription className="text-xs">
-                    Brief description for your reference.
+                  <FormDescription>
+                    A brief description of this payment method for your reference.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </CardContent>
+        </Card>
 
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+        {/* Payment Link Configuration */}
+        {selectedType === 'payment-link' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Payment Link Configuration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment URL</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="icon"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Payment Icon</FormLabel>
-                  <FormControl>
-                    <div className="space-y-3">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleIconChange}
-                        className="cursor-pointer text-xs"
+                      <Input 
+                        placeholder="https://paypal.me/yourlink or https://stripe.com/payment-link" 
+                        {...field} 
+                        value={field.value || ''}
                       />
-                      {previewUrl && (
-                        <div className="flex items-center gap-2">
-                          <img
-                            src={previewUrl}
-                            alt="Icon preview"
-                            className="w-12 h-12 object-contain border rounded"
-                          />
-                          <span className="text-xs text-muted-foreground">Preview</span>
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormDescription className="text-xs">
-                    Upload icon (64x64px recommended)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+                    </FormControl>
+                    <FormDescription>
+                      Enter the URL where customers will be redirected to complete payment.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Middle Column */}
-          <div className="space-y-4">
+        {/* Manual Payment Custom Fields */}
+        {selectedType === 'manual' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Custom Payment Fields</CardTitle>
+              <FormDescription>
+                Create custom fields that customers will fill out when using this payment method.
+              </FormDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {fields.map((field, index) => (
+                <Card key={field.id} className="p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1 grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name={`custom_fields.${index}.label`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Field Label</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Account Number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name={`custom_fields.${index}.type`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Field Type</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="text">Text</SelectItem>
+                                <SelectItem value="number">Number</SelectItem>
+                                <SelectItem value="email">Email</SelectItem>
+                                <SelectItem value="tel">Phone</SelectItem>
+                                <SelectItem value="textarea">Long Text</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name={`custom_fields.${index}.placeholder`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Placeholder</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter your account number..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name={`custom_fields.${index}.required`}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>Required Field</FormLabel>
+                              <FormDescription>
+                                Customer must fill this field
+                              </FormDescription>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => remove(index)}
+                      className="mt-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+              
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addCustomField}
+                className="w-full"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Custom Field
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Configuration */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <FormField
               control={form.control}
               name="countries"
@@ -435,38 +527,37 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  <FormDescription className="text-xs">
-                    Select countries or "Global" for everywhere.
+                  <FormDescription>
+                    Select the countries where this payment method is available, or select "Global" if available everywhere.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Payment Link URL - Only show when type is payment-link */}
-            {selectedType === 'payment-link' && (
-              <FormField
-                control={form.control}
-                name="url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Payment URL</FormLabel>
+            
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <Input 
-                        placeholder="https://paypal.me/yourlink" 
-                        {...field} 
-                        value={field.value || ''}
-                      />
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
                     </FormControl>
-                    <FormDescription className="text-xs">
-                      Customer redirect URL for payment.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
             <FormField
               control={form.control}
               name="instructions"
@@ -477,149 +568,61 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
                     <Textarea 
                       placeholder={
                         selectedType === 'payment-link' 
-                          ? 'Click the link above to complete payment...'
+                          ? 'Click the link above to complete your payment securely...'
                           : selectedType === 'manual'
-                          ? 'Fill in the required fields below...'
-                          : 'Enter payment instructions...'
+                          ? 'Please fill in all the required fields and follow the payment instructions...'
+                          : 'Enter payment instructions here...'
                       }
-                      className="min-h-20 resize-none"
+                      className="min-h-24"
                       {...field} 
                       value={field.value || ''}
                     />
                   </FormControl>
-                  <FormDescription className="text-xs">
-                    Instructions for customers.
+                  <FormDescription>
+                    Provide instructions for customers on how to complete this payment method.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </div>
-
-          {/* Right Column - Custom Fields for Manual Payments */}
-          <div className="space-y-4">
-            {selectedType === 'manual' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <FormLabel className="text-base font-medium">Custom Payment Fields</FormLabel>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addCustomField}
-                  >
-                    <Plus className="mr-1 h-3 w-3" />
-                    Add Field
-                  </Button>
-                </div>
-                
-                <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {fields.map((field, index) => (
-                    <Card key={field.id} className="p-3">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Field {index + 1}</span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => remove(index)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-2">
-                          <FormField
-                            control={form.control}
-                            name={`custom_fields.${index}.label`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input placeholder="Field Label" {...field} className="text-xs" />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          
-                          <FormField
-                            control={form.control}
-                            name={`custom_fields.${index}.type`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger className="text-xs">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="text">Text</SelectItem>
-                                    <SelectItem value="number">Number</SelectItem>
-                                    <SelectItem value="email">Email</SelectItem>
-                                    <SelectItem value="tel">Phone</SelectItem>
-                                    <SelectItem value="textarea">Long Text</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        
-                        <FormField
-                          control={form.control}
-                          name={`custom_fields.${index}.placeholder`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input placeholder="Placeholder text..." {...field} className="text-xs" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={form.control}
-                          name={`custom_fields.${index}.required`}
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                              <FormLabel className="text-xs">Required field</FormLabel>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </Card>
-                  ))}
-                  
-                  {fields.length === 0 && (
-                    <div className="text-center text-muted-foreground text-sm py-8 border-2 border-dashed rounded-lg">
-                      <p>No custom fields added yet.</p>
-                      <p className="text-xs">Click "Add Field" to create fields for customers to fill.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
             
-            {selectedType !== 'manual' && (
-              <div className="text-center text-muted-foreground text-sm py-8">
-                <p>Custom fields are only available for manual payment methods.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-4 pt-6 border-t">
+            <FormField
+              control={form.control}
+              name="icon"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Method Icon</FormLabel>
+                  <FormControl>
+                    <div className="flex flex-col gap-4">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleIconChange}
+                        className="cursor-pointer"
+                      />
+                      {previewUrl && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium mb-2">Preview:</p>
+                          <img
+                            src={previewUrl}
+                            alt="Icon preview"
+                            className="w-16 h-16 object-contain border rounded"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Upload an icon for this payment method. Recommended size: 64x64px.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+        
+        <div className="flex justify-end space-x-4 pt-4">
           <Button 
             type="button" 
             variant="outline" 

@@ -202,8 +202,8 @@ export default function ContentCustomizationPage() {
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="basic">Basic Info</TabsTrigger>
                 <TabsTrigger value="content">Content</TabsTrigger>
-              </TabsList>
-              
+        </TabsList>
+        
               <TabsContent value="basic" className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -263,9 +263,9 @@ export default function ContentCustomizationPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
+              <div className="space-y-2">
                     <Label htmlFor="version">Version</Label>
-                    <Input
+                <Input 
                       id="version"
                       type="number"
                       value={currentTemplate.version}
@@ -273,12 +273,12 @@ export default function ContentCustomizationPage() {
                       min="1"
                     />
                   </div>
-                </div>
+              </div>
               </TabsContent>
               
               <TabsContent value="content" className="space-y-4">
                 <div className="space-y-4">
-                  <div className="space-y-2">
+              <div className="space-y-2">
                     <Label htmlFor="content">Content</Label>
                     <Textarea
                       id="content"
@@ -288,9 +288,9 @@ export default function ContentCustomizationPage() {
                       rows={12}
                       className="font-mono text-sm"
                     />
-                  </div>
+              </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
+              <div className="space-y-2">
                       <Label htmlFor="variables">Variables (JSON)</Label>
                       <Textarea
                         id="variables"
@@ -307,8 +307,8 @@ export default function ContentCustomizationPage() {
                         rows={4}
                         className="font-mono text-sm"
                       />
-                    </div>
-                    <div className="space-y-2">
+              </div>
+                <div className="space-y-2">
                       <Label htmlFor="metadata">Metadata (JSON)</Label>
                       <Textarea
                         id="metadata"
@@ -367,8 +367,8 @@ export default function ContentCustomizationPage() {
             ))}
           </SelectContent>
         </Select>
-      </div>
-
+                </div>
+                
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
@@ -417,7 +417,7 @@ export default function ContentCustomizationPage() {
                     {template.title}
                     {template.is_active && <Badge variant="default">Active</Badge>}
                   </CardTitle>
-                </div>
+                    </div>
                 <CardDescription>
                   {template.template_key} • {template.category} • {template.content_type}
                 </CardDescription>
@@ -445,10 +445,10 @@ export default function ContentCustomizationPage() {
                       <Trash2 className="h-4 w-4 mr-1" />
                       Delete
                     </Button>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
           ))}
         </div>
       )}

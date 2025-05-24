@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
-import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Settings, ExternalLink } from "lucide-react"
+import { useState, useEffect } from "react"
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -16,13 +16,16 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useNotificationActions } from "@/providers/notification-provider"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export function PaymentMethodsList() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("all")
-  const { openModal, searchQuery, setSearchQuery, refreshFlag } = useAdminStore()
+  const { searchQuery, setSearchQuery, refreshFlag } = useAdminStore()
   const { showSuccess, showError } = useNotificationActions()
+  const router = useRouter()
 
   // Fetch payment methods from the API
   useEffect(() => {
@@ -45,7 +48,7 @@ export function PaymentMethodsList() {
     }
 
     fetchPaymentMethods()
-  }, [searchQuery, refreshFlag]) // Simplified dependencies
+  }, [searchQuery, refreshFlag])
 
   // Filter payment methods based on active tab
   const filteredMethods = paymentMethods.filter(method => {
@@ -63,7 +66,7 @@ export function PaymentMethodsList() {
       await paymentMethodsApi.delete(id)
       showSuccess("Payment method deleted successfully")
       
-      // Instead of triggering global refresh, just update local state
+      // Update local state
       setPaymentMethods(prev => prev.filter(method => method.id !== id))
     } catch (error) {
       console.error("Error deleting payment method:", error)
@@ -85,16 +88,16 @@ export function PaymentMethodsList() {
 
     // Default icons based on type
     const iconMap = {
-      manual: "⚙️",
-      "payment-link": "🔗",
-      bank: "🏦",
-      mobile: "📱",
-      crypto: "₿"
+      manual: "Manual",
+      "payment-link": "Link",
+      bank: "Bank",
+      mobile: "Mobile",
+      crypto: "Crypto"
     }
 
     return (
-      <span className="text-lg">
-        {iconMap[method.type] || "💳"}
+      <span className="text-sm px-2 py-1 bg-gray-100 rounded text-gray-700">
+        {iconMap[method.type] || "Payment"}
       </span>
     )
   }
@@ -146,10 +149,12 @@ export function PaymentMethodsList() {
           <h1 className="text-3xl font-bold tracking-tight">Payment Methods</h1>
           <p className="text-muted-foreground">Manage payment methods for your checkout.</p>
         </div>
-        <Button onClick={() => openModal('payment-method', 'create')}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Payment Method
-        </Button>
+        <Link href="/payment-methods/create">
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Payment Method
+          </Button>
+        </Link>
       </div>
 
       <div className="flex items-center py-4">
@@ -218,14 +223,14 @@ export function PaymentMethodsList() {
                               
                               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                                 <span>
-                                  📍 {method.countries.length === 1 && method.countries[0] === 'Global' 
+                                  {method.countries.length === 1 && method.countries[0] === 'Global' 
                                     ? 'Available globally' 
                                     : `${method.countries.length} countries`}
                                 </span>
                                 
                                 {method.type === 'manual' && method.custom_fields && (
                                   <span>
-                                    ⚙️ {method.custom_fields.length} custom fields
+                                    {method.custom_fields.length} custom fields
                                   </span>
                                 )}
                                 
@@ -253,7 +258,7 @@ export function PaymentMethodsList() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openModal('payment-method', 'edit', method)}>
+                              <DropdownMenuItem onClick={() => router.push(`/payment-methods/edit/${method.id}`)}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 <span>Edit</span>
                               </DropdownMenuItem>
@@ -288,10 +293,12 @@ export function PaymentMethodsList() {
                       ? "Get started by creating your first payment method."
                       : `No ${getTypeDisplayName(activeTab).toLowerCase()} methods found.`}
                   </p>
-                  <Button onClick={() => openModal('payment-method', 'create')}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create Payment Method
-                  </Button>
+                  <Link href="/payment-methods/create">
+                    <Button>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Create Payment Method
+                    </Button>
+                  </Link>
                 </div>
               )}
             </CardContent>

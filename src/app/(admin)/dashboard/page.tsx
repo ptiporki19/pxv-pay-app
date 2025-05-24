@@ -78,7 +78,7 @@ export default async function DashboardPage() {
       {/* Header with welcome message and recent activity button */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {userData?.email?.split('@')[0] || 'User'}</p>
         </div>
         <Button variant="outline" size="sm" className="gap-2" asChild>
@@ -97,11 +97,11 @@ export default async function DashboardPage() {
             <CardTitle>Payments</CardTitle>
           </div>
           <CardDescription>Manage your payments</CardDescription>
-        </CardHeader>
+              </CardHeader>
         <CardContent className="text-sm pb-3">
           <p>View transactions and verify pending payments.</p>
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
 
       {/* Real-Time Dashboard Stats */}
       <div>

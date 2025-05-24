@@ -66,11 +66,11 @@ export default async function MerchantDashboardLayout({
   // Get user profile if session exists
   if (session?.user) {
     // Get user profile
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', session.user.id)
-      .single()
+  const { data: profile } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', session.user.id)
+    .single()
 
     // Get role from profile or use default
     userRole = (profile?.role as UserRole) || 'registered_user'
@@ -104,25 +104,25 @@ export default async function MerchantDashboardLayout({
   return (
     <RouteGuard>
       <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
-        {/* Sidebar */}
+      {/* Sidebar */}
         <aside className="hidden md:flex md:w-64 md:flex-col border-r border-gray-200 dark:border-gray-800">
           <div className="flex h-full flex-col overflow-y-auto bg-white dark:bg-gray-900">
-            <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-gray-200 dark:border-gray-800">
               <Link href={isSuperAdmin ? "/super-admin" : "/dashboard"} className="flex items-center">
                 <span className="text-xl font-bold text-black dark:text-white">PXV Pay</span>
-              </Link>
-            </div>
+            </Link>
+          </div>
             <nav className="flex-1 space-y-1 px-3 py-4">
               {navItems.map((item) => (
-                  <ActiveNavLink
-                    key={item.path}
-                    href={item.path}
+                <ActiveNavLink
+                  key={item.path}
+                  href={item.path}
                     iconName={item.iconName}
-                  >
-                    {item.label}
-                  </ActiveNavLink>
+                >
+                  {item.label}
+                </ActiveNavLink>
               ))}
-            </nav>
+          </nav>
             <div className="p-4 mt-auto border-t border-gray-200 dark:border-gray-800">
               <div className="flex items-center gap-3">
                 <Avatar className="h-9 w-9 border border-gray-200 dark:border-gray-700">
@@ -135,60 +135,60 @@ export default async function MerchantDashboardLayout({
                 </div>
               </div>
             </div>
-          </div>
-        </aside>
+        </div>
+      </aside>
 
-        {/* Mobile sidebar */}
-        <div className="md:hidden">
-          <div id="mobile-sidebar-container" className="fixed inset-0 z-40 hidden">
-            <div className="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
-            <div className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white dark:bg-gray-900">
-              <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
+      {/* Mobile sidebar */}
+      <div className="md:hidden">
+        <div id="mobile-sidebar-container" className="fixed inset-0 z-40 hidden">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+          <div className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white dark:bg-gray-900">
+            <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
                 <Link href={isSuperAdmin ? "/super-admin" : "/dashboard"} className="flex items-center">
                   <span className="text-xl font-bold text-black dark:text-white">PXV Pay</span>
-                </Link>
-                <Button variant="ghost" size="icon" className="mobile-sidebar-close">
+              </Link>
+              <Button variant="ghost" size="icon" className="mobile-sidebar-close">
                   <X className="h-5 w-5" />
-                  <span className="sr-only">Close sidebar</span>
-                </Button>
-              </div>
+                <span className="sr-only">Close sidebar</span>
+              </Button>
+            </div>
               <nav className="flex-1 space-y-1 px-3 py-4">
                 {navItems.map((item) => (
-                    <ActiveNavLink
-                      key={item.path}
-                      href={item.path}
+                  <ActiveNavLink
+                    key={item.path}
+                    href={item.path}
                       iconName={item.iconName}
-                    >
-                      {item.label}
-                    </ActiveNavLink>
+                  >
+                    {item.label}
+                  </ActiveNavLink>
                 ))}
-              </nav>
-            </div>
+            </nav>
           </div>
         </div>
+      </div>
 
-        {/* Main content */}
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {/* Header */}
+      {/* Main content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Header */}
           <header className="w-full h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
             <div className="flex h-full items-center justify-between px-4">
-              <div className="flex items-center md:hidden">
-                <MobileSidebarToggle />
-              </div>
-              
-              {/* Right side header items */}
+            <div className="flex items-center md:hidden">
+              <MobileSidebarToggle />
+            </div>
+            
+            {/* Right side header items */}
               <div className="flex flex-1 justify-end items-center gap-3">
                 <NotificationsPopover />
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
                       <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
-                        <AvatarImage src="" alt={userName} />
+                      <AvatarImage src="" alt={userName} />
                         <AvatarFallback className="text-sm bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">{userName.charAt(0).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="flex items-center justify-start gap-2 p-2">
                       <Avatar className="h-9 w-9 border border-gray-200 dark:border-gray-700">
@@ -200,33 +200,33 @@ export default async function MerchantDashboardLayout({
                         <p className="text-xs leading-none text-gray-500 dark:text-gray-400">{userEmail}</p>
                       </div>
                     </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
                       <Link href="/profile" className="flex w-full items-center">
                         <User className="mr-2 h-4 w-4" />
                         <span>Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
                       <Link href="/settings" className="flex w-full items-center">
                         <Settings className="mr-2 h-4 w-4" />
                         <span>Settings</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                     <LogoutButton />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          </header>
+          </div>
+        </header>
 
-          {/* Main content area */}
+        {/* Main content area */}
           <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950 p-6">
-            {children}
-          </main>
-        </div>
+          {children}
+        </main>
       </div>
+    </div>
     </RouteGuard>
   )
 } 

@@ -6,6 +6,7 @@ import { useAdminStore } from "@/lib/store/admin-store"
 import { CountryForm } from "@/components/forms/country-form"
 import { CurrencyForm } from "@/components/forms/currency-form"
 import { PaymentMethodForm } from "@/components/forms/payment-method-form"
+import { PaymentMethodFormProfessional } from "@/components/forms/payment-method-form-professional"
 
 export function FormModal() {
   const { isModalOpen, modalType, modalAction, currentItem, closeModal } = useAdminStore()
@@ -33,7 +34,7 @@ export function FormModal() {
       case 'currency':
         return <CurrencyForm initialData={currentItem} />
       case 'payment-method':
-        return <PaymentMethodForm initialData={currentItem} />
+        return <PaymentMethodFormProfessional initialData={currentItem} />
       default:
         return null
     }
@@ -41,9 +42,15 @@ export function FormModal() {
   
   return (
     <Dialog open={isModalOpen} onOpenChange={(open: boolean) => !open && closeModal()}>
-      <DialogContent className="sm:max-w-[550px]">
-        <DialogHeader>
-          <DialogTitle>{getTitleText()}</DialogTitle>
+      <DialogContent className={
+        modalType === 'payment-method' 
+          ? "max-w-[98vw] w-[98vw] min-h-[90vh] max-h-[95vh] overflow-auto p-0" 
+          : "sm:max-w-[550px]"
+      }>
+        <DialogHeader className={modalType === 'payment-method' ? "px-8 pt-6 pb-2" : ""}>
+          <DialogTitle className={modalType === 'payment-method' ? "text-3xl font-bold" : ""}>
+            {getTitleText()}
+          </DialogTitle>
         </DialogHeader>
         {renderForm()}
       </DialogContent>
