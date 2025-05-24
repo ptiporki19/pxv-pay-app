@@ -29,7 +29,6 @@ type UserRole = 'super_admin' | 'registered_user' | 'subscriber' | 'free_user'
 
 // Navigation items for merchants
 const merchantNavItems = [
-  { label: 'Dashboard', path: '/dashboard', iconName: 'Home' },
   { label: 'Countries', path: '/countries', iconName: 'Globe' },
   { label: 'Currencies', path: '/currencies', iconName: 'DollarSign' },
   { label: 'Payment Methods', path: '/payment-methods', iconName: 'CreditCard' },
@@ -97,9 +96,9 @@ export default async function MerchantDashboardLayout({
     return true
   })
 
-  // Add super admin items if applicable
+  // Add super admin items at the top if applicable
   if (isSuperAdmin) {
-    navItems.push(...superAdminItems)
+    navItems.unshift(...superAdminItems)
   }
 
   return (

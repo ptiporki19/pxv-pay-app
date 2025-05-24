@@ -97,7 +97,7 @@ export default async function SuperAdminDashboard() {
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           
           {/* User Management Card */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow border-2 hover:border-black dark:hover:border-white">
+          <Card className="relative">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
@@ -123,7 +123,7 @@ export default async function SuperAdminDashboard() {
           </Card>
 
           {/* Website Content (Blog) Management Card */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow border-2 hover:border-black dark:hover:border-white">
+          <Card className="relative">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
@@ -149,7 +149,7 @@ export default async function SuperAdminDashboard() {
           </Card>
 
           {/* Audit Logs Card */}
-          <Card className="shadow-md hover:shadow-lg transition-shadow border-2 hover:border-black dark:hover:border-white">
+          <Card className="relative">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
@@ -183,7 +183,7 @@ export default async function SuperAdminDashboard() {
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           
           {/* Platform Settings */}
-          <Card className="shadow-sm border">
+          <Card className="relative">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Settings className="h-5 w-5 text-gray-600" />
@@ -203,7 +203,7 @@ export default async function SuperAdminDashboard() {
           </Card>
 
           {/* Payment Verification */}
-          <Card className="shadow-sm border">
+          <Card className="relative">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <Shield className="h-5 w-5 text-gray-600" />
