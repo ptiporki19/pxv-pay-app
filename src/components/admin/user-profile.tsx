@@ -337,20 +337,20 @@ export function UserProfile({ userId }: UserProfileProps) {
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
       case 'super_admin':
-        return 'bg-black text-white dark:bg-white dark:text-black'
+        return 'bg-black text-white'
       case 'subscriber':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
+        return 'bg-blue-100 text-blue-800'
       case 'registered_user':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+        return 'bg-green-100 text-green-800'
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
   const getStatusBadgeClass = (active: boolean) => {
-    return active 
-      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+    return active
+      ? 'bg-green-100 text-green-800'
+      : 'bg-red-100 text-red-800'
   }
 
   const getPaymentStatusIcon = (status: string) => {
@@ -383,16 +383,16 @@ export function UserProfile({ userId }: UserProfileProps) {
     variant?: "default" | "success" | "warning" | "danger"
   }) => {
     const variantClasses = {
-      default: "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600",
-      success: "border-green-200 hover:border-green-300 dark:border-green-700 dark:hover:border-green-600",
-      warning: "border-yellow-200 hover:border-yellow-300 dark:border-yellow-700 dark:hover:border-yellow-600",
-      danger: "border-red-200 hover:border-red-300 dark:border-red-700 dark:hover:border-red-600"
+      default: "border-gray-200 hover:border-gray-300",
+      success: "border-green-200 hover:border-green-300",
+      warning: "border-yellow-200 hover:border-yellow-300",
+      danger: "border-red-200 hover:border-red-300"
     }
 
     return (
       <div 
         className={`
-          relative p-6 border rounded-lg transition-all duration-200 bg-white dark:bg-gray-900
+          relative p-6 border rounded-lg transition-all duration-200 bg-white
           ${onClick ? 'cursor-pointer hover:shadow-md hover:scale-105' : ''}
           ${variantClasses[variant]}
         `}

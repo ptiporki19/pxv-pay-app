@@ -1,24 +1,21 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { Home, Globe, DollarSign, CreditCard, Link2, Palette, FileText, Shield, X, User, Settings, LogOut, Zap, Crown, Users } from 'lucide-react'
+import { User, Settings, X } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Separator } from '@/components/ui/separator'
 import { createClient } from '@/lib/supabase/server'
 import { MobileSidebarToggle } from '@/components/MobileSidebarToggle'
 import { ActiveNavLink } from '@/components/ActiveNavLink'
 import { LogoutButton } from '@/components/LogoutButton'
 import { NotificationsPopover } from '@/components/NotificationsPopover'
 import { RouteGuard } from '@/components/RouteGuard'
-import { ThemeToggle } from '@/components/theme-toggle'
 
 export const metadata: Metadata = {
   title: 'Merchant Dashboard - PXV Pay',
@@ -105,13 +102,13 @@ export default async function MerchantDashboardLayout({
 
   return (
     <RouteGuard>
-      <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
+      <div className="flex h-screen overflow-hidden bg-white">
       {/* Sidebar */}
-        <aside className="hidden md:flex md:w-64 md:flex-col border-r border-gray-200 dark:border-gray-800">
-          <div className="flex h-full flex-col overflow-y-auto bg-white dark:bg-gray-900">
-          <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-gray-200 dark:border-gray-800">
+        <aside className="hidden md:flex md:w-64 md:flex-col border-r border-gray-200">
+          <div className="flex h-full flex-col overflow-y-auto bg-white">
+          <div className="flex h-16 flex-shrink-0 items-center px-4 border-b border-gray-200">
               <Link href={isSuperAdmin ? "/super-admin" : "/dashboard"} className="flex items-center">
-                <span className="text-xl font-bold text-black dark:text-white">PXV Pay</span>
+                <span className="text-xl font-bold text-black">PXV Pay</span>
             </Link>
           </div>
             <nav className="flex-1 space-y-1 px-3 py-4">
@@ -125,15 +122,15 @@ export default async function MerchantDashboardLayout({
                 </ActiveNavLink>
               ))}
           </nav>
-            <div className="p-4 mt-auto border-t border-gray-200 dark:border-gray-800">
+            <div className="p-4 mt-auto border-t border-gray-200">
               <div className="flex items-center gap-3">
-                <Avatar className="h-9 w-9 border border-gray-200 dark:border-gray-700">
+                <Avatar className="h-9 w-9 border border-gray-200">
                   <AvatarImage src="" alt={userName} />
-                  <AvatarFallback className="text-sm bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">{userName.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="text-sm bg-gray-100 text-gray-800">{userName.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="text-sm font-medium truncate max-w-[140px]">{userName}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[140px]">{userEmail}</span>
+                  <span className="text-xs text-gray-500 truncate max-w-[140px]">{userEmail}</span>
                 </div>
               </div>
             </div>
@@ -144,10 +141,10 @@ export default async function MerchantDashboardLayout({
       <div className="md:hidden">
         <div id="mobile-sidebar-container" className="fixed inset-0 z-40 hidden">
           <div className="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
-          <div className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white dark:bg-gray-900">
-            <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white">
+            <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
                 <Link href={isSuperAdmin ? "/super-admin" : "/dashboard"} className="flex items-center">
-                  <span className="text-xl font-bold text-black dark:text-white">PXV Pay</span>
+                  <span className="text-xl font-bold text-black">PXV Pay</span>
               </Link>
               <Button variant="ghost" size="icon" className="mobile-sidebar-close">
                   <X className="h-5 w-5" />
@@ -172,7 +169,7 @@ export default async function MerchantDashboardLayout({
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-          <header className="w-full h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+          <header className="w-full h-16 border-b border-gray-200 bg-white shadow-sm">
             <div className="flex h-full items-center justify-between px-4">
             <div className="flex items-center md:hidden">
               <MobileSidebarToggle />
@@ -181,26 +178,25 @@ export default async function MerchantDashboardLayout({
             {/* Right side header items */}
               <div className="flex flex-1 justify-end items-center gap-3">
                 <NotificationsPopover />
-                <ThemeToggle />
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
-                      <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
+                      <Avatar className="h-8 w-8 border border-gray-200">
                       <AvatarImage src="" alt={userName} />
-                        <AvatarFallback className="text-sm bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">{userName.charAt(0).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback className="text-sm bg-gray-100 text-gray-800">{userName.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <div className="flex items-center justify-start gap-2 p-2">
-                      <Avatar className="h-9 w-9 border border-gray-200 dark:border-gray-700">
+                      <Avatar className="h-9 w-9 border border-gray-200">
                         <AvatarImage src="" alt={userName} />
-                        <AvatarFallback className="text-sm bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">{userName.charAt(0).toUpperCase()}</AvatarFallback>
+                        <AvatarFallback className="text-sm bg-gray-100 text-gray-800">{userName.charAt(0).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{userName}</p>
-                        <p className="text-xs leading-none text-gray-500 dark:text-gray-400">{userEmail}</p>
+                        <p className="text-xs leading-none text-gray-500">{userEmail}</p>
                       </div>
                     </div>
                   <DropdownMenuSeparator />
@@ -225,7 +221,7 @@ export default async function MerchantDashboardLayout({
         </header>
 
         {/* Main content area */}
-          <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-950 p-6">
+          <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
           {children}
         </main>
       </div>

@@ -1,21 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Settings, Moon, Sun, Bell, Shield, Globe, Database, Palette, Monitor } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/use-toast"
 import { createClient } from '@/lib/supabase/client'
-import { useTheme } from "next-themes"
 import Link from 'next/link'
 
 interface UserSettings {
   id?: string
   user_id: string
-  theme: string
   notifications_enabled: boolean
   email_notifications: boolean
   system_alerts: boolean
@@ -30,7 +28,6 @@ export function SettingsContent() {
   const [settings, setSettings] = useState<UserSettings | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const { theme, setTheme } = useTheme()
   
   const supabase = createClient()
 
@@ -46,8 +43,8 @@ export function SettingsContent() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Try to get existing settings
-      const { data: existingSettings, error } = await supabase
+      // Get user settings
+      const { data: settingsData, error } = await supabase
         .from('user_settings')
         .select('*')
         .eq('user_id', user.id)
@@ -55,15 +52,15 @@ export function SettingsContent() {
 
       if (error && error.code !== 'PGRST116') {
         console.warn('Error loading settings:', error.message)
+        return
       }
 
-      if (existingSettings) {
-        setSettings(existingSettings)
+      if (settingsData) {
+        setSettings(settingsData)
       } else {
         // Create default settings
         const defaultSettings: UserSettings = {
           user_id: user.id,
-          theme: theme || 'system',
           notifications_enabled: true,
           email_notifications: true,
           system_alerts: true,
@@ -128,11 +125,6 @@ export function SettingsContent() {
     }
   }
 
-  const handleThemeChange = (newTheme: string) => {
-    setTheme(newTheme)
-    saveSettings({ theme: newTheme })
-  }
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -172,36 +164,7 @@ export function SettingsContent() {
                 <p className="text-sm text-gray-600">Customize the look and feel of your interface</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Theme</Label>
-                  <Select value={theme} onValueChange={handleThemeChange}>
-                    <SelectTrigger className="h-11">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">
-                        <div className="flex items-center gap-2">
-                          <Sun className="h-4 w-4" />
-                          Light
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="dark">
-                        <div className="flex items-center gap-2">
-                          <Moon className="h-4 w-4" />
-                          Dark
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="system">
-                        <div className="flex items-center gap-2">
-                          <Monitor className="h-4 w-4" />
-                          System
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Language</Label>
                   <Select 
@@ -282,7 +245,7 @@ export function SettingsContent() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Security</h2>
-                <p className="text-sm text-gray-600">Manage your security preferences</p>
+                <p className="text-sm text-gray-600">Manage your account security preferences</p>
               </div>
 
               <div className="space-y-4">
@@ -299,12 +262,10 @@ export function SettingsContent() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Button variant="outline" className="h-11 gap-2" disabled>
-                    <Shield className="h-4 w-4" />
+                  <Button variant="outline" className="h-11" disabled>
                     Change Password
                   </Button>
-                  <Button variant="outline" className="h-11 gap-2" disabled>
-                    <Database className="h-4 w-4" />
+                  <Button variant="outline" className="h-11" disabled>
                     Export Data
                   </Button>
                 </div>
@@ -318,29 +279,25 @@ export function SettingsContent() {
                 <p className="text-sm text-gray-600">Application and system details</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">App Version:</span>
-                    <span className="text-sm font-medium text-gray-900">1.0.0</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">App Version</Label>
+                  <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    v1.0.0
                   </div>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Database:</span>
-                    <span className="text-sm font-medium text-gray-900">Supabase</span>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Database</Label>
+                  <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    Supabase
                   </div>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Environment:</span>
-                    <span className="text-sm font-medium text-gray-900">Development</span>
-                  </div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Last Backup:</span>
-                    <span className="text-sm font-medium text-gray-900">Today</span>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">Environment</Label>
+                  <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    Development
                   </div>
                 </div>
               </div>

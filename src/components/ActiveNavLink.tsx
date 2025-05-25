@@ -31,8 +31,8 @@ export function ActiveNavLink({ href, iconName, children }: ActiveNavLinkProps) 
   const renderIcon = () => {
     const className = cn("mr-3 h-5 w-5",
       isActive 
-        ? "text-black dark:text-white" 
-        : "text-gray-500 dark:text-gray-400 group-hover:text-black dark:group-hover:text-white"
+        ? "text-black" 
+        : "text-gray-500 group-hover:text-black"
     )
     
     switch (iconName) {
@@ -71,10 +71,10 @@ export function ActiveNavLink({ href, iconName, children }: ActiveNavLinkProps) 
     <Link
       href={href}
       className={cn(
-        "group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-        isActive 
-          ? "bg-black/5 dark:bg-white/10 text-black dark:text-white font-medium" 
-          : "text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 hover:text-black dark:hover:text-white"
+        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-gray-100",
+        isActive
+          ? "text-black"
+          : "text-gray-500 group-hover:text-black"
       )}
     >
       {renderIcon()}

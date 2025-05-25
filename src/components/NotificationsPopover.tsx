@@ -9,7 +9,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -185,8 +184,8 @@ export function NotificationsPopover() {
           <span className="sr-only">Notifications</span>
           {unreadCount > 0 && (
             <span className="absolute top-0 right-0 flex h-[10px] w-[10px] items-center justify-center">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-black dark:bg-white opacity-75"></span>
-              <span className="relative inline-flex h-[6px] w-[6px] rounded-full bg-black dark:bg-white"></span>
+              <span className="absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+              <span className="relative inline-flex h-[6px] w-[6px] rounded-full bg-black"></span>
             </span>
           )}
         </Button>
@@ -196,7 +195,7 @@ export function NotificationsPopover() {
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-medium">Notifications</h4>
             {unreadCount > 0 && (
-              <span className="inline-flex items-center rounded-full bg-black/10 dark:bg-white/10 px-2 py-0.5 text-xs font-medium">
+              <span className="inline-flex items-center rounded-full bg-black/10 px-2 py-0.5 text-xs font-medium">
                 {unreadCount} new
               </span>
             )}
@@ -205,7 +204,7 @@ export function NotificationsPopover() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-auto p-0 text-xs hover:bg-transparent hover:text-gray-900 dark:hover:text-gray-100"
+              className="h-auto p-0 text-xs hover:bg-transparent hover:text-gray-900"
               onClick={markAllAsRead}
             >
               <CheckCircle2 className="mr-1 h-3 w-3" />
@@ -224,14 +223,14 @@ export function NotificationsPopover() {
                 <div 
                   key={notification.id}
                   className={cn(
-                    "flex gap-3 p-3 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition-colors",
+                    "flex gap-3 p-3 cursor-pointer border-b border-gray-100 transition-colors",
                     notification.is_read 
-                      ? "hover:bg-gray-50 dark:hover:bg-gray-800/60" 
-                      : "bg-black/[0.02] dark:bg-white/[0.02]"
+                      ? "hover:bg-gray-50" 
+                      : "bg-black/[0.02]"
                   )}
                   onClick={() => markAsRead(notification.id)}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-50">
                     {getNotificationIcon(notification.type)}
                   </div>
                   <div className="flex-1">
@@ -244,7 +243,7 @@ export function NotificationsPopover() {
                       </p>
                       <div className="flex items-center gap-1">
                         {!notification.is_read && (
-                          <span className="h-2 w-2 rounded-full bg-black dark:bg-white"></span>
+                          <span className="h-2 w-2 rounded-full bg-black"></span>
                         )}
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {notification.time}

@@ -194,21 +194,21 @@ export function UsersList() {
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
       case 'super_admin':
-        return 'bg-black text-white dark:bg-white dark:text-black'
+        return 'bg-black text-white'
       case 'subscriber':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
+        return 'bg-blue-100 text-blue-800'
       case 'registered_user':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+        return 'bg-green-100 text-green-800'
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
   // Status badge color helper
   const getStatusBadgeClass = (active: boolean) => {
-    return active 
-      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+    return active
+      ? 'bg-green-100 text-green-800'
+      : 'bg-red-100 text-red-800'
   }
 
   // Format date helper
@@ -260,14 +260,14 @@ export function UsersList() {
           </div>
         ) : users.length > 0 ? (
           users.map((user) => (
-            <div key={user.id} className="flex items-center justify-between px-4 py-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div key={user.id} className="flex items-center justify-between px-4 py-4 hover:bg-gray-50">
               <div className="w-1/3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                     {user.role === 'super_admin' ? (
-                      <Crown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <Crown className="h-5 w-5 text-blue-600" />
                     ) : (
-                      <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <User className="h-5 w-5 text-blue-600" />
                     )}
                   </div>
                   <div>

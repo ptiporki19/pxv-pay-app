@@ -75,11 +75,11 @@ export function CountriesList() {
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
+        return 'bg-green-100 text-green-800'
+      case 'inactive':
+        return 'bg-yellow-100 text-yellow-800'
       default:
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+        return 'bg-red-100 text-red-800'
     }
   }
 
@@ -124,7 +124,7 @@ export function CountriesList() {
           </div>
         ) : countries.length > 0 ? (
           countries.map((country) => (
-            <div key={country.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div key={country.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
               <div className="w-1/3">{country.name}</div>
               <div className="w-1/3">{country.code}</div>
               <div className="w-1/6 text-center">

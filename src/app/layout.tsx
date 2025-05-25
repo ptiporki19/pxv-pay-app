@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationProvider } from "@/providers/notification-provider";
-import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,28 +36,26 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-foreground bg-background`}
       >
-        <ThemeProvider>
-          <NotificationProvider>
-            {children}
-            <Toaster
-              position="top-right"
-              expand={true}
-              richColors={true}
-              closeButton={true}
-              duration={4000}
-              visibleToasts={5}
-              toastOptions={{
-                style: {
-                  background: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  color: 'hsl(var(--foreground))',
-                },
-                className: 'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
-                descriptionClassName: 'group-[.toast]:text-muted-foreground'
-              }}
-            />
-          </NotificationProvider>
-        </ThemeProvider>
+        <NotificationProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            expand={true}
+            richColors={true}
+            closeButton={true}
+            duration={4000}
+            visibleToasts={5}
+            toastOptions={{
+              style: {
+                background: 'hsl(var(--background))',
+                border: '1px solid hsl(var(--border))',
+                color: 'hsl(var(--foreground))',
+              },
+              className: 'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
+              descriptionClassName: 'group-[.toast]:text-muted-foreground'
+            }}
+          />
+        </NotificationProvider>
       </body>
     </html>
   );

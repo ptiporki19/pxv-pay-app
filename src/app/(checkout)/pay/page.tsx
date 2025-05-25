@@ -88,7 +88,7 @@ export default async function PaymentPage({
         <p className="text-gray-500 mt-2">Please enter your payment information</p>
       </div>
       
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <div className="bg-white p-6 rounded-lg shadow-md">
         <form action={handlePaymentSubmit} className="space-y-4">
           <div>
             <label htmlFor="amount" className="block text-sm font-medium mb-1">
