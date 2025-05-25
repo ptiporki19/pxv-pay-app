@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
-import { Country, countriesApi } from "@/lib/supabase/client-api"
+import { Country, countriesApi, Currency, currenciesApi } from "@/lib/supabase/client-api"
 import { countryFormSchema, CountryFormValues } from "@/lib/validations/admin-forms"
 import { useRouter } from "next/navigation"
 
@@ -31,7 +31,31 @@ interface CountryFormProps {
 
 export function CountryFormSimple({ initialData }: CountryFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [currencies, setCurrencies] = useState<Currency[]>([])
+  const [loadingCurrencies, setLoadingCurrencies] = useState(true)
   const router = useRouter()
+  
+  // Load currencies on component mount
+  useEffect(() => {
+    loadCurrencies()
+  }, [])
+
+  const loadCurrencies = async () => {
+    try {
+      setLoadingCurrencies(true)
+      const currencyData = await currenciesApi.getAll()
+      setCurrencies(currencyData)
+    } catch (error) {
+      console.error('Error loading currencies:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load currencies. Please refresh the page.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingCurrencies(false)
+    }
+  }
   
   // Initialize the form with default values or existing data
   const form = useForm<CountryFormValues>({
@@ -39,10 +63,12 @@ export function CountryFormSimple({ initialData }: CountryFormProps) {
     defaultValues: initialData ? {
       name: initialData.name,
       code: initialData.code,
+      currency_id: initialData.currency_id || "",
       status: initialData.status,
     } : {
       name: "",
       code: "",
+      currency_id: "",
       status: "inactive",
     },
   })
@@ -140,6 +166,56 @@ export function CountryFormSimple({ initialData }: CountryFormProps) {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="currency_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Primary Currency *</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  disabled={loadingCurrencies}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={loadingCurrencies ? "Loading currencies..." : "Select currency"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {currencies.length === 0 && !loadingCurrencies ? (
+                      <SelectItem value="" disabled>
+                        No currencies available. Create a currency first.
+                      </SelectItem>
+                    ) : (
+                      currencies
+                        .filter(currency => currency.status === 'active')
+                        .map((currency) => (
+                          <SelectItem key={currency.id} value={currency.id!}>
+                            {currency.name} ({currency.code}) - {currency.symbol}
+                          </SelectItem>
+                        ))
+                    )}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+                {currencies.length === 0 && !loadingCurrencies && (
+                  <p className="text-sm text-muted-foreground">
+                    You need to create at least one active currency before creating a country.{" "}
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 h-auto text-sm"
+                      onClick={() => router.push('/currencies/create')}
+                    >
+                      Create Currency
+                    </Button>
+                  </p>
+                )}
+              </FormItem>
+            )}
+          />
           
           <div className="flex justify-end space-x-4 pt-6">
             <Button 
@@ -150,7 +226,10 @@ export function CountryFormSimple({ initialData }: CountryFormProps) {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button 
+              type="submit" 
+              disabled={isLoading || (currencies.length === 0 && !loadingCurrencies)}
+            >
               {isLoading ? "Saving..." : initialData ? "Update Country" : "Create Country"}
             </Button>
           </div>

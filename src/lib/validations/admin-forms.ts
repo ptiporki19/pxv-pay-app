@@ -10,6 +10,9 @@ export const countryFormSchema = z.object({
   }).max(3, {
     message: "Country code cannot be more than 3 characters",
   }).toUpperCase(),
+  currency_id: z.string().min(1, {
+    message: "Currency selection is required",
+  }),
   status: z.enum(['active', 'pending', 'inactive'], {
     required_error: "Please select a status",
   }),

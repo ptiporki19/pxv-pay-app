@@ -23,10 +23,17 @@ export interface Country {
   id?: string
   name: string
   code: string
+  currency_id?: string
   status: 'active' | 'pending' | 'inactive'
   user_id?: string
   created_at?: string
   updated_at?: string
+  currency?: {
+    id: string
+    name: string
+    code: string
+    symbol: string
+  } | null
 }
 
 export interface Currency {
@@ -90,18 +97,60 @@ export const countriesApi = {
       return []
     }
     
-    const { data, error } = await supabase
-      .from('countries')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('name', { ascending: true })
-    
-    if (error) {
-      console.error('Error fetching countries:', error)
-      throw new Error(error.message)
+    try {
+      // First, get countries
+      const { data, error } = await supabase
+        .from('countries')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('name', { ascending: true })
+      
+      if (error) {
+        console.error('Error fetching countries:', error)
+        throw new Error(error.message)
+      }
+      
+      // If no countries, return empty array
+      if (!data || data.length === 0) {
+        return []
+      }
+      
+      // Get unique currency IDs from countries
+      const currencyIds = [...new Set(data
+        .map(country => country.currency_id)
+        .filter(Boolean))]
+      
+      // If no currency IDs, return countries as is
+      if (currencyIds.length === 0) {
+        return data
+      }
+      
+      // Fetch currencies separately
+      const { data: currencies, error: currenciesError } = await supabase
+        .from('currencies')
+        .select('id, name, code, symbol')
+        .in('id', currencyIds)
+      
+      if (currenciesError) {
+        console.error('Error fetching currencies:', currenciesError)
+        // Return countries without currency data if currency fetch fails
+        return data
+      }
+      
+      // Create a map of currencies for quick lookup
+      const currencyMap = new Map(currencies?.map(c => [c.id, c]) || [])
+      
+      // Attach currency data to countries
+      const countriesWithCurrency = data.map(country => ({
+        ...country,
+        currency: country.currency_id ? currencyMap.get(country.currency_id) : null
+      }))
+      
+      return countriesWithCurrency
+    } catch (error) {
+      console.error('Error in getAll countries:', error)
+      throw error
     }
-    
-    return data || []
   },
   
   getById: async (id: string): Promise<Country> => {
@@ -131,12 +180,12 @@ export const countriesApi = {
       throw new Error('User not authenticated')
     }
     
-    // Explicitly set user_id for the country
-    const countryWithUser = { ...country, user_id: user.id }
+    // Remove user_id from country object since trigger will set it automatically
+    const { user_id, ...countryData } = country
     
     const { data, error } = await supabase
       .from('countries')
-      .insert([countryWithUser])
+      .insert([countryData])
       .select()
       .single()
     
