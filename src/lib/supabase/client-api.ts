@@ -179,21 +179,53 @@ export const countriesApi = {
     if (!user) {
       throw new Error('User not authenticated')
     }
-    
-    // Remove user_id from country object since trigger will set it automatically
-    const { user_id, ...countryData } = country
-    
+
+    // Include user_id in the insert data to satisfy RLS policy
+    const countryData = {
+      ...country,
+      user_id: user.id
+    }
+
     const { data, error } = await supabase
       .from('countries')
       .insert([countryData])
       .select()
       .single()
-    
+
     if (error) {
       console.error('Error creating country:', error)
-      throw new Error(error.message)
+      
+      // Provide more specific error messages for common errors
+      if (error.code === '23505') {
+        // Unique constraint violation
+        if (error.message.includes('countries_code_key')) {
+          throw new Error(`Country code '${country.code}' already exists. Please use a different country code.`)
+        }
+        if (error.message.includes('countries_user_code_unique')) {
+          throw new Error(`You already have a country with code '${country.code}'. Please use a different country code.`)
+        }
+        if (error.message.includes('countries_user_name_unique')) {
+          throw new Error(`You already have a country named '${country.name}'. Please use a different country name.`)
+        }
+        throw new Error(`A country with this code or name already exists. Please use different values.`)
+      }
+      
+      if (error.code === '23503') {
+        // Foreign key constraint violation
+        if (error.message.includes('currency_id')) {
+          throw new Error('The selected currency is invalid. Please select a valid currency.')
+        }
+        throw new Error('Invalid reference data. Please check your selections.')
+      }
+      
+      if (error.code === '42501') {
+        throw new Error('You do not have permission to create countries.')
+      }
+      
+      // Generic error message
+      throw new Error(error.message || 'Failed to create country. Please try again.')
     }
-    
+
     return data
   },
   
