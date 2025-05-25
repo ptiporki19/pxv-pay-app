@@ -48,5 +48,4 @@ TO authenticated
 WITH CHECK (auth.uid() = id);
 
 -- Ensure RLS is enabled
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
-    
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY; 

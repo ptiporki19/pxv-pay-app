@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
-import { UserCountWidget } from '@/components/dashboard/user-count-widget'
+import { DashboardStatsGrid } from '@/components/dashboard/dashboard-stats-grid'
 
 export const metadata: Metadata = {
   title: 'Super Admin Dashboard - PXV Pay',
@@ -80,14 +80,12 @@ export default async function SuperAdminDashboard() {
         </div>
       </div>
 
-      {/* Test: Single User Count Widget */}
+      {/* Real-time Dashboard Statistics */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Platform Stats (Testing)</h2>
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          <UserCountWidget />
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          Testing single widget with real data from Supabase
+        <h2 className="text-2xl font-semibold mb-6">Platform Overview</h2>
+        <DashboardStatsGrid />
+        <p className="text-xs text-muted-foreground mt-4">
+          📊 Real-time data • Updates every 30 seconds • Click widgets to navigate
         </p>
       </div>
 
