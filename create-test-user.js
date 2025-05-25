@@ -1,137 +1,182 @@
 const { createClient } = require('@supabase/supabase-js')
 
-console.log('👤 Creating test user and testing RLS policies...')
+const supabaseUrl = 'http://127.0.0.1:54321'
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
 
-const supabase = createClient(
-  'http://127.0.0.1:54321',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
-)
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-const anonClient = createClient(
-  'http://127.0.0.1:54321',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
-)
-
-async function createAndTestUsers() {
+async function createTestUser() {
+  console.log('🧪 Creating test user for profile testing...\n')
+  
   try {
-    console.log('\n1️⃣ Creating super admin user...')
-    
-    // Create super admin using service role
-    const { data: adminUser, error: adminError } = await supabase.auth.admin.createUser({
-      email: 'admin@pxvpay.com',
-      password: 'admin123456',
-      email_confirm: true
-    })
-    
-    if (adminError) {
-      console.error('❌ Failed to create admin:', adminError.message)
-    } else {
-      console.log('✅ Admin user created:', adminUser.user.email)
-      
-      // Update role to super_admin
-      const { error: roleError } = await supabase
-        .from('users')
-        .update({ role: 'super_admin' })
-        .eq('id', adminUser.user.id)
-      
-      if (roleError) {
-        console.error('❌ Failed to update admin role:', roleError.message)
-      } else {
-        console.log('✅ Admin role updated to super_admin')
-      }
-    }
-
-    console.log('\n2️⃣ Creating regular test user...')
-    
-    // Create regular user
-    const { data: testUser, error: testError } = await supabase.auth.admin.createUser({
+    // Create auth user
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: 'testuser@example.com',
-      password: 'testpass123',
+      password: 'testpassword123',
       email_confirm: true
-    })
-    
-    if (testError) {
-      console.error('❌ Failed to create test user:', testError.message)
-    } else {
-      console.log('✅ Test user created:', testUser.user.email)
-    }
-
-    console.log('\n3️⃣ Testing RLS policies...')
-    
-    // Test 1: Service role should see all users
-    const { data: serviceUsers, error: serviceError } = await supabase
-      .from('users')
-      .select('*')
-    
-    if (serviceError) {
-      console.error('❌ Service role fetch failed:', serviceError.message)
-    } else {
-      console.log(`✅ Service role can see ${serviceUsers.length} users:`)
-      serviceUsers.forEach((user, index) => {
-        console.log(`   ${index + 1}. ${user.email} (${user.role})`)
-      })
-    }
-
-    // Test 2: Super admin should see all users
-    console.log('\n4️⃣ Testing super admin access...')
-    
-    const { data: authData, error: authError } = await anonClient.auth.signInWithPassword({
-      email: 'admin@pxvpay.com',
-      password: 'admin123456'
     })
     
     if (authError) {
-      console.error('❌ Super admin auth failed:', authError.message)
-    } else {
-      console.log('✅ Super admin authenticated')
-      
-      const { data: adminUsers, error: adminUsersError } = await anonClient
-        .from('users')
-        .select('*')
-      
-      if (adminUsersError) {
-        console.error('❌ Super admin fetch failed:', adminUsersError.message)
-      } else {
-        console.log(`✅ Super admin can see ${adminUsers.length} users:`)
-        adminUsers.forEach((user, index) => {
-          console.log(`   ${index + 1}. ${user.email} (${user.role})`)
-        })
-      }
+      console.log('❌ Failed to create auth user:', authError.message)
+      return
     }
-
-    // Test 3: Regular user should only see themselves
-    console.log('\n5️⃣ Testing regular user access...')
     
-    const { data: testAuthData, error: testAuthError } = await anonClient.auth.signInWithPassword({
-      email: 'testuser@example.com',
-      password: 'testpass123'
-    })
+    console.log('✅ Auth user created:', authData.user.id)
     
-    if (testAuthError) {
-      console.error('❌ Test user auth failed:', testAuthError.message)
-    } else {
-      console.log('✅ Test user authenticated')
-      
-      const { data: testUserUsers, error: testUserUsersError } = await anonClient
-        .from('users')
-        .select('*')
-      
-      if (testUserUsersError) {
-        console.error('❌ Test user fetch failed:', testUserUsersError.message)
-      } else {
-        console.log(`✅ Test user can see ${testUserUsers.length} users:`)
-        testUserUsers.forEach((user, index) => {
-          console.log(`   ${index + 1}. ${user.email} (${user.role})`)
-        })
-      }
+    // Create user in public.users table
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        email: 'testuser@example.com',
+        role: 'registered_user',
+        active: true
+      })
+      .select()
+      .single()
+    
+    if (userError) {
+      console.log('❌ Failed to create user profile:', userError.message)
+      return
     }
-
-  } catch (err) {
-    console.error('💥 Test failed:', err)
+    
+    console.log('✅ User profile created')
+    
+    // Create some sample data for the user
+    
+    // Sample currencies
+    const { data: currencies, error: currencyError } = await supabase
+      .from('currencies')
+      .insert([
+        {
+          user_id: authData.user.id,
+          name: 'US Dollar',
+          code: 'USD',
+          symbol: '$',
+          status: 'active'
+        },
+        {
+          user_id: authData.user.id,
+          name: 'Euro',
+          code: 'EUR',
+          symbol: '€',
+          status: 'active'
+        }
+      ])
+      .select()
+    
+    if (currencyError) {
+      console.log('⚠️ Failed to create currencies:', currencyError.message)
+    } else {
+      console.log('✅ Sample currencies created:', currencies.length)
+    }
+    
+    // Sample countries
+    const { data: countries, error: countryError } = await supabase
+      .from('countries')
+      .insert([
+        {
+          user_id: authData.user.id,
+          name: 'United States',
+          code: 'US',
+          status: 'active'
+        },
+        {
+          user_id: authData.user.id,
+          name: 'Germany',
+          code: 'DE',
+          status: 'active'
+        }
+      ])
+      .select()
+    
+    if (countryError) {
+      console.log('⚠️ Failed to create countries:', countryError.message)
+    } else {
+      console.log('✅ Sample countries created:', countries.length)
+    }
+    
+    // Sample payment methods
+    const { data: paymentMethods, error: pmError } = await supabase
+      .from('payment_methods')
+      .insert([
+        {
+          user_id: authData.user.id,
+          name: 'Credit Card',
+          type: 'card',
+          status: 'active',
+          countries: ['US', 'DE']
+        },
+        {
+          user_id: authData.user.id,
+          name: 'PayPal',
+          type: 'wallet',
+          status: 'active',
+          countries: ['US']
+        }
+      ])
+      .select()
+    
+    if (pmError) {
+      console.log('⚠️ Failed to create payment methods:', pmError.message)
+    } else {
+      console.log('✅ Sample payment methods created:', paymentMethods.length)
+    }
+    
+    // Sample payments
+    const { data: payments, error: paymentError } = await supabase
+      .from('payments')
+      .insert([
+        {
+          user_id: authData.user.id,
+          amount: 100.00,
+          currency: 'USD',
+          payment_method: 'Credit Card',
+          status: 'completed',
+          country: 'US',
+          description: 'Test payment 1'
+        },
+        {
+          user_id: authData.user.id,
+          amount: 50.00,
+          currency: 'EUR',
+          payment_method: 'PayPal',
+          status: 'pending',
+          country: 'DE',
+          description: 'Test payment 2'
+        },
+        {
+          user_id: authData.user.id,
+          amount: 25.00,
+          currency: 'USD',
+          payment_method: 'Credit Card',
+          status: 'failed',
+          country: 'US',
+          description: 'Test payment 3'
+        }
+      ])
+      .select()
+    
+    if (paymentError) {
+      console.log('⚠️ Failed to create payments:', paymentError.message)
+    } else {
+      console.log('✅ Sample payments created:', payments.length)
+    }
+    
+    console.log('\n🎉 Test user created successfully!')
+    console.log(`📧 Email: testuser@example.com`)
+    console.log(`🔑 Password: testpassword123`)
+    console.log(`👤 User ID: ${authData.user.id}`)
+    console.log(`\n🔗 Profile URL: http://localhost:3002/users/${authData.user.id}/profile`)
+    
+  } catch (error) {
+    console.error('💥 Error creating test user:', error)
   }
 }
 
-createAndTestUsers().then(() => {
-  console.log('\n✅ User creation and RLS test completed!')
-  process.exit(0)
-}) 
+createTestUser()
+  .then(() => process.exit(0))
+  .catch(error => {
+    console.error('Fatal error:', error)
+    process.exit(1)
+  }) 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Crown, Shield, User, Mail, Calendar } from "lucide-react"
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Crown, Shield, User, Mail, Calendar, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -10,11 +10,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { toast } from "@/components/ui/use-toast"
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useRealtimeUsers } from '@/hooks/use-realtime-users'
+import Link from 'next/link'
 
 interface User {
   id: string
@@ -301,6 +303,13 @@ export function UsersList() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/users/${user.id}/profile`}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'registered_user')}>
                       <User className="mr-2 h-4 w-4" />
                       Make User

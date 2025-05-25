@@ -18,6 +18,7 @@ import { ActiveNavLink } from '@/components/ActiveNavLink'
 import { LogoutButton } from '@/components/LogoutButton'
 import { NotificationsPopover } from '@/components/NotificationsPopover'
 import { RouteGuard } from '@/components/RouteGuard'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export const metadata: Metadata = {
   title: 'Merchant Dashboard - PXV Pay',
@@ -180,6 +181,7 @@ export default async function MerchantDashboardLayout({
             {/* Right side header items */}
               <div className="flex flex-1 justify-end items-center gap-3">
                 <NotificationsPopover />
+                <ThemeToggle />
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

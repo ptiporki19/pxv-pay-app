@@ -50,7 +50,10 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
           // Redirect logic
           const path = pathname || ''
           const isAuthRoute = ['/signin', '/signup', '/reset-password'].includes(path)
-          const isSuperAdminRoute = path.startsWith('/super-admin') || path.startsWith('/blog-management')
+          const isSuperAdminRoute = path.startsWith('/super-admin') || 
+                                   path.startsWith('/blog-management') ||
+                                   path.startsWith('/users') ||
+                                   path.startsWith('/audit-logs')
           const isDashboardRoute = path.startsWith('/dashboard')
           
           // Authenticated users shouldn't be on auth routes
