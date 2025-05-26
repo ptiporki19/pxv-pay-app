@@ -695,7 +695,7 @@ async function uploadIcon(base64Image: string, name: string): Promise<string> {
     
     // Upload to Supabase Storage
     const { data, error } = await supabase.storage
-      .from('icons')
+      .from('payment-method-icons')
       .upload(fileName, file)
     
     if (error) {
@@ -705,7 +705,7 @@ async function uploadIcon(base64Image: string, name: string): Promise<string> {
     
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
-      .from('icons')
+      .from('payment-method-icons')
       .getPublicUrl(fileName)
     
     return publicUrl

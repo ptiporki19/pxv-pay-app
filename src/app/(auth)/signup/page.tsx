@@ -71,23 +71,8 @@ export default function SignUpPage() {
         throw error
       }
 
-      // For local Supabase, we'll also need to create a users record
-      // since email confirmation might be disabled in local dev
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('users')
-          .upsert({
-            id: data.user.id,
-            email: values.email,
-            full_name: values.fullName,
-            role: 'registered_user',
-            created_at: new Date().toISOString(),
-          });
-
-        if (profileError) {
-          console.error('Error creating user profile:', profileError);
-        }
-      }
+      // The handle_new_user trigger will automatically create the user profile
+      // No need to manually create it here
 
       toast.success('Account created successfully', {
         description: 'Please check your email to verify your account.',

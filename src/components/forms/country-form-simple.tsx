@@ -185,7 +185,7 @@ export function CountryFormSimple({ initialData }: CountryFormProps) {
                   </FormControl>
                   <SelectContent>
                     {currencies.length === 0 && !loadingCurrencies ? (
-                      <SelectItem value="" disabled>
+                      <SelectItem value="no-currencies" disabled>
                         No currencies available. Create a currency first.
                       </SelectItem>
                     ) : (

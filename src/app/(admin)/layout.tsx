@@ -28,6 +28,7 @@ type UserRole = 'super_admin' | 'registered_user' | 'subscriber' | 'free_user'
 // Navigation items for merchants
 const merchantNavItems = [
   { label: 'Dashboard', path: '/dashboard', iconName: 'Home' },
+  { label: 'Checkout Links', path: '/checkout-links', iconName: 'Link2' },
   { label: 'Countries', path: '/countries', iconName: 'Globe' },
   { label: 'Currencies', path: '/currencies', iconName: 'DollarSign' },
   { label: 'Payment Methods', path: '/payment-methods', iconName: 'CreditCard' },
