@@ -448,14 +448,14 @@ export function UserProfile({ userId }: UserProfileProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
         <Link href="/users">
           <Button variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Users
           </Button>
         </Link>
-        <div className="flex-1">
+        <div className="text-right">
           <h1 className="text-3xl font-bold tracking-tight">User Profile</h1>
           <p className="text-muted-foreground">View and manage user account information</p>
         </div>

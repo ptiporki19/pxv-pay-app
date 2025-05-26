@@ -112,8 +112,9 @@ export function CountriesList() {
 
       <div className="border rounded-lg">
         <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
-          <div className="w-1/3">Country Name</div>
-          <div className="w-1/3">Country Code</div>
+          <div className="w-1/4">Country Name</div>
+          <div className="w-1/4">Country Code</div>
+          <div className="w-1/4">Currency</div>
           <div className="w-1/6 text-center">Status</div>
           <div className="w-1/12 text-right">Actions</div>
         </div>
@@ -125,8 +126,17 @@ export function CountriesList() {
         ) : countries.length > 0 ? (
           countries.map((country) => (
             <div key={country.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-              <div className="w-1/3">{country.name}</div>
-              <div className="w-1/3">{country.code}</div>
+              <div className="w-1/4">{country.name}</div>
+              <div className="w-1/4">{country.code}</div>
+              <div className="w-1/4">
+                {country.currency ? (
+                  <span className="text-sm">
+                    {country.currency.name} ({country.currency.code}) {country.currency.symbol}
+                  </span>
+                ) : (
+                  <span className="text-sm text-muted-foreground">No currency</span>
+                )}
+              </div>
               <div className="w-1/6 text-center">
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(country.status)}`}>
                   {country.status === 'active' ? 'Active' : 

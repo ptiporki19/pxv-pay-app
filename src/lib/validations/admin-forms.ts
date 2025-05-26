@@ -7,8 +7,8 @@ export const countryFormSchema = z.object({
   }),
   code: z.string().min(2, {
     message: "Country code must be at least 2 characters",
-  }).max(3, {
-    message: "Country code cannot be more than 3 characters",
+  }).max(5, {
+    message: "Country code cannot be more than 5 characters",
   }).toUpperCase(),
   currency_id: z.string().min(1, {
     message: "Currency selection is required",

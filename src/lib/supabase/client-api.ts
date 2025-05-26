@@ -199,15 +199,15 @@ export const countriesApi = {
       if (error.code === '23505') {
         // Unique constraint violation
         if (error.message.includes('countries_code_key')) {
-          throw new Error(`Country code '${country.code}' already exists. Please use a different country code.`)
+          throw new Error(`Country code '${country.code}' already exists.`)
         }
         if (error.message.includes('countries_user_code_unique')) {
-          throw new Error(`You already have a country with code '${country.code}'. Please use a different country code.`)
+          throw new Error(`You already have a country with code '${country.code}'.`)
         }
         if (error.message.includes('countries_user_name_unique')) {
-          throw new Error(`You already have a country named '${country.name}'. Please use a different country name.`)
+          throw new Error(`You already have a country named '${country.name}'.`)
         }
-        throw new Error(`A country with this code or name already exists. Please use different values.`)
+        throw new Error(`This country already exists.`)
       }
       
       if (error.code === '23503') {
@@ -374,7 +374,33 @@ export const currenciesApi = {
     
     if (error) {
       console.error('Error creating currency:', error)
-      throw new Error(error.message)
+      
+      // Handle empty error object
+      if (!error.message && !error.code) {
+        throw new Error('Failed to create currency. Please check your input and try again.')
+      }
+      
+      // Provide more specific error messages for common errors
+      if (error.code === '23505') {
+        // Unique constraint violation
+        if (error.message.includes('currencies_code_key')) {
+          throw new Error(`Currency code '${currency.code}' already exists.`)
+        }
+        if (error.message.includes('currencies_user_code_unique')) {
+          throw new Error(`You already have a currency with code '${currency.code}'.`)
+        }
+        if (error.message.includes('currencies_user_name_unique')) {
+          throw new Error(`You already have a currency named '${currency.name}'.`)
+        }
+        throw new Error(`This currency already exists.`)
+      }
+      
+      if (error.code === '42501') {
+        throw new Error('You do not have permission to create currencies.')
+      }
+      
+      // Generic error message
+      throw new Error(error.message || 'Failed to create currency. Please try again.')
     }
     
     return data
@@ -531,7 +557,27 @@ export const paymentMethodsApi = {
     
     if (error) {
       console.error('Error creating payment method:', error)
-      throw new Error(error.message)
+      
+      // Handle empty error object
+      if (!error.message && !error.code) {
+        throw new Error('Failed to create payment method. Please check your input and try again.')
+      }
+      
+      // Provide more specific error messages for common errors
+      if (error.code === '23505') {
+        // Unique constraint violation
+        if (error.message.includes('payment_methods_user_name_unique')) {
+          throw new Error(`You already have a payment method named '${method.name}'.`)
+        }
+        throw new Error(`This payment method name already exists.`)
+      }
+      
+      if (error.code === '42501') {
+        throw new Error('You do not have permission to create payment methods.')
+      }
+      
+      // Generic error message
+      throw new Error(error.message || 'Failed to create payment method. Please try again.')
     }
     
     return data

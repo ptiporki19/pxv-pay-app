@@ -111,7 +111,7 @@ export function CountryForm({ initialData, onSuccess }: CountryFormProps) {
                 <Input 
                   placeholder="US" 
                   {...field} 
-                  maxLength={3}
+                  maxLength={5}
                   onChange={(e) => field.onChange(e.target.value.toUpperCase())}
                 />
               </FormControl>
