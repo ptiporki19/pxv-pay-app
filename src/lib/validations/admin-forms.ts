@@ -50,6 +50,14 @@ const customFieldSchema = z.object({
   value: z.string().optional(),
 })
 
+// Country-specific details schema
+const countrySpecificDetailsSchema = z.object({
+  custom_fields: z.array(customFieldSchema).optional(),
+  instructions: z.string().optional(),
+  url: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")).nullable(),
+  additional_info: z.string().optional(),
+})
+
 // Base schema for payment method fields
 const basePaymentMethodObjectSchema = z.object({
   name: z.string().min(2, {
@@ -65,8 +73,11 @@ const basePaymentMethodObjectSchema = z.object({
     required_error: "Please select a status",
   }),
   instructions: z.string().optional(),
+  instructions_for_checkout: z.string().optional(),
   description: z.string().optional(),
   custom_fields: z.array(customFieldSchema).optional(),
+  country_specific_details: z.record(z.string(), countrySpecificDetailsSchema).optional(),
+  display_order: z.number().optional(),
   icon: z.union([
     z.string(),
     z.null(),

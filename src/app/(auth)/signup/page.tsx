@@ -54,34 +54,25 @@ export default function SignUpPage() {
     try {
       setIsLoading(true)
       
-      // Create the user with Supabase
-      const { data, error } = await supabase.auth.signUp({
+      // Use server action for signup
+      const { signUpAction } = await import('@/app/actions/auth')
+      
+      const result = await signUpAction({
         email: values.email,
         password: values.password,
-        options: {
-          data: {
-            full_name: values.fullName,
-            role: 'registered_user', // Default role for new signups
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        fullName: values.fullName
       })
 
-      if (error) {
-        throw error
+      if (result.success) {
+        toast.success('Account created successfully', {
+          description: 'Please check your email to verify your account.',
+        })
+        router.push('/signin')
+      } else {
+        throw new Error(result.message)
       }
-
-      // The handle_new_user trigger will automatically create the user profile
-      // No need to manually create it here
-
-      toast.success('Account created successfully', {
-        description: 'Please check your email to verify your account.',
-      })
-      
-      // For local development, we can redirect directly to signin 
-      // since email verification might be disabled
-      router.push('/signin')
     } catch (error: any) {
+      console.error('Signup error:', error)
       toast.error('Sign up failed', {
         description: error?.message || 'Failed to create your account. Please try again.',
       })

@@ -1,6 +1,6 @@
 "use client"
 
-import { PaymentMethodFormSimple } from "@/components/forms/payment-method-form-simple"
+import { PaymentMethodFormSimplified } from "@/components/forms/payment-method-form-simplified"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
@@ -22,7 +22,7 @@ export default function CreatePaymentMethodPage() {
 
         {/* Form Container */}
         <div className="bg-white rounded-lg shadow-sm border">
-          <PaymentMethodFormSimple />
+          <PaymentMethodFormSimplified />
         </div>
       </div>
     </div>

@@ -7,11 +7,8 @@ export interface CheckoutLink {
   slug: string
   link_name: string
   title: string // Display title for the checkout link
-  amount: number // Fixed amount for this checkout link (when amount_type is 'fixed')
-  amount_type: 'fixed' | 'flexible' // Type of amount: fixed (predefined) or flexible (user enters amount)
-  min_amount?: number | null // Minimum amount for flexible checkout links
-  max_amount?: number | null // Maximum amount for flexible checkout links
-  currency: string // Currency code (USD, EUR, etc.) - derived from selected country
+  amount: number // Fixed amount for this checkout link
+  currency: string // Currency code (USD, EUR, etc.)
   status: 'active' | 'inactive' | 'expired' | 'draft' // Link status
   active_country_codes: string[]
   is_active: boolean
@@ -86,23 +83,9 @@ export interface CheckoutSessionData {
 
 export interface CheckoutValidationResult {
   valid: boolean
-  error?: string
   checkout_link?: CheckoutLink
   merchant_settings?: MerchantCheckoutSettings
-}
-
-export interface Country {
-  id: string
-  name: string
-  code: string
-  currency_id?: string
-  status: string
-  currency?: {
-    id: string
-    name: string
-    code: string
-    symbol: string
-  }
+  error?: string
 }
 
 // Enhanced payment types for checkout (extending existing without modification)

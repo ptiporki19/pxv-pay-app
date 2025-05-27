@@ -1,89 +1,167 @@
 -- Seed script for PXV Pay
+-- This script creates the admin user and basic data
 
--- First, we'll insert a few default records for testing
--- This assumes you already have users created in auth.users through the auth system
+-- Create admin user in auth.users table
+-- Note: This uses the service role to directly insert into auth.users
+INSERT INTO auth.users (
+  instance_id,
+  id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  recovery_sent_at,
+  last_sign_in_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at,
+  confirmation_token,
+  email_change,
+  email_change_token_new,
+  recovery_token
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  '00000000-0000-0000-0000-000000000001',
+  'authenticated',
+  'authenticated',
+  'admin@pxvpay.com',
+  crypt('admin123456', gen_salt('bf')),
+  NOW(),
+  NOW(),
+  NOW(),
+  '{"provider": "email", "providers": ["email"]}',
+  '{"role": "super_admin"}',
+  NOW(),
+  NOW(),
+  '',
+  '',
+  '',
+  ''
+) ON CONFLICT (id) DO NOTHING;
 
--- Insert default admin user profile
-INSERT INTO profiles (id, full_name, user_type)
-VALUES 
-  ('00000000-0000-0000-0000-000000000000', 'System Admin', 'admin')
-ON CONFLICT (id) DO NOTHING;
+-- Create admin user profile in public.users table
+INSERT INTO public.users (
+  id,
+  email,
+  role,
+  active,
+  created_at
+) VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'admin@pxvpay.com',
+  'super_admin',
+  true,
+  NOW()
+) ON CONFLICT (id) DO UPDATE SET role = 'super_admin';
 
--- Insert a test merchant
-INSERT INTO merchants (id, name, description, website, status, owner_id)
+-- Insert default countries
+INSERT INTO public.countries (user_id, name, code, status, created_at, updated_at)
 VALUES
-  ('11111111-1111-1111-1111-111111111111', 'Test Merchant', 'A test merchant for development', 'https://example.com', 'active', '00000000-0000-0000-0000-000000000000')
-ON CONFLICT (id) DO NOTHING;
+  ('00000000-0000-0000-0000-000000000001', 'United States', 'US', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Canada', 'CA', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'United Kingdom', 'GB', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Nigeria', 'NG', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Kenya', 'KE', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Ghana', 'GH', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'South Africa', 'ZA', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Germany', 'DE', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'France', 'FR', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Japan', 'JP', 'active', NOW(), NOW());
 
--- Insert countries
-INSERT INTO countries (name, code, status)
+-- Insert default currencies
+INSERT INTO public.currencies (user_id, name, code, symbol, status, created_at, updated_at)
 VALUES
-  ('United States', 'US', 'active'),
-  ('Canada', 'CA', 'active'),
-  ('United Kingdom', 'GB', 'pending'),
-  ('Brazil', 'BR', 'inactive'),
-  ('Nigeria', 'NG', 'active'),
-  ('Kenya', 'KE', 'active'),
-  ('Ghana', 'GH', 'active'),
-  ('South Africa', 'ZA', 'active'),
-  ('Tanzania', 'TZ', 'active'),
-  ('Germany', 'DE', 'active'),
-  ('France', 'FR', 'active'),
-  ('Japan', 'JP', 'active')
-ON CONFLICT (code) DO NOTHING;
+  ('00000000-0000-0000-0000-000000000001', 'US Dollar', 'USD', '$', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Euro', 'EUR', '€', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'British Pound', 'GBP', '£', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Nigerian Naira', 'NGN', '₦', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Kenyan Shilling', 'KES', 'KSh', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'South African Rand', 'ZAR', 'R', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Ghanaian Cedi', 'GHS', 'GH₵', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Japanese Yen', 'JPY', '¥', 'active', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Canadian Dollar', 'CAD', 'CA$', 'active', NOW(), NOW());
 
--- Insert currencies
-INSERT INTO currencies (name, code, symbol, status)
+-- Update countries with currency relationships
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'USD' LIMIT 1) WHERE code = 'US';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'CAD' LIMIT 1) WHERE code = 'CA';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'GBP' LIMIT 1) WHERE code = 'GB';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'NGN' LIMIT 1) WHERE code = 'NG';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'KES' LIMIT 1) WHERE code = 'KE';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'GHS' LIMIT 1) WHERE code = 'GH';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'ZAR' LIMIT 1) WHERE code = 'ZA';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'EUR' LIMIT 1) WHERE code = 'DE';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'EUR' LIMIT 1) WHERE code = 'FR';
+UPDATE public.countries SET currency_id = (SELECT id FROM public.currencies WHERE code = 'JPY' LIMIT 1) WHERE code = 'JP';
+
+-- Insert default payment methods
+INSERT INTO public.payment_methods (user_id, name, type, countries, status, url, created_at, updated_at)
 VALUES
-  ('US Dollar', 'USD', '$', 'active'),
-  ('Euro', 'EUR', '€', 'active'),
-  ('British Pound', 'GBP', '£', 'active'),
-  ('Nigerian Naira', 'NGN', '₦', 'active'),
-  ('Brazilian Real', 'BRL', 'R$', 'pending'),
-  ('Kenyan Shilling', 'KES', 'KSh', 'active'),
-  ('South African Rand', 'ZAR', 'R', 'active'),
-  ('Ghanaian Cedi', 'GHS', 'GH₵', 'active'),
-  ('Japanese Yen', 'JPY', '¥', 'active'),
-  ('Canadian Dollar', 'CAD', 'CA$', 'active')
-ON CONFLICT (code) DO NOTHING;
+  ('00000000-0000-0000-0000-000000000001', 'Bank Transfer', 'manual', ARRAY['US', 'CA', 'GB', 'NG', 'KE', 'GH', 'ZA', 'DE', 'FR', 'JP'], 'active', NULL, NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Mobile Money', 'manual', ARRAY['NG', 'KE', 'GH', 'ZA'], 'active', NULL, NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Cryptocurrency', 'manual', ARRAY['US', 'CA', 'GB', 'NG', 'KE', 'GH', 'ZA', 'DE', 'FR', 'JP'], 'active', NULL, NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'PayPal', 'payment-link', ARRAY['US', 'CA', 'GB', 'DE', 'FR', 'JP'], 'active', 'https://paypal.com', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'Stripe', 'payment-link', ARRAY['US', 'CA', 'GB', 'DE', 'FR', 'JP'], 'active', 'https://stripe.com', NOW(), NOW());
 
--- Insert payment methods
-INSERT INTO payment_methods (name, type, countries, status, icon)
+-- Create default themes for admin user
+INSERT INTO public.themes (user_id, name, primary_color, secondary_color, accent_color, background_color, text_color, border_color, success_color, warning_color, error_color, font_family, border_radius, is_active, created_at, updated_at)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'Default Theme',
+  '#3b82f6',
+  '#6474bb',
+  '#0bb6d4',
+  '#ffffff',
+  '#0f172a',
+  '#e2e8f0',
+  '#22c55e',
+  '#f59e0b',
+  '#ef4444',
+  'Inter',
+  'medium',
+  true,
+  NOW(),
+  NOW()
+);
+
+-- Create default content templates for admin user
+INSERT INTO public.content_templates (user_id, template_key, title, content, category, created_at, updated_at)
 VALUES
-  ('Bank Transfer (USD)', 'bank', ARRAY['US', 'CA'], 'active', 'BT'),
-  ('M-Pesa', 'mobile', ARRAY['KE', 'TZ'], 'active', 'MM'),
-  ('SEPA Transfer', 'bank', ARRAY['DE', 'FR', 'IT', 'ES'], 'inactive', 'BT'),
-  ('Bitcoin', 'crypto', ARRAY['Global'], 'active', 'BTC'),
-  ('Ethereum', 'crypto', ARRAY['Global'], 'active', 'ETH'),
-  ('Interac e-Transfer', 'bank', ARRAY['CA'], 'active', 'INT'),
-  ('Wise Transfer', 'bank', ARRAY['US', 'GB', 'EU', 'AU'], 'active', 'WT'),
-  ('PayPal', 'bank', ARRAY['Global'], 'active', 'PP'),
-  ('MTN Mobile Money', 'mobile', ARRAY['GH', 'NG', 'ZA'], 'active', 'MTN')
-ON CONFLICT DO NOTHING;
+  ('00000000-0000-0000-0000-000000000001', 'welcome_message', 'Welcome Message', 'Welcome to our secure payment portal. Please complete your payment safely.', 'checkout', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'payment_instructions', 'Payment Instructions', 'Please follow the instructions below to complete your payment.', 'checkout', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'success_message', 'Success Message', 'Your payment has been processed successfully. Thank you!', 'checkout', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'footer_text', 'Footer Text', 'Secure payments powered by PXV Pay', 'general', NOW(), NOW()),
+  ('00000000-0000-0000-0000-000000000001', 'support_contact', 'Support Contact', 'For support, please contact us.', 'general', NOW(), NOW());
 
--- Insert some sample payments for testing
-DO $$
-DECLARE
-  test_user_id UUID;
-  merchant_id UUID;
-BEGIN
-  -- Get our test merchant
-  SELECT id INTO merchant_id FROM merchants LIMIT 1;
-  
-  -- Get a test user (other than admin)
-  SELECT id INTO test_user_id FROM auth.users WHERE id != '00000000-0000-0000-0000-000000000000' LIMIT 1;
-  
-  -- Only proceed if we have both a merchant and a user
-  IF test_user_id IS NOT NULL AND merchant_id IS NOT NULL THEN
-    -- Insert sample payments
-    INSERT INTO payments (user_id, merchant_id, amount, currency, payment_method, status, country, description)
-    VALUES
-      (test_user_id, merchant_id, 100.00, 'USD', 'bank', 'pending', 'US', 'Test payment 1'),
-      (test_user_id, merchant_id, 50.00, 'USD', 'bank', 'completed', 'US', 'Test payment 2'),
-      (test_user_id, merchant_id, 75.50, 'USD', 'bank', 'failed', 'US', 'Test payment 3'),
-      (test_user_id, merchant_id, 200.00, 'EUR', 'bank', 'pending', 'DE', 'Test payment 4'),
-      (test_user_id, merchant_id, 500.00, 'GBP', 'bank', 'completed', 'GB', 'Test payment 5'),
-      (test_user_id, merchant_id, 0.05, 'BTC', 'crypto', 'pending', 'Global', 'Test payment 6')
-    ON CONFLICT DO NOTHING;
-  END IF;
-END $$; 
+-- Create theme settings for admin user
+INSERT INTO public.theme_settings (user_id, theme_id, setting_key, setting_value, created_at, updated_at)
+SELECT 
+  '00000000-0000-0000-0000-000000000001',
+  t.id,
+  'logo_url',
+  '',
+  NOW(),
+  NOW()
+FROM public.themes t 
+WHERE t.user_id = '00000000-0000-0000-0000-000000000001' 
+  AND t.name = 'Default Theme';
+
+-- Add some sample blog posts for testing
+INSERT INTO public.blog_posts (title, slug, content, excerpt, published, featured_image, author_id, created_at, updated_at)
+VALUES
+  ('Welcome to PXV Pay', 'welcome-to-pxv-pay', 'Welcome to PXV Pay, your secure payment platform...', 'Learn about our secure payment platform', true, '', '00000000-0000-0000-0000-000000000001', NOW(), NOW()),
+  ('Security Best Practices', 'security-best-practices', 'Learn about our security measures...', 'How we keep your payments secure', true, '', '00000000-0000-0000-0000-000000000001', NOW(), NOW()),
+  ('Getting Started Guide', 'getting-started-guide', 'A comprehensive guide to get started...', 'Everything you need to know to get started', false, '', '00000000-0000-0000-0000-000000000001', NOW(), NOW());
+
+-- Log the admin user creation
+INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, old_data, new_data, created_at)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  'INSERT',
+  'users',
+  '00000000-0000-0000-0000-000000000001',
+  NULL,
+  '{"email": "admin@pxvpay.com", "role": "super_admin", "active": true}',
+  NOW()
+); 

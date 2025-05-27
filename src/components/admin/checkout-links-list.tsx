@@ -90,11 +90,11 @@ export function CheckoutLinksList() {
       
       // Refresh the list
       setCheckoutLinks(prev => prev.filter(link => link.id !== id))
-    } catch (error) {
-      console.error("Error deleting checkout link:", error)
+    } catch (err) {
+      console.error("Error deleting checkout link:", err)
       toast({ 
         title: "Error", 
-        description: error instanceof Error ? error.message : "Failed to delete checkout link", 
+        description: err instanceof Error ? err.message : "Failed to delete checkout link", 
         variant: "destructive" 
       })
     } finally {
@@ -137,6 +137,16 @@ export function CheckoutLinksList() {
       style: 'currency',
       currency: currency || 'USD',
     }).format(amount)
+  }
+
+  // Format amount display based on type
+  const formatAmountDisplay = (link: CheckoutLink) => {
+    if (link.amount_type === 'flexible') {
+      const minAmount = formatCurrency(link.min_amount || 0, link.currency)
+      const maxAmount = formatCurrency(link.max_amount || 0, link.currency)
+      return `${minAmount} - ${maxAmount}`
+    }
+    return formatCurrency(link.amount, link.currency)
   }
 
   return (
@@ -188,7 +198,7 @@ export function CheckoutLinksList() {
                 <div className="text-sm text-muted-foreground">/{link.slug}</div>
               </div>
               <div className="w-1/6">
-                {formatCurrency(link.amount, link.currency)}
+                {formatAmountDisplay(link)}
               </div>
               <div className="w-1/6">
                 <span className="text-sm">

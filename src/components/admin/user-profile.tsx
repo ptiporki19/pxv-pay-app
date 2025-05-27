@@ -1,12 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ArrowLeft, Crown, User, Mail, Calendar, DollarSign, CreditCard, Globe, Coins, MoreHorizontal, Shield, UserCheck, UserX, CheckCircle, XCircle, AlertCircle, TrendingUp, Eye, Activity } from "lucide-react"
+import { ArrowLeft, Crown, User, Mail, Calendar, DollarSign, CreditCard, Globe, Coins, MoreHorizontal, Shield, UserCheck, UserX, CheckCircle, XCircle, AlertCircle, Eye, Activity, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { 
   DropdownMenu, 
@@ -73,6 +72,20 @@ interface Currency {
   created_at: string
 }
 
+interface CheckoutLink {
+  id: string
+  title: string
+  slug: string
+  amount: number
+  amount_type: 'fixed' | 'flexible'
+  min_amount?: number | null
+  max_amount?: number | null
+  currency: string
+  status: string
+  active_country_codes: string[]
+  created_at: string
+}
+
 interface UserStats {
   totalPayments: number
   totalAmount: number
@@ -82,6 +95,7 @@ interface UserStats {
   uniqueCurrencies: number
   activePaymentMethods: number
   activeCountries: number
+  activeCheckoutLinks: number
   accountAge: number
 }
 
@@ -95,6 +109,7 @@ export function UserProfile({ userId }: UserProfileProps) {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [countries, setCountries] = useState<Country[]>([])
   const [currencies, setCurrencies] = useState<Currency[]>([])
+  const [checkoutLinks, setCheckoutLinks] = useState<CheckoutLink[]>([])
   const [stats, setStats] = useState<UserStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -104,9 +119,10 @@ export function UserProfile({ userId }: UserProfileProps) {
   const [paymentMethodsModalOpen, setPaymentMethodsModalOpen] = useState(false)
   const [countriesModalOpen, setCountriesModalOpen] = useState(false)
   const [currenciesModalOpen, setCurrenciesModalOpen] = useState(false)
+  const [checkoutLinksModalOpen, setCheckoutLinksModalOpen] = useState(false)
   
   const supabase = createClient()
-  const router = useRouter()
+
 
   useEffect(() => {
     fetchUserProfile()
@@ -131,6 +147,17 @@ export function UserProfile({ userId }: UserProfileProps) {
           schema: 'public', 
           table: 'payments',
           filter: `user_id=eq.${userId}`
+        }, 
+        () => {
+          fetchUserProfile()
+        }
+      )
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'checkout_links',
+          filter: `merchant_id=eq.${userId}`
         }, 
         () => {
           fetchUserProfile()
@@ -216,6 +243,20 @@ export function UserProfile({ userId }: UserProfileProps) {
         setCurrencies(currenciesData || [])
       }
 
+      // Fetch checkout links for this user
+      const { data: checkoutLinksData, error: checkoutLinksError } = await supabase
+        .from('checkout_links')
+        .select('*')
+        .eq('merchant_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (checkoutLinksError) {
+        console.warn('Could not fetch checkout links:', checkoutLinksError.message)
+        setCheckoutLinks([])
+      } else {
+        setCheckoutLinks(checkoutLinksData || [])
+      }
+
       // Calculate stats
       if (userData) {
         const totalPayments = (paymentsData || []).length
@@ -226,6 +267,7 @@ export function UserProfile({ userId }: UserProfileProps) {
         const uniqueCurrencies = new Set((paymentsData || []).map(p => p.currency)).size
         const activePaymentMethods = (paymentMethodsData || []).filter(pm => pm.status === 'active').length
         const activeCountries = (countriesData || []).filter(c => c.status === 'active').length
+        const activeCheckoutLinks = (checkoutLinksData || []).filter(cl => cl.status === 'active').length
         const accountAge = Math.floor((new Date().getTime() - new Date(userData.created_at).getTime()) / (1000 * 60 * 60 * 24))
 
         setStats({
@@ -237,6 +279,7 @@ export function UserProfile({ userId }: UserProfileProps) {
           uniqueCurrencies,
           activePaymentMethods,
           activeCountries,
+          activeCheckoutLinks,
           accountAge
         })
       }
@@ -377,7 +420,7 @@ export function UserProfile({ userId }: UserProfileProps) {
   }: {
     title: string
     value: string | number
-    icon: any
+    icon: React.ComponentType<{ className?: string }>
     description: string
     onClick?: () => void
     variant?: "default" | "success" | "warning" | "danger"
@@ -557,7 +600,7 @@ export function UserProfile({ userId }: UserProfileProps) {
 
       {/* Stats Widgets */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <StatWidget
             title="Total Payments"
             value={stats.totalPayments}
@@ -591,6 +634,15 @@ export function UserProfile({ userId }: UserProfileProps) {
             icon={Coins}
             description={`${stats.uniqueCurrencies} used in payments`}
             onClick={() => setCurrenciesModalOpen(true)}
+            variant="default"
+          />
+          
+          <StatWidget
+            title="Checkout Links"
+            value={checkoutLinks.length}
+            icon={Link2}
+            description={`${stats.activeCheckoutLinks} active links`}
+            onClick={() => setCheckoutLinksModalOpen(true)}
             variant="default"
           />
         </div>
@@ -775,6 +827,49 @@ export function UserProfile({ userId }: UserProfileProps) {
               ))
             ) : (
               <p className="text-muted-foreground text-center py-8">No currencies configured</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Checkout Links Modal */}
+      <Dialog open={checkoutLinksModalOpen} onOpenChange={setCheckoutLinksModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5" />
+              Checkout Links ({checkoutLinks.length} configured)
+            </DialogTitle>
+            <DialogDescription>
+              Available checkout links for this user
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 gap-3">
+            {checkoutLinks.length > 0 ? (
+              checkoutLinks.map((link) => (
+                <div key={link.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{link.title}</p>
+                    <p className="text-sm text-muted-foreground capitalize">{link.amount_type}</p>
+                    {link.min_amount && (
+                      <p className="text-xs text-muted-foreground">
+                        Min amount: {link.min_amount}
+                      </p>
+                    )}
+                    {link.max_amount && (
+                      <p className="text-xs text-muted-foreground">
+                        Max amount: {link.max_amount}
+                      </p>
+                    )}
+                  </div>
+                  <Badge variant={link.status === 'active' ? 'default' : 'secondary'}>
+                    {link.status}
+                  </Badge>
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground text-center py-8">No checkout links configured</p>
             )}
           </div>
         </DialogContent>

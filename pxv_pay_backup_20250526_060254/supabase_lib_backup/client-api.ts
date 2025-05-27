@@ -56,13 +56,6 @@ export interface CustomField {
   value?: string
 }
 
-export interface CountrySpecificDetails {
-  custom_fields?: CustomField[]
-  instructions?: string
-  url?: string | null // For payment-link type
-  additional_info?: string
-}
-
 export interface PaymentMethod {
   id?: string
   name: string
@@ -70,13 +63,10 @@ export interface PaymentMethod {
   countries: string[]
   status: 'active' | 'pending' | 'inactive'
   icon?: string | null
-  instructions?: string | null // General instructions (fallback)
-  instructions_for_checkout?: string | null // General checkout instructions
-  url?: string | null // General URL (fallback for payment-link type)
+  instructions?: string | null
+  url?: string | null // For payment-link type
   description?: string | null // For detailed descriptions
-  custom_fields?: CustomField[] | null // General custom fields (fallback)
-  country_specific_details?: Record<string, CountrySpecificDetails> // Country-specific details
-  display_order?: number // Order for displaying payment methods
+  custom_fields?: CustomField[] | null // For manual payment methods
   user_id?: string
   created_at?: string
   updated_at?: string
@@ -678,52 +668,6 @@ export const paymentMethodsApi = {
     }
     
     return data || []
-  },
-
-  // Get payment methods for a specific country with country-specific details
-  getForCountry: async (countryCode: string): Promise<PaymentMethod[]> => {
-    const user = await getCurrentUser()
-    if (!user) {
-      console.log('User not authenticated, returning empty payment methods list')
-      return []
-    }
-    
-    const { data, error } = await supabase
-      .from('payment_methods')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .contains('countries', [countryCode])
-      .order('display_order', { ascending: true })
-      .order('name', { ascending: true })
-    
-    if (error) {
-      console.error('Error fetching payment methods for country:', error)
-      throw new Error(error.message)
-    }
-    
-    return data || []
-  },
-
-  // Get country-specific details for a payment method
-  getCountrySpecificDetails: (paymentMethod: PaymentMethod, countryCode: string): CountrySpecificDetails | null => {
-    if (!paymentMethod.country_specific_details || !paymentMethod.country_specific_details[countryCode]) {
-      return null
-    }
-    
-    return paymentMethod.country_specific_details[countryCode]
-  },
-
-  // Get effective details for a payment method in a specific country (with fallbacks)
-  getEffectiveDetails: (paymentMethod: PaymentMethod, countryCode: string) => {
-    const countrySpecific = paymentMethod.country_specific_details?.[countryCode]
-    
-    return {
-      instructions: countrySpecific?.instructions || paymentMethod.instructions_for_checkout || paymentMethod.instructions || '',
-      url: countrySpecific?.url || paymentMethod.url || '',
-      custom_fields: countrySpecific?.custom_fields || paymentMethod.custom_fields || [],
-      additional_info: countrySpecific?.additional_info || ''
-    }
   }
 }
 
