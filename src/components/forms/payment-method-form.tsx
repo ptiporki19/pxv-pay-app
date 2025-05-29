@@ -166,7 +166,7 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
     try {
       setIsLoading(true)
       
-      let submissionData = { ...values }
+      const submissionData = { ...values }
 
       // If there's a new file to upload, set the base64 string to the icon field
       if (previewUrl && previewUrl !== initialData?.icon) {

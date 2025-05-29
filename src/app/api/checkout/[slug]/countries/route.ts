@@ -9,7 +9,7 @@ export async function GET(
     const supabase = createPublicClient()
     const { slug } = params
 
-    // Get checkout link with active countries
+    // First validate the checkout link exists and is active
     const { data: checkoutLink, error: linkError } = await supabase
       .from('checkout_links')
       .select('active_country_codes')
@@ -24,13 +24,24 @@ export async function GET(
       )
     }
 
-    // Get country details for active country codes
+    // Get countries that are active for this checkout link
     const { data: countries, error: countriesError } = await supabase
       .from('countries')
-      .select('*')
+      .select(`
+        id,
+        name,
+        code,
+        currency_id,
+        currency:currencies(
+          id,
+          name,
+          code,
+          symbol
+        )
+      `)
       .in('code', checkoutLink.active_country_codes)
       .eq('status', 'active')
-      .order('name', { ascending: true })
+      .order('name')
 
     if (countriesError) {
       console.error('Countries fetch error:', countriesError)
@@ -40,10 +51,12 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ countries: countries || [] })
+    return NextResponse.json({
+      countries: countries || []
+    })
 
   } catch (error) {
-    console.error('Checkout countries error:', error)
+    console.error('Countries API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

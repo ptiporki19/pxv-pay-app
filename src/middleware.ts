@@ -5,7 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 // This middleware handles minimal redirects
 // The client-side RouteGuard component handles role-based redirects
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -57,7 +57,7 @@ export async function middleware(request: NextRequest) {
 
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session && !path.startsWith('/api/public/')) {
+      if (!session && !path.startsWith('/api/public/') && !path.startsWith('/api/checkout/')) {
         return NextResponse.json(
           { error: 'Unauthorized' },
           { status: 401 }

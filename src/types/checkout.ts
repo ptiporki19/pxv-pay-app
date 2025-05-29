@@ -16,6 +16,12 @@ export interface CheckoutLink {
   active_country_codes: string[]
   is_active: boolean
   
+  // Checkout type and product fields
+  checkout_type: 'simple' | 'product' // Type of checkout: simple payment or product sales
+  product_name?: string | null // Product name for product checkout
+  product_description?: string | null // Product description for product checkout
+  product_image_url?: string | null // Product image URL for product checkout
+  
   // Customization overrides
   logo_url?: string | null
   checkout_page_heading?: string | null
@@ -51,6 +57,16 @@ export interface MerchantCheckoutSettings {
 // Form data types for creating/updating checkout links
 export interface CreateCheckoutLinkData {
   link_name: string
+  title: string
+  checkout_type: 'simple' | 'product'
+  amount_type: 'fixed' | 'flexible'
+  amount: number
+  min_amount?: number | null
+  max_amount?: number | null
+  currency: string
+  product_name?: string | null
+  product_description?: string | null
+  product_image_url?: string | null
   active_country_codes: string[]
   logo_url?: string | null
   checkout_page_heading?: string | null

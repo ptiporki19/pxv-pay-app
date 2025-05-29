@@ -144,7 +144,7 @@ export default async function AuditLogsPage() {
     }
     
     if (log.action === 'UPDATE') {
-      let changedFields: string[] = []
+      const changedFields: string[] = []
       
       if (log.old_data && log.new_data) {
         // Find what fields changed

@@ -155,7 +155,7 @@ export function PaymentMethodFormSimple({ initialData }: PaymentMethodFormProps)
     try {
       setIsLoading(true)
       
-      let submissionData = { ...values }
+      const submissionData = { ...values }
 
       if (previewUrl && previewUrl !== initialData?.icon) {
         submissionData.icon = previewUrl;

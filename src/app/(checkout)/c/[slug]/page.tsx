@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { CheckoutForm } from '@/components/checkout/checkout-form'
+import { ModernCheckoutForm } from '@/components/checkout/modern-checkout-form'
 
 export const metadata: Metadata = {
   title: 'Complete Your Payment - PXV Pay',
@@ -19,11 +19,5 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
     notFound()
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <CheckoutForm slug={slug} />
-      </div>
-    </div>
-  )
+  return <ModernCheckoutForm slug={slug} />
 } 

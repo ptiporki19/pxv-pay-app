@@ -13,15 +13,15 @@ export async function GET(
 
     if (!countryCode) {
       return NextResponse.json(
-        { error: 'Country code is required' },
+        { error: 'Country parameter is required' },
         { status: 400 }
       )
     }
 
-    // Get checkout link to verify it exists and get merchant
+    // First validate the checkout link exists and is active
     const { data: checkoutLink, error: linkError } = await supabase
       .from('checkout_links')
-      .select('merchant_id, active_country_codes')
+      .select('active_country_codes, merchant_id')
       .eq('slug', slug)
       .eq('is_active', true)
       .single()
@@ -33,23 +33,46 @@ export async function GET(
       )
     }
 
-    // Verify the country is active for this checkout link
+    // Validate that the country is allowed for this checkout link
     if (!checkoutLink.active_country_codes.includes(countryCode)) {
       return NextResponse.json(
-        { error: 'Country not available for this checkout link' },
+        { error: 'Country not supported for this checkout link' },
         { status: 400 }
       )
     }
 
-    // Get payment methods for this merchant that support the selected country
+    // Get the country and its currency
+    const { data: country, error: countryError } = await supabase
+      .from('countries')
+      .select('id, currency_id')
+      .eq('code', countryCode)
+      .eq('status', 'active')
+      .single()
+
+    if (countryError || !country) {
+      return NextResponse.json(
+        { error: 'Invalid country' },
+        { status: 400 }
+      )
+    }
+
+    // Get payment methods that support this country
     const { data: paymentMethods, error: methodsError } = await supabase
       .from('payment_methods')
-      .select('*')
+      .select(`
+        id,
+        name,
+        type,
+        description,
+        instructions_for_checkout,
+        icon,
+        display_order,
+        countries
+      `)
       .eq('user_id', checkoutLink.merchant_id)
       .eq('status', 'active')
       .contains('countries', [countryCode])
-      .order('display_order', { ascending: true })
-      .order('name', { ascending: true })
+      .order('display_order')
 
     if (methodsError) {
       console.error('Payment methods fetch error:', methodsError)
@@ -59,30 +82,23 @@ export async function GET(
       )
     }
 
-    // Get currency for the country
-    const { data: country, error: countryError } = await supabase
-      .from('countries')
-      .select('*, currencies(*)')
-      .eq('code', countryCode)
-      .eq('status', 'active')
-      .single()
-
-    if (countryError) {
-      console.error('Country fetch error:', countryError)
-      return NextResponse.json(
-        { error: 'Failed to fetch country information' },
-        { status: 500 }
-      )
-    }
+    // Format the payment methods
+    const formattedMethods = (paymentMethods || []).map((method: any) => ({
+      id: method.id,
+      name: method.name,
+      type: method.type,
+      description: method.description,
+      instructions_for_checkout: method.instructions_for_checkout,
+      icon_url: method.icon,
+      display_order: method.display_order || 0
+    }))
 
     return NextResponse.json({
-      payment_methods: paymentMethods || [],
-      country: country,
-      currency: country?.currencies || null
+      payment_methods: formattedMethods
     })
 
   } catch (error) {
-    console.error('Checkout methods error:', error)
+    console.error('Payment methods API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
