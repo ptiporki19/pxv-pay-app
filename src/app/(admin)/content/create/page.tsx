@@ -1,30 +1,7 @@
 "use client"
 
-import { ContentFormSimple } from "@/components/forms/content-form-simple"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { SimpleProductForm } from '@/components/forms/simple-product-form'
 
-export default function CreateContentPage() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <Link href="/content">
-            <Button variant="outline" size="sm" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Content Templates
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Create Content Template</h1>
-        </div>
-
-        {/* Form Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <ContentFormSimple />
-        </div>
-      </div>
-    </div>
-  )
+export default function CreateProductPage() {
+  return <SimpleProductForm />
 } 

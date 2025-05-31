@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { CreateCheckoutLinkForm } from "@/components/admin/create-checkout-link-form"
+import { EnhancedCreateCheckoutLinkForm } from "@/components/admin/enhanced-checkout-link-form"
 
 export const metadata: Metadata = {
   title: 'Create Checkout Link - PXV Pay',
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function CreateCheckoutLinkPage() {
   return (
     <div className="flex flex-col gap-5">
-      <CreateCheckoutLinkForm />
+      <EnhancedCreateCheckoutLinkForm />
     </div>
   )
 } 

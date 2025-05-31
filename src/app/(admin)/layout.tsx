@@ -29,16 +29,14 @@ type UserRole = 'super_admin' | 'registered_user' | 'subscriber' | 'free_user'
 const merchantNavItems = [
   { label: 'Dashboard', path: '/dashboard', iconName: 'Home' },
   { label: 'Checkout Links', path: '/checkout-links', iconName: 'Link2' },
-  { label: 'Countries', path: '/countries', iconName: 'Globe' },
-  { label: 'Currencies', path: '/currencies', iconName: 'DollarSign' },
   { label: 'Payment Methods', path: '/payment-methods', iconName: 'CreditCard' },
   { label: 'Theme Customization', path: '/theme', iconName: 'Palette' },
-  { label: 'Content Customization', path: '/content', iconName: 'FileText' },
+  { label: 'Product Management', path: '/content', iconName: 'ShoppingBag' },
   { label: 'Payment Verification', path: '/verification', iconName: 'Shield' },
   { label: 'Real-Time Test', path: '/test-realtime', iconName: 'Zap' },
 ]
 
-// Super admin only items
+// Super admin only items - includes global data management
 const superAdminItems = [
   { label: 'Super Admin Dashboard', path: '/super-admin', iconName: 'Crown' },
   { label: 'Users', path: '/users', iconName: 'Users' },
@@ -90,7 +88,7 @@ export default async function MerchantDashboardLayout({
     if (item.label === 'Theme Customization') {
       return true // Available to all users
     }
-    if (item.label === 'Content Customization') {
+    if (item.label === 'Product Management') {
       return true // Available to all users
     }
     return true

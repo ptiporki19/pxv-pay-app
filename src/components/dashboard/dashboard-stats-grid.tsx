@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, CreditCard, Globe, Shield, TrendingUp, AlertCircle, CheckCircle, Clock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 interface DashboardStats {
   totalUsers: number
@@ -28,6 +29,32 @@ export function DashboardStatsGrid() {
     recentRegistrations: 0
   })
   const [loading, setLoading] = useState(true)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        // Check if super admin by email or role
+        const { data: profile } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        
+        const isSuper = profile?.role === 'super_admin' || 
+          user.email === 'admin@pxvpay.com' || 
+          user.email === 'dev-admin@pxvpay.com' || 
+          user.email === 'superadmin@pxvpay.com'
+        
+        setIsSuperAdmin(isSuper)
+      }
+    }
+
+    checkUserRole()
+  }, [])
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -60,7 +87,8 @@ export function DashboardStatsGrid() {
       description: "Registered users",
       color: "text-blue-600",
       bgColor: "bg-blue-100 dark:bg-blue-900/20",
-      link: "/users"
+      link: "/users",
+      requiresSuperAdmin: true
     },
     {
       title: "Active Users",
@@ -69,7 +97,8 @@ export function DashboardStatsGrid() {
       description: "Currently active",
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/20",
-      link: "/users"
+      link: "/users",
+      requiresSuperAdmin: true
     },
     {
       title: "Total Payments",
@@ -78,7 +107,8 @@ export function DashboardStatsGrid() {
       description: "All transactions",
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/20",
-      link: "/payments"
+      link: "/payments",
+      requiresSuperAdmin: false
     },
     {
       title: "Pending Verifications",
@@ -87,34 +117,18 @@ export function DashboardStatsGrid() {
       description: "Awaiting review",
       color: "text-orange-600",
       bgColor: "bg-orange-100 dark:bg-orange-900/20",
-      link: "/verification"
-    },
-    {
-      title: "Countries",
-      value: stats.totalCountries,
-      icon: Globe,
-      description: "Supported regions",
-      color: "text-indigo-600",
-      bgColor: "bg-indigo-100 dark:bg-indigo-900/20",
-      link: "/countries"
-    },
-    {
-      title: "Currencies",
-      value: stats.totalCurrencies,
-      icon: TrendingUp,
-      description: "Available currencies",
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-100 dark:bg-emerald-900/20",
-      link: "/currencies"
+      link: "/verification",
+      requiresSuperAdmin: false
     },
     {
       title: "Payment Methods",
       value: stats.totalPaymentMethods,
       icon: Shield,
-      description: "Active methods",
+      description: "Your active methods",
       color: "text-cyan-600",
       bgColor: "bg-cyan-100 dark:bg-cyan-900/20",
-      link: "/payment-methods"
+      link: "/payment-methods",
+      requiresSuperAdmin: false
     },
     {
       title: "Recent Registrations",
@@ -123,17 +137,17 @@ export function DashboardStatsGrid() {
       description: "Last 24 hours",
       color: "text-pink-600",
       bgColor: "bg-pink-100 dark:bg-pink-900/20",
-      link: "/users"
+      link: "/users",
+      requiresSuperAdmin: true
     }
   ]
 
-  return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-      {widgets.map((widget, index) => {
+  const StatCard = ({ widget, index }: { widget: any, index: number }) => {
         const Icon = widget.icon
-        return (
-          <Link key={index} href={widget.link}>
-            <Card className="hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105">
+    const shouldLink = !widget.requiresSuperAdmin || isSuperAdmin
+    
+    const cardContent = (
+      <Card className={`${shouldLink ? 'hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105' : ''}`}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{widget.title}</CardTitle>
                 <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${widget.bgColor}`}>
@@ -149,9 +163,24 @@ export function DashboardStatsGrid() {
                 </p>
               </CardContent>
             </Card>
+    )
+
+    return shouldLink ? (
+      <Link key={index} href={widget.link}>
+        {cardContent}
           </Link>
+    ) : (
+      <div key={index}>
+        {cardContent}
+      </div>
         )
-      })}
+  }
+
+  return (
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      {widgets.map((widget, index) => (
+        <StatCard key={index} widget={widget} index={index} />
+      ))}
     </div>
   )
 } 

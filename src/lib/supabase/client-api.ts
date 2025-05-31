@@ -108,11 +108,11 @@ export const countriesApi = {
     }
     
     try {
-      // First, get countries
+      // Fetch both user-specific and global countries
       const { data, error } = await supabase
         .from('countries')
         .select('*')
-        .eq('user_id', user.id)
+        .or(`user_id.eq.${user.id},user_id.is.null`)
         .order('name', { ascending: true })
       
       if (error) {
@@ -135,10 +135,11 @@ export const countriesApi = {
         return data
       }
       
-      // Fetch currencies separately
+      // Fetch currencies separately (both user-specific and global)
       const { data: currencies, error: currenciesError } = await supabase
         .from('currencies')
         .select('id, name, code, symbol')
+        .or(`user_id.eq.${user.id},user_id.is.null`)
         .in('id', currencyIds)
       
       if (currenciesError) {
@@ -333,10 +334,11 @@ export const currenciesApi = {
       return []
     }
     
+    // Fetch both user-specific and global currencies
     const { data, error } = await supabase
       .from('currencies')
       .select('*')
-      .eq('user_id', user.id)
+      .or(`user_id.eq.${user.id},user_id.is.null`)
       .order('name', { ascending: true })
     
     if (error) {

@@ -27,9 +27,23 @@ import {
   PaymentMethodFormValues,
   CustomFieldType
 } from "@/lib/validations/admin-forms"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, Check, ChevronsUpDown } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Badge } from "@/components/ui/badge"
 
 interface PaymentMethodFormProps {
   initialData?: PaymentMethod
@@ -40,6 +54,7 @@ export function PaymentMethodFormSimple({ initialData }: PaymentMethodFormProps)
   const [countries, setCountries] = useState<Country[]>([])
   const [countriesLoading, setCountriesLoading] = useState(true)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [countriesOpen, setCountriesOpen] = useState(false)
   const router = useRouter()
   
   // Fetch countries
@@ -272,32 +287,123 @@ export function PaymentMethodFormSimple({ initialData }: PaymentMethodFormProps)
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Supported Countries</FormLabel>
-                <Select 
-                  onValueChange={(value) => {
-                    if (value === "Global") {
-                      field.onChange(["Global"])
+                <Popover open={countriesOpen} onOpenChange={setCountriesOpen}>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={countriesOpen}
+                        className={cn(
+                          "w-full justify-between h-auto min-h-10",
+                          !(field.value && field.value.length) && "text-muted-foreground"
+                        )}
+                      >
+                        {(field.value && field.value.length) ? (
+                          <div className="flex flex-wrap gap-1">
+                            {field.value.slice(0, 3).map((code: string) => {
+                              const country = countries.find(c => c.code === code)
+                              return (
+                                <Badge key={code} variant="secondary" className="text-xs">
+                                  {code === "Global" ? "Global" : country ? `${country.name} (${code})` : code}
+                                </Badge>
+                              )
+                            })}
+                            {field.value.length > 3 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{field.value.length - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        ) : (
+                          <span>{countriesLoading ? "Loading countries..." : "Select supported countries"}</span>
+                        )}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search countries..." />
+                      <CommandEmpty>No country found.</CommandEmpty>
+                      <CommandGroup className="max-h-64 overflow-auto">
+                        <CommandItem
+                          value="Global"
+                          onSelect={() => {
+                            const currentValue = field.value || [];
+                            const updatedValue = currentValue.includes("Global")
+                              ? currentValue.filter((code: string) => code !== "Global")
+                              : ["Global"]
+                            field.onChange(updatedValue)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              (field.value && field.value.includes("Global")) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          Global (Available Everywhere)
+                        </CommandItem>
+                        {countries.map((country) => (
+                          <CommandItem
+                            key={country.code}
+                            value={country.code}
+                            onSelect={(selectedValue: string) => {
+                              const currentValue = field.value || [];
+                              // If Global is selected, clear everything and add the new country
+                              // If a country is being selected, remove Global first
+                              let updatedValue;
+                              if (selectedValue === "Global") {
+                                updatedValue = ["Global"];
                     } else {
-                      // For individual countries, allow multiple selection later
-                      field.onChange([value])
-                    }
-                  }} 
-                  defaultValue={field.value?.[0] || ""}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={countriesLoading ? "Loading countries..." : "Select supported countries"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Global">Global (Available Everywhere)</SelectItem>
-                    {countries.map((country) => (
-                      <SelectItem key={country.code} value={country.code}>
+                                const filteredValue = currentValue.filter((code: string) => code !== "Global");
+                                updatedValue = filteredValue.includes(selectedValue)
+                                  ? filteredValue.filter((code: string) => code !== selectedValue)
+                                  : [...filteredValue, selectedValue];
+                              }
+                              field.onChange(updatedValue)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                (field.value && field.value.includes(country.code)) ? "opacity-100" : "opacity-0"
+                              )}
+                            />
                         {country.name} ({country.code})
-                      </SelectItem>
+                            {country.user_id === null && (
+                              <Badge variant="outline" className="ml-auto text-xs">
+                                Global
+                              </Badge>
+                            )}
+                          </CommandItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
+                
+                {/* Display all selected countries */}
+                {field.value && field.value.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-sm font-medium mb-2">Selected Countries ({field.value.length}):</p>
+                    <div className="flex flex-wrap gap-2">
+                      {field.value.map((code: string) => {
+                        const country = countries.find(c => c.code === code)
+                        return (
+                          <Badge key={code} variant="secondary" className="text-sm">
+                            {code === "Global" ? "🌍 Global" : country ? `${country.name} (${code})` : code}
+                            {country?.user_id === null && code !== "Global" && (
+                              <span className="ml-1 text-xs opacity-75">• Global</span>
+                            )}
+                          </Badge>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
               </FormItem>
             )}
           />

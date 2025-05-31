@@ -175,40 +175,6 @@ export function RealTimeStats({ userRole = 'admin' }: RealTimeStatsProps) {
           </Card>
         </Link>
 
-        <Link href="/countries">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Countries</CardTitle>
-              <Globe className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading ? '...' : stats.countries}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Supported countries
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/currencies">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Currencies</CardTitle>
-              <Coins className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {loading ? '...' : stats.currencies}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Supported currencies
-              </p>
-            </CardContent>
-          </Card>
-        </Link>
-
         <Link href="/payment-methods">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

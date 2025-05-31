@@ -74,9 +74,9 @@ export default function ThemeCustomizationPage() {
         </div>
         <Link href="/theme/create">
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Theme
-          </Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Theme
+            </Button>
         </Link>
       </div>
 
@@ -107,9 +107,9 @@ export default function ThemeCustomizationPage() {
             </p>
             <Link href="/theme/create">
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Your First Theme
-              </Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Your First Theme
+            </Button>
             </Link>
           </CardContent>
         </Card>
@@ -164,13 +164,13 @@ export default function ThemeCustomizationPage() {
                       </Button>
                     )}
                     <Link href={`/theme/edit/${theme.id}`}>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
                     </Link>
                     <Button 
                       size="sm" 
@@ -181,10 +181,10 @@ export default function ThemeCustomizationPage() {
                       <Trash2 className="h-4 w-4 mr-1" />
                       Delete
                     </Button>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
           ))}
         </div>
       )}

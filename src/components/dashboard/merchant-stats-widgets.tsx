@@ -6,13 +6,15 @@ import {
   Clock, 
   CreditCard, 
   DollarSign, 
-  TrendingUp 
+  TrendingUp,
+  Package
 } from 'lucide-react'
 import { 
   getPendingVerificationCount,
   getPaymentMethodsCount,
   getCurrenciesCount,
-  getTotalPaymentsCount
+  getTotalPaymentsCount,
+  getProductsCount
 } from '@/lib/actions/dashboard-stats'
 
 interface StatWidgetProps {
@@ -117,6 +119,17 @@ export function TotalPaymentsWidget() {
       icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
       description="All payment transactions"
       fetchFunction={getTotalPaymentsCount}
+    />
+  )
+}
+
+export function ProductsWidget() {
+  return (
+    <StatWidget
+      title="Products"
+      icon={<Package className="h-4 w-4 text-muted-foreground" />}
+      description="Total products created"
+      fetchFunction={getProductsCount}
     />
   )
 } 

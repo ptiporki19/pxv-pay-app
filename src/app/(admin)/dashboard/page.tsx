@@ -14,7 +14,8 @@ import {
   PendingVerificationWidget,
   PaymentMethodsWidget,
   CurrenciesWidget,
-  TotalPaymentsWidget
+  TotalPaymentsWidget,
+  ProductsWidget
 } from '@/components/dashboard/merchant-stats-widgets'
 
 export const metadata: Metadata = {
@@ -106,11 +107,12 @@ export default async function DashboardPage() {
       {/* Real-Time Dashboard Stats */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Dashboard Stats</h2>
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
           <PendingVerificationWidget />
           <PaymentMethodsWidget />
           <CurrenciesWidget />
           <TotalPaymentsWidget />
+          <ProductsWidget />
         </div>
         <p className="text-xs text-muted-foreground mt-2">
           Real-time data updates automatically when changes are made

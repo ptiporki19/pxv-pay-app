@@ -195,3 +195,34 @@ export async function getTotalPaymentsCount() {
     return { success: false, error: 'Server error', count: 0 }
   }
 } 
+
+export async function getProductsCount() {
+  try {
+    console.log('🔄 Server: Fetching products count...')
+    
+    const supabase = await createClient()
+    
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return { success: false, error: 'Not authenticated', count: 0 }
+    }
+
+    // Filter by current user's products only
+    const { count, error } = await supabase
+      .from('product_templates')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', session.user.id)
+
+    if (error) {
+      console.error('❌ Server: Products query failed:', error)
+      return { success: false, error: error.message, count: 0 }
+    }
+
+    console.log('✅ Server: Products count (user-specific):', count)
+    return { success: true, error: null, count: count || 0 }
+
+  } catch (error) {
+    console.error('💥 Server: Exception in getProductsCount:', error)
+    return { success: false, error: 'Server error', count: 0 }
+  }
+} 

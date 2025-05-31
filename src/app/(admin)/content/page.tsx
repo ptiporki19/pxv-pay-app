@@ -1,223 +1,243 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Copy, Star, StarOff, ToggleLeft, ToggleRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { useNotificationActions } from '@/providers/notification-provider'
-import { ContentTemplate, contentTemplatesApi } from '@/lib/supabase/client-api'
-import { FileText, Plus, Edit, Trash2, Search } from 'lucide-react'
+import { productTemplatesApi } from '@/lib/supabase/product-templates-api'
+import type { ProductTemplate } from '@/types/content'
 import Link from 'next/link'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
-const contentCategories = [
-  { value: 'general', label: 'General' },
-  { value: 'checkout', label: 'Checkout' },
-  { value: 'payment', label: 'Payment' },
-  { value: 'success', label: 'Success' },
-  { value: 'error', label: 'Error' },
-  { value: 'email', label: 'Email' },
-  { value: 'notification', label: 'Notification' }
-]
-
-export default function ContentCustomizationPage() {
-  const [templates, setTemplates] = useState<ContentTemplate[]>([])
-  const [loading, setLoading] = useState(true)
+export default function ProductManagementPage() {
+  const [products, setProducts] = useState<ProductTemplate[]>([])
+  const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
-  // Use notification actions hook
   const { showSuccess, showError } = useNotificationActions()
 
   useEffect(() => {
-    loadTemplates()
-  }, [])
+    loadProducts()
+  }, [searchQuery])
 
-  const loadTemplates = async () => {
+  const loadProducts = async () => {
     try {
-      setLoading(true)
-      const templatesData = await contentTemplatesApi.getAll()
-      setTemplates(templatesData)
+      setIsLoading(true)
+      
+      const filters = searchQuery ? { search: searchQuery } : {}
+      const productsData = await productTemplatesApi.getAll(filters)
+      setProducts(productsData)
     } catch (error) {
-      console.error('Error loading content templates:', error)
-      showError('Error', 'Failed to load content templates')
+      console.error('Error loading products:', error)
+      showError('Error', 'Failed to load products')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
-  const handleDelete = async (template: ContentTemplate) => {
-    if (!confirm(`Are you sure you want to delete the template "${template.title}"?`)) {
+  const handleDelete = async (product: ProductTemplate) => {
+    if (!confirm(`Are you sure you want to delete "${product.name}"? This action cannot be undone.`)) {
       return
     }
 
     try {
-      await contentTemplatesApi.delete(template.id!)
-      setTemplates(templates.filter(t => t.id !== template.id))
-      showSuccess('Success', `Template "${template.title}" deleted successfully`)
+      await productTemplatesApi.delete(product.id)
+      await loadProducts()
+      showSuccess('Success', `Product "${product.name}" deleted successfully`)
     } catch (error: any) {
-      console.error('Error deleting content template:', error)
-      showError('Error', error.message || 'Failed to delete content template')
+      console.error('Error deleting product:', error)
+      showError('Error', error.message || 'Failed to delete product')
     }
   }
 
-  // Filter templates based on search and category
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = searchQuery === '' || 
-      template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.template_key.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.content.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory
-    
-    return matchesSearch && matchesCategory
-  })
+  const handleToggleActive = async (product: ProductTemplate) => {
+    try {
+      await productTemplatesApi.toggleActive(product.id, !product.is_active)
+      await loadProducts()
+      showSuccess('Success', `Product ${!product.is_active ? 'activated' : 'deactivated'} successfully`)
+    } catch (error: any) {
+      console.error('Error toggling product status:', error)
+      showError('Error', error.message || 'Failed to update product status')
+    }
+  }
+
+  const handleToggleFeatured = async (product: ProductTemplate) => {
+    try {
+      await productTemplatesApi.toggleFeatured(product.id, !product.is_featured)
+      await loadProducts()
+      showSuccess('Success', `Product ${!product.is_featured ? 'featured' : 'unfeatured'} successfully`)
+    } catch (error: any) {
+      console.error('Error toggling featured status:', error)
+      showError('Error', error.message || 'Failed to update featured status')
+    }
+  }
+
+  const handleDuplicate = async (product: ProductTemplate) => {
+    const newName = prompt('Enter name for the duplicate product:', `${product.name} (Copy)`)
+    if (!newName) return
+
+    const newKey = newName.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')
+
+    try {
+      await productTemplatesApi.duplicate(product.id, newKey, newName)
+      await loadProducts()
+      showSuccess('Success', `Product duplicated as "${newName}"`)
+    } catch (error: any) {
+      console.error('Error duplicating product:', error)
+      showError('Error', error.message || 'Failed to duplicate product')
+    }
+  }
+
+  // Helper function to strip HTML and truncate text
+  const stripHtmlAndTruncate = (html: string, maxLength: number = 60) => {
+    const div = document.createElement('div')
+    div.innerHTML = html
+    const text = div.textContent || div.innerText || ''
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+  }
+
+  // Status badge style helper - same as payment methods
+  const getStatusBadgeClass = (status: boolean) => {
+    return status 
+      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+  }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <>
+      {/* Header - Same structure as payment methods */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Content Customization</h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Manage your payment portal content templates and messaging
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">Product Management</h1>
+          <p className="text-muted-foreground">Manage products for your checkout.</p>
         </div>
         <Link href="/content/create">
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Template
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Product
           </Button>
         </Link>
       </div>
 
-      {/* Search and Filter Controls */}
-      <div className="flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+      {/* Search Bar - Same as payment methods */}
+      <div className="flex items-center py-4">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search templates..."
+            placeholder="Search products..."
+            className="w-full bg-white pl-8"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
           />
         </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filter by category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {contentCategories.map((category) => (
-              <SelectItem key={category.value} value={category.value}>
-                {category.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded"></div>
-                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      {/* Table - Same structure as payment methods */}
+      <div className="border rounded-lg">
+        <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
+          <div className="w-1/3">Product Name</div>
+          <div className="w-1/3">Description</div>
+          <div className="w-1/6">Category</div>
+          <div className="w-1/6 text-center">Status</div>
+          <div className="w-1/12 text-right">Actions</div>
         </div>
-      ) : filteredTemplates.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {searchQuery || selectedCategory !== 'all' ? 'No Templates Found' : 'No Templates Yet'}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
-              {searchQuery || selectedCategory !== 'all' 
-                ? 'Try adjusting your search or filter criteria' 
-                : 'Create your first content template to customize your payment portal messaging'
-              }
-            </p>
-            {!searchQuery && selectedCategory === 'all' && (
-              <Link href="/content/create">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Template
-                </Button>
-              </Link>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.map((template) => (
-            <Card key={template.id} className="relative hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg font-semibold mb-1">
-                      {template.title}
-                    </CardTitle>
-                    <CardDescription className="text-sm text-gray-500">
-                      {template.template_key}
-                    </CardDescription>
+        
+        {isLoading ? (
+          <div className="px-4 py-3 text-center text-muted-foreground">
+            Loading products...
+          </div>
+        ) : products.length > 0 ? (
+          products.map((product) => (
+            <div key={product.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+              <div className="w-1/3 flex items-center space-x-3">
+                {product.featured_image && (
+                  <img 
+                    src={product.featured_image} 
+                    alt={product.name}
+                    className="w-6 h-6 rounded object-cover"
+                  />
+                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span>{product.name}</span>
+                    {product.is_featured && (
+                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                    )}
                   </div>
-                  {template.is_active && (
-                    <Badge variant="default" className="ml-2">Active</Badge>
-                  )}
+                  <div className="text-xs text-muted-foreground">{product.product_key}</div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {contentCategories.find(c => c.value === template.category)?.label || template.category}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {template.content_type}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      v{template.version}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-gray-600 line-clamp-2">
-                    {template.content.length > 100 
-                      ? `${template.content.substring(0, 100)}...` 
-                      : template.content
-                    }
-                  </p>
-                  <div className="flex gap-2 pt-2">
-                    <Link href={`/content/edit/${template.id}`}>
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                    </Link>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleDelete(template)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
+              </div>
+              <div className="w-1/3">{stripHtmlAndTruncate(product.description)}</div>
+              <div className="w-1/6 capitalize">{product.category}</div>
+              <div className="w-1/6 text-center">
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(product.is_active)}`}>
+                  {product.is_active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <div className="w-1/12 text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
                     </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/content/edit/${product.id}`}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDuplicate(product)}>
+                      <Copy className="mr-2 h-4 w-4" />
+                      <span>Duplicate</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleToggleFeatured(product)}>
+                      {product.is_featured ? <StarOff className="mr-2 h-4 w-4" /> : <Star className="mr-2 h-4 w-4" />}
+                      <span>{product.is_featured ? 'Unfeature' : 'Feature'}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleToggleActive(product)}>
+                      {product.is_active ? <ToggleLeft className="mr-2 h-4 w-4" /> : <ToggleRight className="mr-2 h-4 w-4" />}
+                      <span>{product.is_active ? 'Deactivate' : 'Activate'}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => handleDelete(product)} 
+                      className="text-red-600"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="px-4 py-3 text-center text-muted-foreground">
+            {searchQuery ? (
+              <>
+                No products found matching "{searchQuery}". 
+                <Link href="/content/create" className="text-blue-600 hover:underline ml-1">
+                  Create a new product
+                </Link>
+              </>
+            ) : (
+              <>
+                No products found. Add one to get started.
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   )
 } 

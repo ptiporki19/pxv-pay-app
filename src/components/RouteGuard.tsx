@@ -12,19 +12,31 @@ import { Spinner } from '@/components/ui/spinner'
 export function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
-  const supabase = createClient()
   const [isLoading, setIsLoading] = useState(true)
   const [shouldRedirect, setShouldRedirect] = useState(false)
 
   useEffect(() => {
+    let isMounted = true
+
     async function checkAuth() {
       try {
-        // Get current session
-        const { data: { session } } = await supabase.auth.getSession()
+        const supabase = createClient()
+        
+        // Get current session with better error handling
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        // Handle auth errors gracefully
+        if (sessionError) {
+          console.warn('Session error, redirecting to signin:', sessionError.message)
+          if (isMounted && pathname !== '/signin' && pathname !== '/signup') {
+            router.push('/signin')
+          }
+          return
+        }
         
         if (!session) {
           // No session - redirect to signin
-          if (pathname !== '/signin' && pathname !== '/signup') {
+          if (isMounted && pathname !== '/signin' && pathname !== '/signup') {
             router.push('/signin')
             return
           }
@@ -37,12 +49,23 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
                                    userEmail === 'dev-admin@pxvpay.com' || 
                                    userEmail === 'superadmin@pxvpay.com'
           
-          // Get user profile from DB
-          const { data: userProfile } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', session.user.id)
-            .single()
+          // Get user profile from DB with better error handling
+          let userProfile = null
+          try {
+            const { data, error: profileError } = await supabase
+              .from('users')
+              .select('role')
+              .eq('id', session.user.id)
+              .single()
+            
+            if (profileError) {
+              console.warn('Profile fetch error:', profileError.message)
+            } else {
+              userProfile = data
+            }
+          } catch (error) {
+            console.warn('Profile fetch failed:', error)
+          }
           
           const isSuperAdminRole = userProfile?.role === 'super_admin'
           const isSuperAdmin = isSuperAdminRole || isSuperAdminEmail
@@ -55,6 +78,9 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
                                    path.startsWith('/users') ||
                                    path.startsWith('/audit-logs')
           const isDashboardRoute = path.startsWith('/dashboard')
+          
+          // Only execute redirects if component is still mounted
+          if (!isMounted) return
           
           // Authenticated users shouldn't be on auth routes
           if (isAuthRoute) {
@@ -95,15 +121,28 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
           }
         }
         
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+        }
       } catch (error) {
         console.error('Auth check error:', error)
-        setIsLoading(false)
+        if (isMounted) {
+          setIsLoading(false)
+          // If there's a critical auth error, redirect to signin
+          if (pathname !== '/signin' && pathname !== '/signup') {
+            router.push('/signin')
+          }
+        }
       }
     }
 
     checkAuth()
-  }, [pathname, router, supabase])
+
+    // Cleanup function
+    return () => {
+      isMounted = false
+    }
+  }, [pathname, router])
 
   // Show spinner while loading or redirecting
   if (isLoading || shouldRedirect) {
