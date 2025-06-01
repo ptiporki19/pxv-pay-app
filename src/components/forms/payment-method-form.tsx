@@ -232,7 +232,7 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
                   <Input 
                     placeholder={
                       selectedType === 'payment-link' ? 'PayPal Checkout' : 
-                      selectedType === 'manual' ? 'Orange Money' :
+                      selectedType === 'manual' ? 'Bank Transfer / Mobile Money / Crypto' :
                       'Payment Method Name'
                     } 
                     {...field} 
@@ -259,17 +259,11 @@ export function PaymentMethodForm({ initialData, onSuccess }: PaymentMethodFormP
                   <SelectContent>
                     <SelectItem value="manual">Manual Payment</SelectItem>
                     <SelectItem value="payment-link">Payment Link</SelectItem>
-                    <SelectItem value="bank">Bank Transfer</SelectItem>
-                    <SelectItem value="mobile">Mobile Money</SelectItem>
-                    <SelectItem value="crypto">Cryptocurrency</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription className="text-xs">
                   {selectedType === 'manual' && "Create a custom payment method with your own fields"}
                   {selectedType === 'payment-link' && "Redirect customers to an external payment URL"}
-                  {selectedType === 'bank' && "Traditional bank transfer method"}
-                  {selectedType === 'mobile' && "Mobile money payment method"}
-                  {selectedType === 'crypto' && "Cryptocurrency payment method"}
                 </FormDescription>
                 <FormMessage />
               </FormItem>

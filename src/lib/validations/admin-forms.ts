@@ -54,7 +54,7 @@ const customFieldSchema = z.object({
 const countrySpecificDetailsSchema = z.object({
   custom_fields: z.array(customFieldSchema).optional(),
   instructions: z.string().optional(),
-  url: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")).nullable(),
+  url: z.string().url({ message: "Please enter a valid URL starting with http:// or https://" }).optional().or(z.literal("")).nullable(),
   additional_info: z.string().optional(),
 })
 
@@ -63,7 +63,7 @@ const basePaymentMethodObjectSchema = z.object({
   name: z.string().min(2, {
     message: "Method name must be at least 2 characters",
   }),
-  type: z.enum(['bank', 'mobile', 'crypto', 'payment-link', 'manual'], {
+  type: z.enum(['manual', 'payment-link'], {
     required_error: "Please select a payment method type",
   }),
   countries: z.array(z.string()).min(1, {
@@ -82,32 +82,53 @@ const basePaymentMethodObjectSchema = z.object({
     z.string(),
     z.null(),
   ]).optional(),
-  // Allow url to be a valid URL, an empty string, or null. Refinement will enforce it for payment-link.
-  url: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")).nullable(),
+  // Enhanced URL validation - must be valid URL format and non-empty for payment-link types
+  url: z.union([
+    z.string().url({ message: "Please enter a valid URL starting with http:// or https://" }),
+    z.literal(""),
+    z.null(),
+    z.undefined()
+  ]).optional().nullable(),
 })
 
-// Refined schema that makes URL mandatory for 'payment-link' type
+// Refined schema that makes URL mandatory for 'payment-link' type with enhanced validation
 export const paymentMethodFormSchema = basePaymentMethodObjectSchema.refine(
   (data) => {
     if (data.type === 'payment-link') {
-      // URL must be a non-empty string if type is payment-link
-      return data.url && data.url.trim().length > 0;
+      // URL must be a non-empty string and a valid URL format
+      if (!data.url || data.url.trim().length === 0) {
+        return false;
+      }
+      // Additional check to ensure it starts with http:// or https://
+      const urlPattern = /^https?:\/\/.+/i;
+      return urlPattern.test(data.url.trim());
     }
     return true;
   },
   {
-    message: "URL is required for payment links and must be a valid URL.",
+    message: "Payment URL is required for payment links and must be a valid URL starting with http:// or https://",
     path: ["url"], 
   }
 ).refine(
   (data) => {
-    // If type is not 'payment-link', URL should ideally be null or undefined (or empty string cleared by form logic)
-    if (data.type !== 'payment-link' && data.url && data.url.trim().length > 0) {
-        // This case indicates a potential issue if form logic doesn't clear URL for non-payment-links.
-        // For strictness, one could return false here to cause a validation error.
-        // However, the form logic is designed to set it to null/empty, so this refinement mostly acts as a safeguard.
+    // Enhanced validation for payment-link URLs to check for common mistakes
+    if (data.type === 'payment-link' && data.url && data.url.trim().length > 0) {
+      const url = data.url.trim();
+      
+      // Check if it's just text without proper URL format
+      if (!url.includes('://')) {
+        return false;
+      }
+      
+      // Check if domain exists (basic check)
+      const domainPattern = /^https?:\/\/[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\/?/;
+      return domainPattern.test(url);
     }
     return true;
+  },
+  {
+    message: "Please enter a complete and valid URL (e.g., https://example.com/payment)",
+    path: ["url"],
   }
 );
 

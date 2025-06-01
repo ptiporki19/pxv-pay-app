@@ -105,7 +105,7 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
     resolver: zodResolver(paymentMethodFormSchema),
     defaultValues: {
       name: initialData?.name || "",
-      type: "manual", // Always manual as per requirements
+      type: initialData?.type || "manual", // Use existing type or default to manual
       countries: [],
       status: initialData?.status || "inactive",
       description: initialData?.description || "",
@@ -113,7 +113,7 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
       country_specific_details: {},
       display_order: initialData?.display_order || 0,
       icon: initialData?.icon || null,
-      url: "",
+      url: initialData?.url || "",
       instructions: "",
       instructions_for_checkout: "",
     },
@@ -188,19 +188,45 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
       return
     }
 
+    // Enhanced validation for payment-link URLs
+    if (countryType === 'payment-link') {
+      if (!countryUrl || countryUrl.trim().length === 0) {
+        toast({
+          title: "Error",
+          description: "Payment URL is required for payment links",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const url = countryUrl.trim()
+      
+      // Check if URL starts with http:// or https://
+      if (!url.match(/^https?:\/\//i)) {
+        toast({
+          title: "Error",
+          description: "Payment URL must start with http:// or https://",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Check if it's a valid URL format with domain
+      const domainPattern = /^https?:\/\/[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*/
+      if (!domainPattern.test(url)) {
+        toast({
+          title: "Error",
+          description: "Please enter a complete and valid URL (e.g., https://paypal.com/checkout)",
+          variant: "destructive",
+        })
+        return
+      }
+    }
+
     if (countryType === 'manual' && countryFields.length === 0) {
       toast({
         title: "Error", 
         description: "Please add at least one payment field for manual payment method",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (countryType === 'payment-link' && !countryUrl.trim()) {
-      toast({
-        title: "Error",
-        description: "Please provide a payment URL for payment link method",
         variant: "destructive",
       })
       return
@@ -281,8 +307,62 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
       return
     }
 
+    // Additional validation for payment-link URLs in configured countries
+    for (const country of configuredCountries) {
+      if (country.type === 'payment-link') {
+        if (!country.url || country.url.trim().length === 0) {
+          toast({
+            title: "Error",
+            description: `Payment URL is required for ${country.name} (payment-link type)`,
+            variant: "destructive",
+          })
+          return
+        }
+
+        const url = country.url.trim()
+        if (!url.match(/^https?:\/\//i)) {
+          toast({
+            title: "Error",
+            description: `Invalid URL for ${country.name}. URL must start with http:// or https://`,
+            variant: "destructive",
+          })
+          return
+        }
+
+        // Check if it's a valid URL format with domain
+        const domainPattern = /^https?:\/\/[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*/
+        if (!domainPattern.test(url)) {
+          toast({
+            title: "Error",
+            description: `Invalid URL format for ${country.name}. Please enter a complete and valid URL.`,
+            variant: "destructive",
+          })
+          return
+        }
+      }
+    }
+
     try {
       setIsLoading(true)
+      
+      // Determine the overall payment method type based on configured countries
+      const hasPaymentLinkCountries = configuredCountries.some(country => country.type === 'payment-link')
+      const hasManualCountries = configuredCountries.some(country => country.type === 'manual')
+      
+      // If all countries are payment-link, set type to payment-link
+      // If mixed or all manual, we'll set it to manual but include country-specific URLs
+      const overallType: 'manual' | 'payment-link' = hasPaymentLinkCountries && !hasManualCountries ? 'payment-link' : 'manual'
+      
+      // For payment-link type, try to use a common URL if all countries have the same URL
+      let mainUrl = null
+      if (overallType === 'payment-link') {
+        const paymentLinkCountries = configuredCountries.filter(c => c.type === 'payment-link')
+        const firstUrl = paymentLinkCountries[0]?.url
+        const allSameUrl = paymentLinkCountries.every(c => c.url === firstUrl)
+        if (allSameUrl && firstUrl) {
+          mainUrl = firstUrl
+        }
+      }
       
       // Build country-specific details
       const countrySpecificDetails: Record<string, any> = {}
@@ -300,10 +380,14 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
 
       const paymentMethodData = {
         ...values,
+        type: overallType, // Use determined type instead of hardcoded 'manual'
+        url: mainUrl, // Set main URL for payment-link types
         countries: countryCodes,
         country_specific_details: countrySpecificDetails,
-        display_order: 0 // Set default value since we removed the field
+        display_order: 0
       }
+
+      console.log('Saving payment method with data:', paymentMethodData)
 
       if (initialData?.id) {
         await paymentMethodsApi.update(initialData.id, paymentMethodData)
@@ -536,13 +620,23 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
 
                 {/* Payment Link URL */}
                 {countryType === 'payment-link' && (
-                  <div>
+                  <div className="space-y-2">
                     <label className="text-sm font-medium">Payment URL</label>
                     <Input
-                      placeholder="https://payment-provider.com/pay"
+                      placeholder="https://paypal.me/yourname or https://stripe.com/checkout/..."
                       value={countryUrl}
                       onChange={(e) => setCountryUrl(e.target.value)}
+                      className={`${countryUrl && !countryUrl.match(/^https?:\/\//i) ? 'border-red-300 focus:border-red-500' : ''}`}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Enter the complete URL where customers will be redirected to complete payment. 
+                      Must start with http:// or https://
+                    </p>
+                    {countryUrl && !countryUrl.match(/^https?:\/\//i) && (
+                      <p className="text-xs text-red-600">
+                        ⚠️ URL must start with http:// or https://
+                      </p>
+                    )}
                   </div>
                 )}
 

@@ -12,7 +12,7 @@ interface CheckoutPageProps {
 }
 
 export default async function CheckoutPage({ params }: CheckoutPageProps) {
-  const { slug } = params
+  const { slug } = await params
 
   // Basic validation - detailed validation will be done in the component
   if (!slug || slug.length < 3) {

@@ -246,7 +246,7 @@ class MerchantWorkflowTester {
         .insert(simpleCheckoutData)
         .select()
         .single()
-      
+    
       if (simpleError) {
         this.logProblem('CHECKOUT_LINKS', 'Simple checkout link creation failed', simpleError)
       } else {
@@ -386,7 +386,7 @@ class MerchantWorkflowTester {
       if (this.testData.customerPayment) {
         const { data: pendingPayment } = await supabase
           .from('payments')
-          .select('*')
+      .select('*')
           .eq('id', this.testData.customerPayment.id)
           .single()
         
@@ -426,7 +426,7 @@ class MerchantWorkflowTester {
       
       if (currenciesError) {
         this.logProblem('BUTTON_FUNCTIONALITY', 'Currencies endpoint failed', currenciesError)
-      } else {
+    } else {
         console.log(`✅ Currencies endpoint working: ${currencies.length} currencies available`)
       }
       
@@ -448,9 +448,9 @@ class MerchantWorkflowTester {
       }
     } catch (error) {
       this.logProblem('BUTTON_FUNCTIONALITY', 'Unexpected error testing button functionality', error)
+      }
     }
-  }
-
+    
   async testDashboardData() {
     console.log('\n📊 Testing Dashboard Data Availability...')
     
@@ -463,8 +463,8 @@ class MerchantWorkflowTester {
       console.log(`✅ Payment Methods in database: ${allPaymentMethods?.length || 0}`)
       
       const { data: allCheckoutLinks } = await supabase
-        .from('checkout_links')
-        .select('*')
+      .from('checkout_links')
+      .select('*')
         .eq('status', 'active')
       
       console.log(`✅ Checkout Links in database: ${allCheckoutLinks?.length || 0}`)

@@ -66,7 +66,7 @@ export interface CountrySpecificDetails {
 export interface PaymentMethod {
   id?: string
   name: string
-  type: 'bank' | 'mobile' | 'crypto' | 'payment-link' | 'manual'
+  type: 'manual' | 'payment-link'
   countries: string[]
   status: 'active' | 'pending' | 'inactive'
   icon?: string | null

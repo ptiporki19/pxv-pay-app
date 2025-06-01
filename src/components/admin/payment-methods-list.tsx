@@ -89,15 +89,17 @@ export function PaymentMethodsList() {
       case 'manual':
         return 'Manual Payment'
       case 'payment-link':
-        return 'Payment Link'
+        return '🔗 Payment Link'
+      // Fallback for existing database entries - treat all as manual
       case 'bank':
-        return 'Bank Transfer'
+      case 'bank_transfer':
       case 'mobile':
-        return 'Mobile Money'
       case 'crypto':
-        return 'Cryptocurrency'
+      case 'cryptocurrency':
+      case 'digital_wallet':
+        return 'Manual Payment'
       default:
-        return type
+        return 'Manual Payment'
     }
   }
 
@@ -139,11 +141,10 @@ export function PaymentMethodsList() {
 
       <div className="border rounded-lg">
         <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
-          <div className="w-1/4">Payment Method Name</div>
-          <div className="w-1/4">Payment Type</div>
-          <div className="w-1/4">Supported Countries</div>
+          <div className="w-1/3">Payment Method Name</div>
+          <div className="w-1/3">Supported Countries</div>
           <div className="w-1/6 text-center">Status</div>
-          <div className="w-1/12 text-right">Actions</div>
+          <div className="w-1/6 text-right">Actions</div>
         </div>
         
         {isLoading ? (
@@ -153,21 +154,20 @@ export function PaymentMethodsList() {
         ) : paymentMethods.length > 0 ? (
           paymentMethods.map((method) => (
             <div key={method.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
-              <div className="w-1/4 flex items-center space-x-3">
+              <div className="w-1/3 flex items-center space-x-3">
                 {method.icon && (
                   <img src={method.icon} alt={method.name} className="w-6 h-6 object-contain" />
                 )}
                 <span>{method.name}</span>
               </div>
-              <div className="w-1/4">{formatType(method.type)}</div>
-              <div className="w-1/4">{formatCountries(method.countries)}</div>
+              <div className="w-1/3">{formatCountries(method.countries)}</div>
               <div className="w-1/6 text-center">
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(method.status)}`}>
                   {method.status === 'active' ? 'Active' : 
                    method.status === 'pending' ? 'Pending' : 'Inactive'}
                 </span>
               </div>
-              <div className="w-1/12 text-right">
+              <div className="w-1/6 text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">

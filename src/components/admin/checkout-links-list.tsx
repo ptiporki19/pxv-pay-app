@@ -178,9 +178,8 @@ export function CheckoutLinksList() {
 
       <div className="border rounded-lg">
         <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
-          <div className="w-1/4">Title</div>
-          <div className="w-1/6">Amount</div>
-          <div className="w-1/6">Payments</div>
+          <div className="w-1/3">Title</div>
+          <div className="w-1/4">Countries</div>
           <div className="w-1/6">Status</div>
           <div className="w-1/6">Created</div>
           <div className="w-1/12 text-right">Actions</div>
@@ -193,16 +192,15 @@ export function CheckoutLinksList() {
         ) : checkoutLinks.length > 0 ? (
           checkoutLinks.map((link) => (
             <div key={link.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-              <div className="w-1/4">
+              <div className="w-1/3">
                 <div className="font-medium">{link.title}</div>
                 <div className="text-sm text-muted-foreground">/{link.slug}</div>
               </div>
-              <div className="w-1/6">
-                {formatAmountDisplay(link)}
-              </div>
-              <div className="w-1/6">
+              <div className="w-1/4">
                 <span className="text-sm">
-                  {link.payments?.[0]?.count || 0} payments
+                  {link.active_country_codes && link.active_country_codes.length > 0 
+                    ? link.active_country_codes.join(', ') 
+                    : 'N/A'}
                 </span>
               </div>
               <div className="w-1/6">

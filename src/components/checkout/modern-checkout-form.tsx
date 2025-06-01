@@ -42,8 +42,18 @@ interface PaymentMethod {
   type: string
   description?: string
   instructions_for_checkout?: string
+  url?: string
   icon_url?: string
   display_order: number
+  custom_fields?: Array<{
+    id: string
+    label: string
+    value: string
+    type: string
+    required: boolean
+    placeholder?: string
+  }>
+  additional_info?: string
 }
 
 interface InstructionItem {
@@ -176,7 +186,47 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
   }
 
   const handleProceedToDetails = () => {
-    if (selectedPaymentMethod) setCurrentStep('payment-details')
+    if (selectedPaymentMethod) {
+      console.log('Selected payment method:', selectedPaymentMethod)
+      console.log('Payment method type:', selectedPaymentMethod.type)
+      console.log('Payment method URL:', selectedPaymentMethod.url)
+      
+      if (selectedPaymentMethod.type === 'payment-link' && selectedPaymentMethod.url) {
+        // Ensure URL has proper protocol
+        let url = selectedPaymentMethod.url.trim()
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url
+        }
+        
+        // Replace template variables if present
+        if (checkoutData?.checkout_link) {
+          const finalAmount = checkoutData.checkout_link.amount_type === 'fixed' 
+            ? checkoutData.checkout_link.amount.toString() 
+            : amount
+          const selectedCountryData = countries.find(c => c.code === selectedCountry)
+          const currency = selectedCountryData?.currency?.code || 'USD'
+          
+          url = url
+            .replace(/\{\{amount\}\}/g, finalAmount)
+            .replace(/\{\{currency\}\}/g, currency)
+        }
+        
+        console.log('Opening external URL in new tab:', url)
+        
+        // Open in new tab instead of replacing current page
+        window.open(url, '_blank', 'noopener,noreferrer')
+        
+        // Set state to show confirmation message
+        setCurrentStep('confirmation')
+        setPaymentId('pending-external-payment')
+      } else if (selectedPaymentMethod.type === 'payment-link' && !selectedPaymentMethod.url) {
+        console.error('Payment-link method selected but no URL provided:', selectedPaymentMethod)
+        setError('Payment method configuration error: No payment URL provided')
+      } else {
+        console.log('Manual payment method selected, proceeding to payment details')
+        setCurrentStep('payment-details')
+      }
+    }
   }
 
   const handleProceedToUpload = () => {
@@ -425,7 +475,6 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                   <div className="space-y-3">
                     {paymentMethods.sort((a,b) => a.display_order - b.display_order).map((method) => (
                       <div key={method.id} className={cn("rounded-2xl p-4 cursor-pointer transition-all duration-200", selectedPaymentMethod?.id === method.id ? "bg-gray-600 text-white" : "bg-gray-100 hover:bg-gray-200")} onClick={() => handlePaymentMethodSelect(method)}>
-                        <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", selectedPaymentMethod?.id === method.id ? "border-white bg-white" : "border-gray-400")}>{selectedPaymentMethod?.id === method.id && (<div className="w-2 h-2 rounded-full bg-gray-600"></div>)}</div>
                             {method.icon_url && (<img src={method.icon_url} alt={method.name} className="w-6 h-6 object-contain"/>)}
@@ -433,8 +482,6 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                               <h4 className={cn("font-medium text-sm", selectedPaymentMethod?.id === method.id ? "text-white" : "text-gray-900")}>{method.name}</h4>
                               {method.description && (<p className={cn("text-xs mt-1", selectedPaymentMethod?.id === method.id ? "text-gray-200" : "text-gray-600")}>{method.description}</p>)}
                             </div>
-                          </div>
-                          <Badge variant="secondary" className={cn("capitalize text-xs", selectedPaymentMethod?.id === method.id ? "bg-white/20 text-white" : "bg-white text-gray-900")}>{method.type.replace('_', ' ')}</Badge>
                         </div>
                       </div>
                     ))}
@@ -442,7 +489,11 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                 )}
                 <div className="pt-4">
                   <Button onClick={handleProceedToDetails} disabled={!selectedPaymentMethod} className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl h-12">
-                    Continue<ArrowRight className="ml-2 h-4 w-4" />
+                    {selectedPaymentMethod?.type === 'payment-link' ? (
+                      <>Pay with {selectedPaymentMethod.name}<ArrowRight className="ml-2 h-4 w-4" /></>
+                    ) : (
+                      <>Continue<ArrowRight className="ml-2 h-4 w-4" /></>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -455,8 +506,40 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                 </div>
                 <div className="bg-gray-100 rounded-2xl p-5 space-y-4">
                   <h3 className="text-sm font-medium text-gray-700 text-center mb-3">Send payment to:</h3>
-                  {selectedPaymentMethod.instructions_for_checkout ? (
-                    parseInstructions(selectedPaymentMethod.instructions_for_checkout).map((item, index) => (
+                  {selectedPaymentMethod.custom_fields && selectedPaymentMethod.custom_fields.length > 0 ? (
+                    <div className="space-y-3">
+                      {selectedPaymentMethod.custom_fields.map((field, index) => (
+                        <div key={field.id || index} className="flex items-stretch space-x-2 min-h-[44px]">
+                          <div className="bg-white rounded-lg px-3 py-2 text-sm text-gray-700 w-2/5 flex items-center overflow-hidden">
+                            <span className="truncate" title={field.label}>{field.label}</span>
+                          </div>
+                          <div className="flex-1 bg-white rounded-lg px-3 py-2 text-sm text-gray-900 font-medium flex items-center justify-between min-w-0 overflow-hidden">
+                            <span 
+                              className={`flex-1 truncate ${isTruncated(field.value) ? 'font-mono text-xs' : ''} mr-2`} 
+                              title={isTruncated(field.value) ? `Full value: ${field.value}` : field.value}
+                            >
+                              {formatValueForDisplay(field.value)}
+                            </span>
+                            <button 
+                              type="button" 
+                              onClick={() => handleCopy(field.value)} 
+                              className="flex-shrink-0 p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors" 
+                              title={`Copy ${isTruncated(field.value) ? 'full value' : 'value'} to clipboard`}
+                            >
+                              <Copy className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      {selectedPaymentMethod.additional_info && (
+                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <p className="text-sm text-blue-800">{selectedPaymentMethod.additional_info}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : selectedPaymentMethod.instructions_for_checkout ? (
+                    <div className="space-y-3">
+                      {parseInstructions(selectedPaymentMethod.instructions_for_checkout).map((item, index) => (
                       <div key={index}>
                         {item.type === 'pair' && item.label && item.value ? (
                           <div className="flex items-stretch space-x-2 min-h-[44px]">
@@ -480,10 +563,15 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                               </button>
                             </div>
                           </div>
-                        ) : item.type === 'text' && item.text ? (<p className="text-sm text-gray-700 leading-relaxed break-words">{item.text}</p>) : null}
+                          ) : item.type === 'text' && item.text ? (
+                            <p className="text-sm text-gray-700 leading-relaxed break-words">{item.text}</p>
+                          ) : null}
+                        </div>
+                      ))}
                       </div>
-                    ))
-                  ) : (<p className="text-sm text-gray-700 text-center">No specific instructions provided. Please ensure you're sending to the correct account for {selectedPaymentMethod.name}.</p>)}
+                  ) : (
+                    <p className="text-sm text-gray-700 text-center">No specific instructions provided. Please ensure you're sending to the correct account for {selectedPaymentMethod.name}.</p>
+                  )}
                 </div>
                 <div className="bg-gray-100 border border-gray-200 rounded-2xl p-4">
                   <div className="flex items-start gap-3">
@@ -524,17 +612,34 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                   <CheckCircle className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">Payment Submitted Successfully!</h3>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {paymentId === 'pending-external-payment' ? 'Payment Tab Opened!' : 'Payment Submitted Successfully!'}
+                  </h3>
                   <p className="text-gray-600 mt-3 text-sm">
-                    {checkoutLink.payment_review_message || 
+                    {paymentId === 'pending-external-payment' 
+                      ? `A new tab has been opened for ${selectedPaymentMethod?.name} payment. Please complete your payment in the new tab and keep this page open for reference.`
+                      : (checkoutLink.payment_review_message || 
                      checkoutData?.merchant_settings?.default_payment_review_message || 
-                     'Thank you for your payment! Your transaction is under review and you will receive an email notification once it has been processed.'}
+                         'Thank you for your payment! Your transaction is under review and you will receive an email notification once it has been processed.')
+                    }
                   </p>
                 </div>
+                {paymentId !== 'pending-external-payment' && (
                 <div className="bg-gray-50 rounded-xl p-4">
                   <p className="text-xs text-gray-600">Payment ID</p>
                   <p className="font-mono text-sm font-medium text-gray-900">{paymentId}</p>
                 </div>
+                )}
+                {paymentId === 'pending-external-payment' && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="text-blue-600">
+                        <p className="font-medium text-sm">External Payment Processing</p>
+                        <p className="text-xs mt-1">Your payment is being processed by {selectedPaymentMethod?.name} in the new tab. You will receive a confirmation once the payment is complete. You can safely close this page after completing your payment.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

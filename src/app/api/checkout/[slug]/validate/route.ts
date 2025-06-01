@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const supabase = createPublicClient()
-    const { slug } = params
+    const { slug } = await params
 
     // Validate checkout link exists and is active
     const { data: checkoutLink, error: linkError } = await supabase

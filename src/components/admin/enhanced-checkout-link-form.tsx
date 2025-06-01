@@ -169,8 +169,6 @@ export function EnhancedCreateCheckoutLinkForm() {
           currency_code
         `)
         .eq('status', 'active')
-        .not('user_id', 'is', null) // Only user-specific countries OR
-        .or('user_id.is.null') // global countries
         .order('name')
 
       if (error) throw error
@@ -180,10 +178,10 @@ export function EnhancedCreateCheckoutLinkForm() {
       
       if (data && data.length > 0) {
         for (const country of data) {
-          // Check if this country is used in any payment methods
+          // Check if this country is used in any payment methods for the current user
           const { data: paymentMethods, error: pmError } = await supabase
             .from('payment_methods')
-            .select('id')
+            .select('id, user_id')
             .contains('countries', [country.code])
             .eq('status', 'active')
             .limit(1)
