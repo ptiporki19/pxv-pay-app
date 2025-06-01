@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 interface Notification {
   id: string
@@ -22,6 +23,14 @@ interface Notification {
   type: string
   created_at: string
   user_id: string
+  data?: {
+    payment_id?: string
+    customer_name?: string
+    amount?: number
+    currency?: string
+    checkout_link_id?: string
+    merchant_id?: string
+  }
 }
 
 export function NotificationsPopover() {
@@ -31,6 +40,7 @@ export function NotificationsPopover() {
   
   const unreadCount = notifications.filter(notification => !notification.is_read).length
   const supabase = createClient()
+  const router = useRouter()
   
   // Fetch notifications from Supabase
   const fetchNotifications = async () => {
@@ -143,6 +153,28 @@ export function NotificationsPopover() {
     }
   }
   
+  const handleNotificationClick = async (notification: Notification) => {
+    // Mark as read first
+    await markAsRead(notification.id)
+    
+    // Close the popover
+    setOpen(false)
+    
+    // Navigate based on notification type and data
+    if (notification.data?.payment_id) {
+      // For payment-related notifications, redirect to verification page
+      if (notification.title.includes('Payment Received') || notification.title.includes('Payment Submitted')) {
+        // Navigate to verification page with the specific payment
+        router.push(`/verification?payment_id=${notification.data.payment_id}`)
+      }
+    }
+    
+    // Default fallback: navigate to verification page
+    if (!notification.data?.payment_id) {
+      router.push('/verification')
+    }
+  }
+
   const markAsRead = async (id: string) => {
     try {
       // Update notification in Supabase
@@ -228,7 +260,7 @@ export function NotificationsPopover() {
                       ? "hover:bg-gray-50" 
                       : "bg-black/[0.02]"
                   )}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-50">
                     {getNotificationIcon(notification.type)}

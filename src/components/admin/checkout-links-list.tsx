@@ -235,12 +235,6 @@ export function CheckoutLinksList() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href={`/checkout-links/${link.id}/analytics`}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        <span>Analytics</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
                       <Link href={`/checkout-links/edit/${link.id}`}>
                         <Edit className="mr-2 h-4 w-4" />
                         <span>Edit</span>

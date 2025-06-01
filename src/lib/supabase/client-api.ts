@@ -84,15 +84,20 @@ export interface PaymentMethod {
 
 export interface Payment {
   id?: string
-  user_id?: string
+  user_id?: string | null
   merchant_id?: string | null
   amount: number
   currency: string
   payment_method: string
-  status: 'pending' | 'completed' | 'failed' | 'refunded'
+  status: 'pending' | 'completed' | 'failed' | 'pending_verification'
   country?: string | null
   description?: string | null
   metadata?: any
+  // New fields for checkout payments
+  customer_name?: string | null
+  customer_email?: string | null
+  payment_proof_url?: string | null
+  checkout_link_id?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -839,7 +844,7 @@ export const paymentsApi = {
     return data || []
   },
   
-  getByStatus: async (status: 'pending' | 'completed' | 'failed' | 'refunded'): Promise<Payment[]> => {
+  getByStatus: async (status: 'pending' | 'completed' | 'failed' | 'pending_verification'): Promise<Payment[]> => {
     const user = await getCurrentUser()
     if (!user) {
       console.log('User not authenticated, returning empty payments list')
@@ -883,7 +888,7 @@ export const paymentsApi = {
     return data
   },
   
-  updateStatus: async (id: string, status: 'pending' | 'completed' | 'failed' | 'refunded'): Promise<Payment> => {
+  updateStatus: async (id: string, status: 'pending' | 'completed' | 'failed' | 'pending_verification'): Promise<Payment> => {
     const user = await getCurrentUser()
     if (!user) {
       throw new Error('User not authenticated')
@@ -924,6 +929,74 @@ export const paymentsApi = {
     }
     
     return data || []
+  },
+
+  // NEW: Get payments received by merchant (for verification page)
+  getMerchantPayments: async (): Promise<Payment[]> => {
+    const user = await getCurrentUser()
+    if (!user) {
+      console.log('User not authenticated, returning empty merchant payments list')
+      return []
+    }
+    
+    const { data, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('merchant_id', user.id)
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('Error fetching merchant payments:', error)
+      throw new Error(error.message)
+    }
+    
+    return data || []
+  },
+
+  // NEW: Get merchant payments by status
+  getMerchantPaymentsByStatus: async (status: 'pending' | 'completed' | 'failed' | 'pending_verification'): Promise<Payment[]> => {
+    const user = await getCurrentUser()
+    if (!user) {
+      console.log('User not authenticated, returning empty merchant payments list')
+      return []
+    }
+    
+    const { data, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('merchant_id', user.id)
+      .eq('status', status)
+      .order('created_at', { ascending: false })
+    
+    if (error) {
+      console.error('Error fetching merchant payments by status:', error)
+      throw new Error(error.message)
+    }
+    
+    return data || []
+  },
+
+  // NEW: Update payment status (for merchants)
+  updateMerchantPaymentStatus: async (id: string, status: 'completed' | 'failed'): Promise<Payment> => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+    
+    const { data, error } = await supabase
+      .from('payments')
+      .update({ status })
+      .eq('id', id)
+      .eq('merchant_id', user.id)
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error updating merchant payment status:', error)
+      throw new Error(error.message)
+    }
+    
+    return data
   }
 }
 

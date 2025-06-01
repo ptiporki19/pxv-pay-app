@@ -193,7 +193,7 @@ export function CountryFormSimple({ initialData }: CountryFormProps) {
                         .filter(currency => currency.status === 'active')
                         .map((currency) => (
                           <SelectItem key={currency.id} value={currency.id!}>
-                            {currency.name} ({currency.code}) - {currency.symbol}
+                            {currency.name} ({currency.code})
                           </SelectItem>
                         ))
                     )}

@@ -444,7 +444,7 @@ export function CreateCheckoutLinkForm() {
                           ) : (
                             countries.map((country) => (
                               <SelectItem key={country.id} value={country.code}>
-                                {country.name} ({country.code}) - {country.currency?.symbol}{country.currency?.code}
+                                {country.name} ({country.code}) - {country.currency?.code}
                               </SelectItem>
                             ))
                           )}

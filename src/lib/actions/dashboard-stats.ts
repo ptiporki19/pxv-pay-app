@@ -82,19 +82,36 @@ export async function getPendingVerificationCount() {
       return { success: false, error: 'Not authenticated', count: 0 }
     }
 
-    // Filter by current user's payments only
-    const { count, error } = await supabase
+    // Check if user is super admin to see all pending verifications
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    const isSuperAdminEmail = session.user.email === 'admin@pxvpay.com' ||
+                              session.user.email === 'dev-admin@pxvpay.com' ||
+                              session.user.email === 'superadmin@pxvpay.com'
+    const isSuperAdmin = userProfile?.role === 'super_admin' || isSuperAdminEmail
+
+    let query = supabase
       .from('payments')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending')
-      .eq('user_id', session.user.id)
+      .eq('status', 'pending_verification')
+
+    // Super admins see all pending verifications, merchants see only their own
+    if (!isSuperAdmin) {
+      query = query.eq('merchant_id', session.user.id)
+    }
+
+    const { count, error } = await query
 
     if (error) {
       console.error('❌ Server: Pending verification query failed:', error)
       return { success: false, error: error.message, count: 0 }
     }
 
-    console.log('✅ Server: Pending verification count (user-specific):', count)
+    console.log('✅ Server: Pending verification count:', count, 'for user:', session.user.email)
     return { success: true, error: null, count: count || 0 }
 
   } catch (error) {
@@ -176,25 +193,42 @@ export async function getTotalPaymentsCount() {
       return { success: false, error: 'Not authenticated', count: 0 }
     }
 
-    // Filter by current user's payments only
-    const { count, error } = await supabase
+    // Check if user is super admin to see all payments
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    const isSuperAdminEmail = session.user.email === 'admin@pxvpay.com' ||
+                              session.user.email === 'dev-admin@pxvpay.com' ||
+                              session.user.email === 'superadmin@pxvpay.com'
+    const isSuperAdmin = userProfile?.role === 'super_admin' || isSuperAdminEmail
+
+    let query = supabase
       .from('payments')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id)
+
+    // Super admins see all payments, merchants see only their own
+    if (!isSuperAdmin) {
+      query = query.eq('merchant_id', session.user.id)
+    }
+
+    const { count, error } = await query
 
     if (error) {
       console.error('❌ Server: Total payments query failed:', error)
       return { success: false, error: error.message, count: 0 }
     }
 
-    console.log('✅ Server: Total payments count (user-specific):', count)
+    console.log('✅ Server: Total payments count:', count, 'for user:', session.user.email)
     return { success: true, error: null, count: count || 0 }
 
   } catch (error) {
     console.error('💥 Server: Exception in getTotalPaymentsCount:', error)
     return { success: false, error: 'Server error', count: 0 }
   }
-} 
+}
 
 export async function getProductsCount() {
   try {

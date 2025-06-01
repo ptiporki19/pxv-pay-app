@@ -131,7 +131,7 @@ export function CountriesList() {
               <div className="w-1/4">
                 {country.currency ? (
                   <span className="text-sm">
-                    {country.currency.name} ({country.currency.code}) {country.currency.symbol}
+                    {country.currency.name} ({country.currency.code})
                   </span>
                 ) : (
                   <span className="text-sm text-muted-foreground">No currency</span>

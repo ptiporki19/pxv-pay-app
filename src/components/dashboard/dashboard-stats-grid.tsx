@@ -30,6 +30,7 @@ export function DashboardStatsGrid() {
   })
   const [loading, setLoading] = useState(true)
   const [isSuperAdmin, setIsSuperAdmin] = useState(false)
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
 
   useEffect(() => {
     const checkUserRole = async () => {
@@ -56,27 +57,79 @@ export function DashboardStatsGrid() {
     checkUserRole()
   }, [])
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch('/api/dashboard/stats')
-        if (response.ok) {
-          const data = await response.json()
-          setStats(data.stats)
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error)
-      } finally {
-        setLoading(false)
+  const fetchStats = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/dashboard/stats')
+      if (response.ok) {
+        const data = await response.json()
+        setStats(data.stats)
+        setLastUpdate(new Date())
       }
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchStats()
     
-    // Refresh stats every 30 seconds
+    // Set up real-time subscriptions for stats updates
+    const supabase = createClient()
+
+    // Subscribe to payments table changes for real-time updates
+    const paymentsSubscription = supabase
+      .channel('payments-stats-channel')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'payments'
+      }, () => {
+        // Refresh stats when payments change
+        console.log('📊 Payment change detected, refreshing stats...')
+        fetchStats()
+      })
+      .subscribe()
+
+    // Subscribe to users table changes for user stats
+    const usersSubscription = supabase
+      .channel('users-stats-channel')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'users'
+      }, () => {
+        // Refresh stats when users change
+        console.log('👥 User change detected, refreshing stats...')
+        fetchStats()
+      })
+      .subscribe()
+
+    // Subscribe to payment methods changes
+    const paymentMethodsSubscription = supabase
+      .channel('payment-methods-stats-channel')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'payment_methods'
+      }, () => {
+        // Refresh stats when payment methods change
+        console.log('💳 Payment method change detected, refreshing stats...')
+        fetchStats()
+      })
+      .subscribe()
+    
+    // Refresh stats every 30 seconds as fallback
     const interval = setInterval(fetchStats, 30000)
-    return () => clearInterval(interval)
+    
+    return () => {
+      clearInterval(interval)
+      supabase.removeChannel(paymentsSubscription)
+      supabase.removeChannel(usersSubscription)
+      supabase.removeChannel(paymentMethodsSubscription)
+    }
   }, [])
 
   const widgets = [
@@ -107,7 +160,7 @@ export function DashboardStatsGrid() {
       description: "All transactions",
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/20",
-      link: "/payments",
+      link: isSuperAdmin ? "/super-admin-transactions" : "/payments",
       requiresSuperAdmin: false
     },
     {
@@ -177,10 +230,15 @@ export function DashboardStatsGrid() {
   }
 
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-      {widgets.map((widget, index) => (
-        <StatCard key={index} widget={widget} index={index} />
-      ))}
+    <div>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {widgets.map((widget, index) => (
+          <StatCard key={index} widget={widget} index={index} />
+        ))}
+      </div>
+      <div className="mt-4 text-xs text-muted-foreground text-center">
+        📊 Real-time updates active • Last updated: {lastUpdate.toLocaleTimeString()}
+      </div>
     </div>
   )
 } 

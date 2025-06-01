@@ -67,7 +67,6 @@ export async function GET(
         instructions_for_checkout,
         icon,
         url,
-        country_specific_details,
         display_order,
         countries
       `)
@@ -86,15 +85,8 @@ export async function GET(
 
     // Format the payment methods with country-specific details
     const formattedMethods = (paymentMethods || []).map((method: any) => {
-      // Get country-specific details if available
-      const countrySpecific = method.country_specific_details?.[countryCode]
-      
-      // Determine the effective type for this country
-      const hasCountryUrl = countrySpecific?.url && countrySpecific.url.trim().length > 0
-      const hasMainUrl = method.url && method.url.trim().length > 0
-      let effectiveUrl = countrySpecific?.url || method.url
-      
       // Normalize URL - ensure it has proper protocol
+      let effectiveUrl = method.url
       if (effectiveUrl && effectiveUrl.trim().length > 0) {
         effectiveUrl = effectiveUrl.trim()
         if (!effectiveUrl.startsWith('http://') && !effectiveUrl.startsWith('https://')) {
@@ -102,23 +94,18 @@ export async function GET(
         }
       }
       
-      // If there's a URL (either country-specific or main), treat as payment-link
-      const effectiveType = (hasCountryUrl || hasMainUrl) ? 'payment-link' : method.type
+      // If there's a URL, treat as payment-link
+      const effectiveType = (effectiveUrl && effectiveUrl.trim().length > 0) ? 'payment-link' : method.type
       
       return {
         id: method.id,
         name: method.name,
-        type: effectiveType, // Use determined type instead of original type
+        type: effectiveType,
         description: method.description,
-        // Use country-specific instructions if available, otherwise fall back to general instructions
-        instructions_for_checkout: countrySpecific?.instructions || method.instructions_for_checkout,
-        // Use country-specific URL if available, otherwise fall back to general URL
+        instructions_for_checkout: method.instructions_for_checkout,
         url: effectiveUrl,
         icon_url: method.icon,
-        display_order: method.display_order || 0,
-        // Include any additional country-specific info
-        additional_info: countrySpecific?.additional_info,
-        custom_fields: countrySpecific?.custom_fields
+        display_order: method.display_order || 0
       }
     })
 
