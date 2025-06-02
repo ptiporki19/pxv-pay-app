@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Copy, Star, StarOff, ToggleLeft, ToggleRight } from 'lucide-react'
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Copy, Star, StarOff, ToggleLeft, ToggleRight, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useNotificationActions } from '@/providers/notification-provider'
@@ -15,24 +15,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function ProductManagementPage() {
   const [products, setProducts] = useState<ProductTemplate[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   const { showSuccess, showError } = useNotificationActions()
 
   useEffect(() => {
     loadProducts()
-  }, [searchQuery])
+  }, [searchQuery, statusFilter])
 
   const loadProducts = async () => {
     try {
       setIsLoading(true)
       
       const filters = searchQuery ? { search: searchQuery } : {}
-      const productsData = await productTemplatesApi.getAll(filters)
+      let productsData = await productTemplatesApi.getAll(filters)
+      
+      // Apply status filter
+      if (statusFilter !== 'all') {
+        if (statusFilter === 'active') {
+          productsData = productsData.filter(product => product.is_active === true)
+        } else if (statusFilter === 'inactive') {
+          productsData = productsData.filter(product => product.is_active === false)
+        }
+      }
+      
       setProducts(productsData)
     } catch (error) {
       console.error('Error loading products:', error)
@@ -127,7 +145,7 @@ export default function ProductManagementPage() {
       </div>
 
       {/* Search Bar - Same as payment methods */}
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 gap-4">
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -137,6 +155,17 @@ export default function ProductManagementPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Table - Same structure as payment methods */}
@@ -155,7 +184,7 @@ export default function ProductManagementPage() {
           </div>
         ) : products.length > 0 ? (
           products.map((product) => (
-            <div key={product.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div key={product.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
               <div className="w-1/3 flex items-center space-x-3">
                 {product.featured_image && (
                   <img 

@@ -315,7 +315,7 @@ export default function SuperAdminTransactionsPage() {
                       </tr>
                     ) : filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction) => (
-                        <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={transaction.id} className="border-b hover:bg-gray-50 transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
                               {transaction.id.slice(0, 8)}...

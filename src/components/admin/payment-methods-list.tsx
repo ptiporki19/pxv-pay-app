@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PlusCircle, Search, Edit, Trash2, MoreHorizontal } from "lucide-react"
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { PaymentMethod, paymentMethodsApi } from "@/lib/supabase/client-api"
@@ -11,6 +11,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 import Link from "next/link"
 
@@ -18,6 +25,7 @@ export function PaymentMethodsList() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
 
   // Fetch payment methods from the API
   useEffect(() => {
@@ -25,13 +33,20 @@ export function PaymentMethodsList() {
       setIsLoading(true)
       try {
         const data = await paymentMethodsApi.getAll()
-        // Filter by search query if provided
-        const filteredData = searchQuery.trim() 
-          ? data.filter(method => 
-              method.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              method.type.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-          : data
+        // Filter by search query and status if provided
+        let filteredData = data
+        
+        if (searchQuery.trim()) {
+          filteredData = filteredData.filter(method => 
+            method.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            method.type.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }
+
+        if (statusFilter !== "all") {
+          filteredData = filteredData.filter(method => method.status === statusFilter)
+        }
+
         setPaymentMethods(filteredData)
       } catch (error) {
         console.error("Error fetching payment methods:", error)
@@ -46,7 +61,7 @@ export function PaymentMethodsList() {
     }
 
     fetchPaymentMethods()
-  }, [searchQuery])
+  }, [searchQuery, statusFilter])
 
   // Handle delete payment method
   const handleDelete = async (id: string) => {
@@ -127,7 +142,7 @@ export function PaymentMethodsList() {
         </Link>
       </div>
 
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 gap-4">
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -137,6 +152,18 @@ export function PaymentMethodsList() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="border rounded-lg">
@@ -153,7 +180,7 @@ export function PaymentMethodsList() {
           </div>
         ) : paymentMethods.length > 0 ? (
           paymentMethods.map((method) => (
-            <div key={method.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div key={method.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
               <div className="w-1/3 flex items-center space-x-3">
                 {method.icon && (
                   <img src={method.icon} alt={method.name} className="w-6 h-6 object-contain" />

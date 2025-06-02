@@ -81,7 +81,7 @@ export default function VerificationPage() {
   }
 
   const renderPaymentRow = (payment: Payment, showActions: boolean = true) => (
-    <div key={payment.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800">
+    <div key={payment.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
       <div className="w-1/8 text-sm font-medium">{payment.id?.slice(0, 8)}...</div>
       <div className="w-1/8 text-sm">{formatDate(payment.created_at || '')}</div>
       <div className="w-1/6 text-sm">

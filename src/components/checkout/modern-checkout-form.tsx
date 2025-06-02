@@ -685,10 +685,10 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                         ) : (
                           <div key={index} className="bg-white rounded-lg px-3 py-2 text-sm text-gray-900">
                             {item.text}
-                          </div>
+                      </div>
                         )
                       ))}
-                    </div>
+                </div>
                   ) : (
                     <div className="text-center text-gray-500">
                       <p>Payment method information will be displayed here</p>

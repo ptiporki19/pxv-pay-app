@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Copy, ExternalLink, Eye } from "lucide-react"
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Copy, ExternalLink, Eye, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { CheckoutLink } from "@/types/checkout"
@@ -11,6 +11,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
@@ -19,6 +26,7 @@ export function CheckoutLinksList() {
   const [checkoutLinks, setCheckoutLinks] = useState<CheckoutLink[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
 
   // Fetch checkout links from the API
   useEffect(() => {
@@ -48,15 +56,21 @@ export function CheckoutLinksList() {
 
         if (error) throw error
 
-        // Filter by search query if provided
-        const filteredData = searchQuery.trim() 
-          ? data.filter(link => 
-              link.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              link.slug.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-          : data
+        // Filter by search query and status if provided
+        let filteredData = data || []
+        
+        if (searchQuery.trim()) {
+          filteredData = filteredData.filter(link => 
+            link.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            link.slug.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }
 
-        setCheckoutLinks(filteredData || [])
+        if (statusFilter !== "all") {
+          filteredData = filteredData.filter(link => link.status === statusFilter)
+        }
+
+        setCheckoutLinks(filteredData)
       } catch (error) {
         console.error("Error fetching checkout links:", error)
         toast({ 
@@ -70,7 +84,7 @@ export function CheckoutLinksList() {
     }
 
     fetchCheckoutLinks()
-  }, [searchQuery])
+  }, [searchQuery, statusFilter])
 
   // Handle delete checkout link
   const handleDelete = async (id: string) => {
@@ -164,7 +178,7 @@ export function CheckoutLinksList() {
         </Link>
       </div>
 
-      <div className="flex items-center py-4">
+      <div className="flex items-center py-4 gap-4">
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -174,6 +188,18 @@ export function CheckoutLinksList() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px]">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+            <SelectItem value="expired">Expired</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="border rounded-lg">
@@ -191,7 +217,7 @@ export function CheckoutLinksList() {
           </div>
         ) : checkoutLinks.length > 0 ? (
           checkoutLinks.map((link) => (
-            <div key={link.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+            <div key={link.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
               <div className="w-1/3">
                 <div className="font-medium">{link.title}</div>
                 <div className="text-sm text-muted-foreground">/{link.slug}</div>
