@@ -20,4 +20,4 @@ This document highlights how to implement Role-Based Access Control (RBAC) logic
 - When building admin features, include checks to ensure the authenticated user has the necessary role (e.g., check `user.role === 'super_admin'` or `user.role === 'registered_user'` depending on the feature in MVP).
 - When building public pages or checkout flow (user side), ensure they handle authenticated vs. unauthenticated users appropriately, but core payment *process* is generally accessible.
 - For features with tiered access (mostly Post-MVP, but prepare for it), implement frontend conditional rendering based on roles.
-- Ensure backend API endpoints for sensitive operations explicitly check the user's role obtained from the authenticated session.
+- Ensure backend API endpoints for sensitive operations explicitly check the user's role obtained from the authenticated session
