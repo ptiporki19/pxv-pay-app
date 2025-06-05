@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
+import { User, Mail, LockKeyhole, CheckCircle, ArrowRight } from 'lucide-react'
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -84,9 +85,9 @@ export default function SignUpPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Create an account</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Enter your information to get started with PXV Pay
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Join PXV Pay</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+          Start accepting global payments with local methods in minutes
         </p>
       </div>
       
@@ -97,15 +98,19 @@ export default function SignUpPage() {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel className="text-gray-700 dark:text-gray-300">Full Name</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="John Doe"
-                    disabled={isLoading}
-                  />
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      placeholder="John Doe"
+                      disabled={isLoading}
+                      className="pl-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500"
+                    />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -115,19 +120,23 @@ export default function SignUpPage() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-gray-700 dark:text-gray-300">Email</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="name@example.com"
-                    type="email"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoCorrect="off"
-                    disabled={isLoading}
-                  />
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      placeholder="name@example.com"
+                      type="email"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      autoCorrect="off"
+                      disabled={isLoading}
+                      className="pl-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500"
+                    />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -137,16 +146,20 @@ export default function SignUpPage() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel className="text-gray-700 dark:text-gray-300">Password</FormLabel>
                 <FormControl>
-                  <Input 
-                    {...field} 
-                    type="password" 
-                    disabled={isLoading}
-                    placeholder="Create a strong password" 
-                  />
+                  <div className="relative">
+                    <Input 
+                      {...field} 
+                      type="password" 
+                      disabled={isLoading}
+                      placeholder="Create a strong password"
+                      className="pl-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500" 
+                    />
+                    <LockKeyhole className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -156,16 +169,20 @@ export default function SignUpPage() {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel className="text-gray-700 dark:text-gray-300">Confirm Password</FormLabel>
                 <FormControl>
-                  <Input 
-                    {...field} 
-                    type="password" 
-                    disabled={isLoading}
-                    placeholder="Confirm your password" 
-                  />
+                  <div className="relative">
+                    <Input 
+                      {...field} 
+                      type="password" 
+                      disabled={isLoading}
+                      placeholder="Confirm your password"
+                      className="pl-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500" 
+                    />
+                    <CheckCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -180,34 +197,44 @@ export default function SignUpPage() {
                     checked={field.value}
                     onCheckedChange={field.onChange}
                     disabled={isLoading}
+                    className="data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600"
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel className="text-sm font-normal">
+                  <FormLabel className="text-sm font-normal text-gray-700 dark:text-gray-300">
                     I agree to the{' '}
                     <Link
                       href="/terms"
-                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                      className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors duration-200"
                     >
                       terms of service
                     </Link>{' '}
                     and{' '}
                     <Link
                       href="/privacy"
-                      className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                      className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors duration-200"
                     >
                       privacy policy
                     </Link>
                   </FormLabel>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </div>
               </FormItem>
             )}
           />
           
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            className="w-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white font-medium transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/25 border-0 mt-2" 
+            disabled={isLoading}
+          >
             {isLoading ? 'Creating account...' : 'Create account'}
+            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
+          
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
+            By creating an account, you'll get access to PXV Pay's global payment platform, enabling you to accept payments in 180+ countries with 300+ local payment methods.
+          </div>
         </form>
       </Form>
       
@@ -215,7 +242,7 @@ export default function SignUpPage() {
         Already have an account?{' '}
         <Link
           href="/signin"
-          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+          className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium transition-colors duration-200"
         >
           Sign in
         </Link>

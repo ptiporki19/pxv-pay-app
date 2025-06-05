@@ -1,23 +1,19 @@
 'use server'
 
-import { createClient as createServerContextClient } from '@/lib/supabase/server' // For user context
-import { createClient as createAdminClient } from '@supabase/supabase-js' // For admin operations
+import { createClient as createServerContextClient } from '@/lib/supabase/server'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 export async function signUpAction(formData: {
   email: string
   password: string
   fullName: string
 }) {
-  const supabaseUserContext = await createServerContextClient() // Client acting as the user
-
-  // Admin client for privileged operations - MUST use service role key
-  const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY! // Ensure this is set in .env.local
-  )
-
+  const supabaseUserContext = await createServerContextClient()
+  
   try {
-    // First, try normal signup (this uses the user context client)
+    console.log('Starting signup process for:', formData.email)
+    
+    // First, try the normal signup approach
     const { data, error } = await supabaseUserContext.auth.signUp({
       email: formData.email,
       password: formData.password,
@@ -26,87 +22,168 @@ export async function signUpAction(formData: {
           full_name: formData.fullName,
           role: 'registered_user',
         },
-        // emailRedirectTo is handled by Supabase, no need to set it here for server action
       },
     })
 
-    if (error) {
-      // If signup fails due to database error, try manual approach with admin client
-      if (error.message.includes('Database error saving new user') || error.message.includes('User not allowed')) {
-        console.warn('Normal signup failed, attempting manual user creation with admin privileges...', error.message)
-        
+    if (!error && data.user?.id) {
+      console.log('✅ Normal signup successful:', data.user.id)
+      
+      // Create user profile manually
+      const supabaseAdmin = createAdminClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      
+      try {
+        console.log('Creating user profile manually...')
+        const { error: profileError } = await supabaseAdmin
+          .from('users')
+          .insert({
+            id: data.user.id,
+            email: formData.email,
+            role: 'registered_user',
+            active: true,
+            created_at: new Date().toISOString()
+    })
+
+        if (profileError) {
+          console.warn('Profile creation failed, but auth user exists:', profileError.message)
+        } else {
+          console.log('User profile created successfully')
+        }
+      } catch (profileError) {
+        console.warn('Profile creation error:', profileError)
+      }
+
+      return {
+        success: true,
+        message: data.user?.email_confirmed_at ? 
+          'Account created successfully! You can now sign in.' :
+          'Account created successfully! Please check your email to verify your account.'
+      }
+    }
+
+    // If normal signup fails, try admin approach
+    console.warn('Normal signup failed, trying admin approach:', error?.message)
+    
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    // Check if user already exists
+    const { data: existingAuthUsers } = await supabaseAdmin.auth.admin.listUsers()
+    const existingUser = existingAuthUsers.users.find(u => u.email === formData.email)
+    
+    if (existingUser) {
+      return {
+        success: false,
+        message: 'A user with this email already exists.'
+      }
+    }
+
+    // Manual user creation using admin API
+    console.log('Attempting admin user creation...')
         const { data: adminData, error: adminError } = await supabaseAdmin.auth.admin.createUser({
           email: formData.email,
           password: formData.password,
-          email_confirm: true, // Auto-confirm for local/dev, adjust for prod if needed
+      email_confirm: true,
           user_metadata: {
-            full_name: formData.fullName,
-            role: 'registered_user'
+        full_name: formData.fullName
           }
         })
 
         if (adminError) {
-          console.error('Admin user creation failed:', adminError)
-          throw adminError // Propagate this error, as it means even admin couldn't create the user
+      console.error('Admin user creation also failed:', adminError.message)
+      
+      return {
+        success: false,
+        message: 'We are experiencing technical difficulties with user registration. Please try again in a few minutes, or contact support at admin@pxvpay.com if the issue persists.'
+      }
         }
 
         console.log('Admin user creation successful:', adminData.user.id)
 
-        // Create user profile manually using the admin client
-        const { data: profileData, error: profileError } = await supabaseAdmin.rpc('create_user_profile', {
-          user_id: adminData.user.id,
-          user_email: formData.email,
-          user_role: 'registered_user'
+    // Create user profile for admin-created user
+    try {
+      const { error: profileError } = await supabaseAdmin
+        .from('users')
+        .insert({
+          id: adminData.user.id,
+          email: formData.email,
+          role: 'registered_user',
+          active: true,
+          created_at: new Date().toISOString()
         })
 
         if (profileError) {
-          console.error('Manual profile creation failed after admin auth user creation:', profileError)
-          // Log this, but proceed as the auth user was created
-          // You might want to add more robust error handling/queuing for profile creation later
-        } else {
-          console.log('Manual profile creation successful.')
-        }
-
-        return { success: true, message: 'Account created successfully. Please check your email to verify your account.' }
+        console.warn('Profile creation failed, but auth user exists:', profileError.message)
       } else {
-        // Other types of errors from supabaseUserContext.auth.signUp
-        throw error
+        console.log('User profile created successfully via admin route')
       }
+    } catch (profileError) {
+      console.warn('Profile creation error in admin route:', profileError)
     }
 
-    // If normal signup was successful, verify/create profile using user context client if possible, or admin as fallback
-    if (data.user?.id) {
-      console.log('Normal auth.signUp successful, user ID:', data.user.id)
-      try {
-        const { data: profileCheck, error: profileCheckError } = await supabaseUserContext
-          .from('users')
-          .select('id')
-          .eq('id', data.user.id)
-          .single()
-
-        if (profileCheckError) {
-          console.warn('User profile not found via user context client, attempting creation with admin client...', profileCheckError.message)
-          const { error: rpcError } = await supabaseAdmin.rpc('create_user_profile', {
-            user_id: data.user.id,
-            user_email: formData.email,
-            user_role: 'registered_user'
-          })
-          if(rpcError) console.error('Fallback profile creation with admin client failed:', rpcError)
-          else console.log('Fallback profile creation with admin client successful.')
-        } else {
-          console.log('User profile confirmed by user context client.')
-        }
-      } catch(e){
-        console.error('Error during profile check/creation post-signup:', e)
-      }
+    return {
+      success: true,
+      message: 'Account created successfully! You can now sign in with your credentials.'
     }
 
-    return { success: true, message: 'Account created successfully. Please check your email to verify your account.' }
   } catch (error: any) {
-    console.error('Overall signUpAction error:', error)
+    console.error('Signup error:', error)
     return { 
       success: false, 
-      message: error?.message || 'Failed to create account. Please try again.' 
+      message: 'Failed to create account. Please try again or contact support at admin@pxvpay.com'
     }
+  }
+}
+
+// Helper function to ensure user profile exists (can be called from other parts of the app)
+export async function ensureUserProfile(userId: string, email: string) {
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  try {
+    // Check if profile exists
+    const { data: existingProfile, error: checkError } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('id', userId)
+      .single()
+
+    if (checkError && checkError.code === 'PGRST116') {
+      // Profile doesn't exist, create it
+      console.log('Creating missing user profile for:', email)
+      
+      const { error: insertError } = await supabaseAdmin
+        .from('users')
+        .insert({
+          id: userId,
+          email: email,
+          role: 'registered_user',
+          active: true,
+          created_at: new Date().toISOString()
+        })
+
+      if (insertError) {
+        console.error('Failed to create missing profile:', insertError)
+        return false
+      }
+      
+      console.log('Missing profile created successfully')
+      return true
+    } else if (checkError) {
+      console.error('Error checking user profile:', checkError)
+      return false
+    } else {
+      console.log('User profile already exists')
+      return true
+    }
+  } catch (error) {
+    console.error('Error ensuring user profile:', error)
+    return false
   }
 } 

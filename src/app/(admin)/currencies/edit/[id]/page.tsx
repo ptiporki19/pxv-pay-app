@@ -32,14 +32,14 @@ export default function EditCurrencyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-lg">Loading...</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -53,7 +53,7 @@ export default function EditCurrencyPage() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <CurrencyFormSimple initialData={currency || undefined} />
         </div>
       </div>

@@ -463,7 +463,7 @@ export function PaymentMethodFormSimple({ initialData }: PaymentMethodFormProps)
                       className="cursor-pointer"
                     />
                     {previewUrl && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded border">
+                      <div className="flex items-center gap-3 p-3 bg-background rounded border">
                         <img
                           src={previewUrl}
                           alt="Icon preview"
@@ -501,7 +501,7 @@ export function PaymentMethodFormSimple({ initialData }: PaymentMethodFormProps)
               
               <div className="space-y-3">
                 {fields.map((field, index) => (
-                  <div key={field.id} className="grid grid-cols-2 gap-3 p-3 bg-gray-50 rounded border">
+                  <div key={field.id} className="grid grid-cols-2 gap-3 p-3 bg-background rounded border">
                     <FormField
                       control={form.control}
                       name={`custom_fields.${index}.label`}
@@ -552,7 +552,7 @@ export function PaymentMethodFormSimple({ initialData }: PaymentMethodFormProps)
                 ))}
                 
                 {fields.length === 0 && (
-                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded bg-gray-50">
+                  <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded bg-background">
                     <p className="text-gray-600 mb-3">No payment details added</p>
                     <Button
                       type="button"

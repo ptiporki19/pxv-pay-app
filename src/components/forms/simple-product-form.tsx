@@ -186,7 +186,7 @@ export function SimpleProductForm({ initialData, onSuccess }: SimpleProductFormP
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header - Same style as payment methods page */}
         <div className="mb-8 flex items-center justify-between">
@@ -202,7 +202,7 @@ export function SimpleProductForm({ initialData, onSuccess }: SimpleProductFormP
         </div>
 
         {/* Form Container - White box like payment methods page */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <div className="max-w-7xl mx-auto p-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Form Section */}

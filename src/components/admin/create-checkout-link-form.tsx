@@ -236,7 +236,7 @@ export function CreateCheckoutLinkForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -250,7 +250,7 @@ export function CreateCheckoutLinkForm() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <div className="max-w-2xl mx-auto p-8">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">

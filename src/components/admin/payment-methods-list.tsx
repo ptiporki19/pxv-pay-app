@@ -38,9 +38,9 @@ export function PaymentMethodsList() {
         
         if (searchQuery.trim()) {
           filteredData = filteredData.filter(method => 
-            method.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            method.type.toLowerCase().includes(searchQuery.toLowerCase())
-          )
+              method.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              method.type.toLowerCase().includes(searchQuery.toLowerCase())
+            )
         }
 
         if (statusFilter !== "all") {
@@ -180,7 +180,7 @@ export function PaymentMethodsList() {
           </div>
         ) : paymentMethods.length > 0 ? (
           paymentMethods.map((method) => (
-            <div key={method.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div key={method.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-background dark:hover:bg-gray-800">
               <div className="w-1/3 flex items-center space-x-3">
                 {method.icon && (
                   <img src={method.icon} alt={method.name} className="w-6 h-6 object-contain" />

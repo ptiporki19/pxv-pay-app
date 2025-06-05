@@ -15,6 +15,7 @@ import { MobileSidebarToggle } from '@/components/MobileSidebarToggle'
 import { ActiveNavLink } from '@/components/ActiveNavLink'
 import { LogoutButton } from '@/components/LogoutButton'
 import { NotificationsPopover } from '@/components/NotificationsPopover'
+import { ThemeToggleButton } from '@/components/theme-toggle-button'
 import { RouteGuard } from '@/components/RouteGuard'
 
 export const metadata: Metadata = {
@@ -177,6 +178,7 @@ export default async function MerchantDashboardLayout({
             {/* Right side header items */}
               <div className="flex flex-1 justify-end items-center gap-3">
                 <NotificationsPopover />
+                <ThemeToggleButton />
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

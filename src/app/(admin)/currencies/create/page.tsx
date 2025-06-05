@@ -7,7 +7,7 @@ import Link from "next/link"
 
 export default function CreateCurrencyPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -21,7 +21,7 @@ export default function CreateCurrencyPage() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <CurrencyFormSimple />
         </div>
       </div>

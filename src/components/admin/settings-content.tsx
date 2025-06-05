@@ -127,7 +127,7 @@ export function SettingsContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -141,7 +141,7 @@ export function SettingsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -155,7 +155,7 @@ export function SettingsContent() {
         </div>
 
         {/* Content Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <div className="p-8 space-y-8">
             {/* Appearance Settings */}
             <div className="space-y-6">
@@ -203,7 +203,7 @@ export function SettingsContent() {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between p-4 bg-background rounded-lg border border-gray-200">
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Push Notifications</Label>
                     <p className="text-xs text-gray-500 mt-1">Receive notifications in your browser</p>
@@ -215,7 +215,7 @@ export function SettingsContent() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between p-4 bg-background rounded-lg border border-gray-200">
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Email Notifications</Label>
                     <p className="text-xs text-gray-500 mt-1">Receive notifications via email</p>
@@ -227,7 +227,7 @@ export function SettingsContent() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between p-4 bg-background rounded-lg border border-gray-200">
                   <div>
                     <Label className="text-sm font-medium text-gray-700">System Alerts</Label>
                     <p className="text-xs text-gray-500 mt-1">Critical system notifications</p>
@@ -249,7 +249,7 @@ export function SettingsContent() {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center justify-between p-4 bg-background rounded-lg border border-gray-200">
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Auto Backup</Label>
                     <p className="text-xs text-gray-500 mt-1">Automatically backup your data</p>
@@ -282,21 +282,21 @@ export function SettingsContent() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">App Version</Label>
-                  <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                  <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                     v1.0.0
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Database</Label>
-                  <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                  <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                     Supabase
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Environment</Label>
-                  <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                  <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                     Development
                   </div>
                 </div>

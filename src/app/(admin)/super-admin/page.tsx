@@ -13,7 +13,10 @@ import {
   ExternalLink,
   Info,
   Eye,
-  Copy
+  Copy,
+  PenTool,
+  CreditCard,
+  BarChart3
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -292,7 +295,7 @@ export default async function SuperAdminDashboard() {
               <p className="text-sm text-muted-foreground mb-4">
                 View, activate, deactivate, and manage user roles across the platform. Monitor user activity and maintain security.
               </p>
-              <Button asChild className="w-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200">
+              <Button asChild className="w-full btn-primary">
                 <Link href="/users" className="flex items-center justify-center gap-2">
                   Access User Management
                   <ArrowRight className="h-4 w-4" />
@@ -318,10 +321,10 @@ export default async function SuperAdminDashboard() {
               <p className="text-sm text-muted-foreground mb-4">
                 Create, edit, and publish blog posts. Manage all website content that's visible to the public and merchants.
               </p>
-              <Button asChild className="w-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200">
-                <Link href="/blog-management" className="flex items-center justify-center gap-2">
-                  Manage Content
-                  <ArrowRight className="h-4 w-4" />
+              <Button asChild className="w-full btn-primary">
+                <Link href="/blog-management" className="flex items-center gap-2">
+                  <PenTool className="h-4 w-4" />
+                  Blog Management
                 </Link>
               </Button>
             </CardContent>
@@ -344,7 +347,7 @@ export default async function SuperAdminDashboard() {
               <p className="text-sm text-muted-foreground mb-4">
                 Track all administrative actions, user activities, and system changes for security and compliance monitoring.
               </p>
-              <Button asChild className="w-full bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black dark:hover:bg-gray-200">
+              <Button asChild className="w-full btn-primary">
                 <Link href="/audit-logs" className="flex items-center justify-center gap-2">
                   View Audit Logs
                   <ArrowRight className="h-4 w-4" />

@@ -125,7 +125,7 @@ export function CountriesList() {
           </div>
         ) : countries.length > 0 ? (
           countries.map((country) => (
-            <div key={country.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+            <div key={country.id} className="flex items-center justify-between px-4 py-3 hover:bg-background">
               <div className="w-1/4">{country.name}</div>
               <div className="w-1/4">{country.code}</div>
               <div className="w-1/4">

@@ -52,7 +52,7 @@ export default function EditProductPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-6">
           <div className="mb-8 flex items-center justify-between">
             <Link href="/content">
@@ -99,7 +99,7 @@ export default function EditProductPage() {
 
   if (notFound) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
         <div className="max-w-4xl mx-auto p-6">
           <div className="mb-8">
           <Link href="/content">

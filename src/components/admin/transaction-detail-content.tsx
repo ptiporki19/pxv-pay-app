@@ -45,7 +45,22 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
     try {
       setIsLoading(true)
       
-      // Fetch transaction details with user data
+      // Get current user and check permissions
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const isSuperAdmin = profile?.role === 'super_admin' || 
+        user.email === 'admin@pxvpay.com' || 
+        user.email === 'dev-admin@pxvpay.com' || 
+        user.email === 'superadmin@pxvpay.com'
+
+      // Fetch transaction details
       const { data: transactionData, error } = await supabase
         .from('payments')
         .select(`
@@ -57,6 +72,13 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
 
       if (error) {
         console.warn('Error loading transaction:', error.message)
+        return
+      }
+
+      // Check if user has access to this transaction
+      if (!isSuperAdmin && transactionData.merchant_id !== user.id) {
+        console.error('User does not have access to this transaction')
+        setTransaction(null)
         return
       }
 
@@ -116,10 +138,17 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
 
   const formatAmount = (amount: string, currency: string) => {
     const numAmount = parseFloat(amount)
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency
+    
+    if (isNaN(numAmount)) {
+      return `0 ${currency || 'USD'}`
+    }
+    
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(numAmount)
+    
+    return `${formattedAmount} ${currency || 'USD'}`
   }
 
   const getStatusIcon = (status: string) => {
@@ -148,13 +177,13 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
       case 'refunded':
         return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800"
       default:
-        return "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
+        return "bg-background text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
     }
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -169,7 +198,7 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
 
   if (!transaction) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -186,7 +215,7 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -200,7 +229,7 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
         </div>
 
         {/* Content Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <div className="p-8 space-y-8">
             {/* Transaction Status Header */}
             <div className="flex items-center justify-between">
@@ -240,7 +269,7 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Transaction ID</Label>
                     <div className="flex items-center gap-2">
-                      <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm font-mono flex-1">
+                      <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm font-mono flex-1">
                         {transaction.id}
                       </div>
                       <Button
@@ -256,35 +285,35 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Reference</Label>
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {transaction.reference || 'N/A'}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Amount</Label>
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm font-semibold">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm font-semibold">
                       {formatAmount(transaction.amount, transaction.currency)}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Payment Method</Label>
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {transaction.payment_method}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Created At</Label>
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {formatDate(transaction.created_at)}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Last Updated</Label>
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {formatDate(transaction.updated_at)}
                     </div>
                   </div>
@@ -293,7 +322,7 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
                 {transaction.description && (
                   <div className="space-y-2 mt-6">
                     <Label className="text-sm font-medium text-gray-700">Description</Label>
-                    <div className="min-h-[44px] px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    <div className="min-h-[44px] px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {transaction.description}
                     </div>
                   </div>
@@ -306,7 +335,7 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Email Address</Label>
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {transaction.customer_email || 'N/A'}
                     </div>
                   </div>
@@ -320,14 +349,14 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
                       <Label className="text-sm font-medium text-gray-700">Gross Amount</Label>
-                      <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm font-semibold">
+                      <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm font-semibold">
                         {formatAmount(transaction.amount, transaction.currency)}
                       </div>
                     </div>
                     {transaction.fee_amount && (
                       <div className="space-y-2">
                         <Label className="text-sm font-medium text-gray-700">Fee Amount</Label>
-                        <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                        <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                           {formatAmount(transaction.fee_amount, transaction.currency)}
                         </div>
                       </div>

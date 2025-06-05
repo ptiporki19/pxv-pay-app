@@ -23,7 +23,7 @@ export interface Country {
   id?: string
   name: string
   code: string
-  currency_id?: string
+  currency_code?: string
   status: 'active' | 'pending' | 'inactive'
   user_id?: string
   created_at?: string
@@ -130,13 +130,13 @@ export const countriesApi = {
         return []
       }
       
-      // Get unique currency IDs from countries
-      const currencyIds = [...new Set(data
-        .map(country => country.currency_id)
+      // Get unique currency codes from countries
+      const currencyCodes = [...new Set(data
+        .map(country => country.currency_code)
         .filter(Boolean))]
       
-      // If no currency IDs, return countries as is
-      if (currencyIds.length === 0) {
+      // If no currency codes, return countries as is
+      if (currencyCodes.length === 0) {
         return data
       }
       
@@ -145,7 +145,7 @@ export const countriesApi = {
         .from('currencies')
         .select('id, name, code, symbol')
         .or(`user_id.eq.${user.id},user_id.is.null`)
-        .in('id', currencyIds)
+        .in('code', currencyCodes)
       
       if (currenciesError) {
         console.error('Error fetching currencies:', currenciesError)
@@ -153,13 +153,13 @@ export const countriesApi = {
         return data
       }
       
-      // Create a map of currencies for quick lookup
-      const currencyMap = new Map(currencies?.map(c => [c.id, c]) || [])
+      // Create a map of currencies for quick lookup by code
+      const currencyMap = new Map(currencies?.map(c => [c.code, c]) || [])
       
       // Attach currency data to countries
       const countriesWithCurrency = data.map(country => ({
         ...country,
-        currency: country.currency_id ? currencyMap.get(country.currency_id) : null
+        currency: country.currency_code ? currencyMap.get(country.currency_code) : null
       }))
       
       return countriesWithCurrency
@@ -1484,5 +1484,154 @@ export const contentTemplatesApi = {
     }
     
     return data || []
+  }
+}
+
+// Checkout Links API
+export const checkoutLinksApi = {
+  getAll: async (): Promise<any[]> => {
+    const user = await getCurrentUser()
+    if (!user) {
+      console.log('User not authenticated, returning empty checkout links list')
+      return []
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('checkout_links')
+        .select(`
+          *,
+          payments:payments(count)
+        `)
+        .eq('merchant_id', user.id)
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        console.error('Error fetching checkout links:', error)
+        throw new Error(error.message)
+      }
+      
+      return data || []
+    } catch (error) {
+      console.error('Error in getAll checkout links:', error)
+      throw error
+    }
+  },
+  
+  getById: async (id: string): Promise<any> => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+    
+    const { data, error } = await supabase
+      .from('checkout_links')
+      .select('*')
+      .eq('id', id)
+      .eq('merchant_id', user.id)
+      .single()
+    
+    if (error) {
+      console.error('Error fetching checkout link:', error)
+      throw new Error(error.message)
+    }
+    
+    return data
+  },
+  
+  create: async (checkoutLink: any): Promise<any> => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    // Remove merchant_id from checkoutLink object since it will be set automatically
+    const { merchant_id, ...checkoutLinkData } = checkoutLink
+    
+    const { data, error } = await supabase
+      .from('checkout_links')
+      .insert([checkoutLinkData])
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error creating checkout link:', error)
+      
+      // Provide more specific error messages
+      if (error.code === '23505') {
+        if (error.message.includes('checkout_links_slug_unique')) {
+          throw new Error(`Slug '${checkoutLinkData.slug}' already exists`)
+        }
+        throw new Error('A checkout link with this slug already exists')
+      }
+      
+      if (error.code === '42501') {
+        throw new Error('You do not have permission to create checkout links')
+      }
+      
+      throw new Error(error.message || 'Failed to create checkout link')
+    }
+    
+    return data
+  },
+  
+  update: async (id: string, checkoutLink: any): Promise<any> => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+    
+    // Remove merchant_id from the update object to prevent conflicts
+    const { merchant_id, ...updateData } = checkoutLink
+    
+    const { data, error } = await supabase
+      .from('checkout_links')
+      .update(updateData)
+      .eq('id', id)
+      .eq('merchant_id', user.id)
+      .select()
+      .single()
+    
+    if (error) {
+      console.error('Error updating checkout link:', error)
+      
+      // Provide more specific error messages
+      if (error.code === '23505') {
+        if (error.message.includes('checkout_links_slug_unique')) {
+          throw new Error(`Slug '${updateData.slug}' already exists`)
+        }
+        throw new Error('A checkout link with this slug already exists')
+      }
+      
+      if (error.code === '42501') {
+        throw new Error('You do not have permission to update this checkout link')
+      }
+      
+      throw new Error(error.message || 'Failed to update checkout link')
+    }
+    
+    if (!data) {
+      throw new Error('Checkout link not found or you do not have permission to update it')
+    }
+    
+    return data
+  },
+  
+  delete: async (id: string): Promise<void> => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+    
+    const { error } = await supabase
+      .from('checkout_links')
+      .delete()
+      .eq('id', id)
+      .eq('merchant_id', user.id)
+    
+    if (error) {
+      console.error('Error deleting checkout link:', error)
+      throw new Error(error.message)
+    }
   }
 } 

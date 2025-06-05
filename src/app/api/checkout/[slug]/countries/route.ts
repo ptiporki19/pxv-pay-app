@@ -31,13 +31,7 @@ export async function GET(
         id,
         name,
         code,
-        currency_id,
-        currency:currencies(
-          id,
-          name,
-          code,
-          symbol
-        )
+        currency_code
       `)
       .in('code', checkoutLink.active_country_codes)
       .eq('status', 'active')
@@ -51,8 +45,35 @@ export async function GET(
       )
     }
 
+    // Get all unique currency codes from the countries
+    const currencyCodes = [...new Set(countries?.map(c => c.currency_code).filter(Boolean))]
+    
+    // Fetch currency details for all currency codes
+    const { data: currencies, error: currencyError } = await supabase
+      .from('currencies')
+      .select('id, name, code, symbol')
+      .in('code', currencyCodes)
+      .eq('status', 'active')
+
+    if (currencyError) {
+      console.error('Currency fetch error:', currencyError)
+      // Continue without currency data rather than failing completely
+    }
+
+    // Create a map of currencies by code for quick lookup
+    const currencyMap = new Map(currencies?.map(c => [c.code, c]) || [])
+
+    // Attach currency data to countries
+    const countriesWithCurrency = countries?.map(country => ({
+      id: country.id,
+      name: country.name,
+      code: country.code,
+      currency_code: country.currency_code,
+      currency: country.currency_code ? currencyMap.get(country.currency_code) || null : null
+    })) || []
+
     return NextResponse.json({
-      countries: countries || []
+      countries: countriesWithCurrency
     })
 
   } catch (error) {

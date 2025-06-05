@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 export interface TestPayment {
   id: string
   amount: string
+  currency?: string
   payment_method: string
   status: 'pending' | 'completed' | 'failed' | 'refunded'
   created_at: string

@@ -258,7 +258,7 @@ export function CheckoutForm({ slug }: CheckoutFormProps) {
                   {paymentMethods.map((method) => (
                     <div
                       key={method.id}
-                      className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="border rounded-lg p-4 cursor-pointer hover:bg-background transition-colors"
                       onClick={() => handlePaymentMethodSelect(method.id)}
                     >
                       <div className="flex items-center justify-between">

@@ -16,11 +16,13 @@ interface Transaction {
   created_at: string
   amount: string
   currency: string
-  status: 'pending' | 'completed' | 'failed' | 'refunded'
+  status: 'pending' | 'pending_verification' | 'completed' | 'failed' | 'refunded'
   payment_method: string
+  customer_name?: string
   customer_email?: string
   description?: string
   reference?: string
+  country?: string
 }
 
 export function TransactionsContent() {
@@ -29,6 +31,7 @@ export function TransactionsContent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
+  const [userRole, setUserRole] = useState<string>('')
   
   const supabase = createClient()
 
@@ -44,17 +47,32 @@ export function TransactionsContent() {
     try {
       setIsLoading(true)
       
-      // Get current user
+      // Get current user and role
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Fetch transactions with user data
-      const { data: transactionsData, error } = await supabase
-        .from('payments')
-        .select(`
-          *,
-          user:users(email)
-        `)
+      const { data: profile } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      const isSuperAdmin = profile?.role === 'super_admin' || 
+        user.email === 'admin@pxvpay.com' || 
+        user.email === 'dev-admin@pxvpay.com' || 
+        user.email === 'superadmin@pxvpay.com'
+
+      setUserRole(isSuperAdmin ? 'super_admin' : 'merchant')
+
+      // Build query based on user role
+      let query = supabase.from('payments').select('*')
+      
+      // If not super admin, filter by merchant_id to show only merchant's own transactions
+      if (!isSuperAdmin) {
+        query = query.eq('merchant_id', user.id)
+      }
+      
+      const { data: transactionsData, error } = await query
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -62,17 +80,21 @@ export function TransactionsContent() {
         return
       }
 
+      console.log(`Loaded ${transactionsData?.length || 0} transactions for ${isSuperAdmin ? 'super admin' : 'merchant'}`)
+
       // Format transaction data
       const formattedTransactions: Transaction[] = transactionsData?.map(payment => ({
         id: payment.id,
         created_at: payment.created_at,
-        amount: payment.amount,
+        amount: payment.amount?.toString() || '0',
         currency: payment.currency || 'USD',
         status: payment.status,
         payment_method: payment.payment_method || 'N/A',
-        customer_email: payment.user?.email,
+        customer_name: payment.customer_name,
+        customer_email: payment.customer_email,
         description: payment.description,
-        reference: payment.reference
+        reference: payment.reference,
+        country: payment.country
       })) || []
 
       setTransactions(formattedTransactions)
@@ -90,6 +112,7 @@ export function TransactionsContent() {
     if (searchTerm) {
       filtered = filtered.filter(transaction =>
         transaction.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        transaction.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         transaction.reference?.toLowerCase().includes(searchTerm.toLowerCase())
       )
@@ -104,21 +127,29 @@ export function TransactionsContent() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
-      month: 'short',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      second: '2-digit'
     })
   }
 
   const formatAmount = (amount: string, currency: string) => {
     const numAmount = parseFloat(amount)
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency
+    
+    if (isNaN(numAmount)) {
+      return `0 ${currency || 'USD'}`
+    }
+    
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(numAmount)
+    
+    return `${formattedAmount} ${currency || 'USD'}`
   }
 
   const getStatusBadgeClass = (status: string) => {
@@ -126,33 +157,19 @@ export function TransactionsContent() {
       case 'completed':
         return "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
       case 'pending':
+      case 'pending_verification':
         return "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800"
       case 'failed':
         return "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
       case 'refunded':
         return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800"
       default:
-        return "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
+        return "bg-background text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading transactions...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -162,11 +179,12 @@ export function TransactionsContent() {
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {userRole === 'super_admin' ? 'Platform Transactions' : 'My Transactions'}
+          </h1>
         </div>
 
-        {/* Content Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <div className="p-6">
             {/* Filters and Search */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -188,6 +206,7 @@ export function TransactionsContent() {
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="pending_verification">Pending Verification</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
                     <SelectItem value="failed">Failed</SelectItem>
                     <SelectItem value="refunded">Refunded</SelectItem>
@@ -202,7 +221,7 @@ export function TransactionsContent() {
 
             {/* Transaction Summary */}
             <div className="mb-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="p-4 bg-background rounded-lg border border-gray-200">
                 <div className="text-sm text-gray-600">Total Transactions</div>
                 <div className="text-2xl font-bold text-gray-900">{transactions.length}</div>
               </div>
@@ -213,9 +232,9 @@ export function TransactionsContent() {
                 </div>
               </div>
               <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div className="text-sm text-yellow-600">Pending</div>
+                <div className="text-sm text-yellow-600">Pending Verification</div>
                 <div className="text-2xl font-bold text-yellow-700">
-                  {transactions.filter(t => t.status === 'pending').length}
+                  {transactions.filter(t => t.status === 'pending_verification').length}
                 </div>
               </div>
               <div className="p-4 bg-red-50 rounded-lg border border-red-200">
@@ -227,38 +246,30 @@ export function TransactionsContent() {
             </div>
 
             {/* Transactions Table */}
-            <div className="rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-hidden border border-gray-200 rounded-lg">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-background">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Transaction ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date & Time
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Customer
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Method
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredTransactions.length > 0 ? (
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center">
+                          <div className="text-gray-500">Loading transactions...</div>
+                        </td>
+                      </tr>
+                    ) : filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction) => (
-                        <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={transaction.id} className="border-b hover:bg-background transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
                               {transaction.id.slice(0, 8)}...
@@ -276,7 +287,7 @@ export function TransactionsContent() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">
-                              {transaction.customer_email?.split('@')[0] || 'N/A'}
+                              {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
                             </div>
                             <div className="text-xs text-gray-500">
                               {transaction.customer_email}
@@ -294,7 +305,7 @@ export function TransactionsContent() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status))}>
-                              {transaction.status}
+                              {transaction.status.replace('_', ' ')}
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -329,7 +340,7 @@ export function TransactionsContent() {
                             <div className="text-sm">
                               {searchTerm || statusFilter !== 'all' 
                                 ? 'Try adjusting your search or filter criteria.'
-                                : 'Transactions will appear here once payments are processed.'
+                                : `${userRole === 'super_admin' ? 'Transactions' : 'Your transactions'} will appear here once payments are processed.`
                               }
                             </div>
                           </div>

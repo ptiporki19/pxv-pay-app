@@ -257,12 +257,12 @@ export function NotificationsPopover() {
                   className={cn(
                     "flex gap-3 p-3 cursor-pointer border-b border-gray-100 transition-colors",
                     notification.is_read 
-                      ? "hover:bg-gray-50" 
+                      ? "hover:bg-background" 
                       : "bg-black/[0.02]"
                   )}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-50">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-background">
                     {getNotificationIcon(notification.type)}
                   </div>
                   <div className="flex-1">

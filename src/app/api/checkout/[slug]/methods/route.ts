@@ -68,7 +68,9 @@ export async function GET(
         icon,
         url,
         display_order,
-        countries
+        countries,
+        country_specific_details,
+        custom_fields
       `)
       .eq('user_id', checkoutLink.merchant_id)
       .eq('status', 'active')
@@ -85,27 +87,38 @@ export async function GET(
 
     // Format the payment methods with country-specific details
     const formattedMethods = (paymentMethods || []).map((method: any) => {
+      // Get country-specific details for this country
+      const countrySpecific = method.country_specific_details?.[countryCode]
+      
+      // Determine effective values (country-specific overrides general)
+      const effectiveInstructions = countrySpecific?.instructions || method.instructions_for_checkout
+      const effectiveCustomFields = countrySpecific?.custom_fields || method.custom_fields
+      const effectiveUrl = countrySpecific?.url || method.url
+      const effectiveAdditionalInfo = countrySpecific?.additional_info
+      
       // Normalize URL - ensure it has proper protocol
-      let effectiveUrl = method.url
-      if (effectiveUrl && effectiveUrl.trim().length > 0) {
-        effectiveUrl = effectiveUrl.trim()
-        if (!effectiveUrl.startsWith('http://') && !effectiveUrl.startsWith('https://')) {
-          effectiveUrl = 'https://' + effectiveUrl
+      let normalizedUrl = effectiveUrl
+      if (normalizedUrl && normalizedUrl.trim().length > 0) {
+        normalizedUrl = normalizedUrl.trim()
+        if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+          normalizedUrl = 'https://' + normalizedUrl
         }
       }
       
       // If there's a URL, treat as payment-link
-      const effectiveType = (effectiveUrl && effectiveUrl.trim().length > 0) ? 'payment-link' : method.type
+      const effectiveType = (normalizedUrl && normalizedUrl.trim().length > 0) ? 'payment-link' : method.type
       
       return {
         id: method.id,
         name: method.name,
         type: effectiveType,
         description: method.description,
-        instructions_for_checkout: method.instructions_for_checkout,
-        url: effectiveUrl,
+        instructions_for_checkout: effectiveInstructions,
+        url: normalizedUrl,
         icon_url: method.icon,
-        display_order: method.display_order || 0
+        display_order: method.display_order || 0,
+        custom_fields: effectiveCustomFields,
+        additional_info: effectiveAdditionalInfo
       }
     })
 

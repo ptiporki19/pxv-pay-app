@@ -260,7 +260,7 @@ export function UsersList() {
           </div>
         ) : users.length > 0 ? (
           users.map((user) => (
-            <div key={user.id} className="flex items-center justify-between px-4 py-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div key={user.id} className="flex items-center justify-between px-4 py-4 border-b hover:bg-background dark:hover:bg-gray-800">
               <div className="w-1/3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">

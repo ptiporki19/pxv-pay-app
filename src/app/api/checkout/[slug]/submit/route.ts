@@ -7,11 +7,11 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { slug: string } }
 ) {
-  console.log('🚀 Payment submission started for slug:', params.slug);
+  const { slug } = await params
+  console.log('🚀 Payment submission started for slug:', slug);
   
   try {
     const supabase = await createClient()
-    const { slug } = params
 
     console.log('📝 Parsing form data...');
     let formData;
@@ -85,11 +85,11 @@ export async function POST(
     }
     console.log('✅ Checkout link validated:', checkoutLink.id);
 
-    console.log('🌍 Validating country...');
-    // Get country and currency info
+    console.log('�� Validating country and currency...');
+    // Get country data with currency_code
     const { data: countryData, error: countryError } = await supabase
       .from('countries')
-      .select('*, currency:currencies(*)')
+      .select('id, name, code, currency_code')
       .eq('code', country)
       .single()
 
@@ -100,7 +100,24 @@ export async function POST(
         { status: 400 }
       )
     }
-    console.log('✅ Country validated:', countryData.name, 'Currency:', countryData.currency?.code);
+
+    // Fetch currency details using the currency_code
+    let currencyData = null;
+    if (countryData.currency_code) {
+      const { data: currency, error: currencyError } = await supabase
+        .from('currencies')
+        .select('id, name, code, symbol')
+        .eq('code', countryData.currency_code)
+        .eq('status', 'active')
+        .single()
+
+      if (!currencyError && currency) {
+        currencyData = currency;
+      }
+    }
+
+    const finalCurrency = currencyData?.code || 'USD';
+    console.log('✅ Country validated:', countryData.name, 'Currency:', finalCurrency);
 
     console.log('💳 Validating payment method...');
     // Validate payment method
@@ -175,7 +192,7 @@ export async function POST(
       .getPublicUrl(filePath)
 
     console.log('💾 Creating payment record...');
-    // Create payment record
+    // Create payment record with better error handling
     const paymentId = randomUUID()
     const paymentData = {
         id: paymentId,
@@ -184,9 +201,9 @@ export async function POST(
         customer_name: customerName,
         customer_email: customerEmail,
         amount: amount,
-        currency: countryData.currency.code,
+        currency: finalCurrency,
         country: country,
-      payment_method: paymentMethod.name,
+        payment_method: paymentMethod.name,
         payment_proof_url: urlData.publicUrl,
         status: 'pending_verification',
         created_at: new Date().toISOString()
@@ -206,6 +223,14 @@ export async function POST(
         .from('payment-proofs')
         .remove([filePath])
 
+      // Provide more specific error messages
+      if (paymentError.code === '23503') {
+        return NextResponse.json(
+          { error: 'Invalid merchant or checkout link reference' },
+          { status: 400 }
+        )
+      }
+
       return NextResponse.json(
         { error: 'Failed to create payment record' },
         { status: 500 }
@@ -224,13 +249,13 @@ export async function POST(
         .insert({
           user_id: checkoutLink.merchant_id,
           title: 'New Payment Received',
-          message: `Payment of ${amount} ${countryData.currency.code} from ${customerName} requires verification`,
+          message: `Payment of ${amount} ${finalCurrency} from ${customerName} requires verification`,
           type: 'success',
           data: {
             payment_id: paymentId,
             customer_name: customerName,
             amount: amount,
-            currency: countryData.currency.code,
+            currency: finalCurrency,
             checkout_link_id: checkoutLinkId
           }
         });
@@ -245,14 +270,14 @@ export async function POST(
         const superAdminNotifications = superAdmins.map(admin => ({
           user_id: admin.id,
           title: 'New Payment Submitted',
-          message: `Payment verification needed: ${amount} ${countryData.currency.code} from ${customerName}`,
+          message: `Payment verification needed: ${amount} ${finalCurrency} from ${customerName}`,
           type: 'info',
           data: {
             payment_id: paymentId,
             merchant_id: checkoutLink.merchant_id,
             customer_name: customerName,
             amount: amount,
-            currency: countryData.currency.code
+            currency: finalCurrency
           }
         }));
 

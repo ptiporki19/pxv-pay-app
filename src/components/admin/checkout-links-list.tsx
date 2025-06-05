@@ -61,9 +61,9 @@ export function CheckoutLinksList() {
         
         if (searchQuery.trim()) {
           filteredData = filteredData.filter(link => 
-            link.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            link.slug.toLowerCase().includes(searchQuery.toLowerCase())
-          )
+              link.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              link.slug.toLowerCase().includes(searchQuery.toLowerCase())
+            )
         }
 
         if (statusFilter !== "all") {
@@ -145,12 +145,18 @@ export function CheckoutLinksList() {
     }
   }
 
-  // Format currency
+  // Format currency using currency codes instead of symbols
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD',
+    if (isNaN(amount)) {
+      return `0 ${currency || 'USD'}`
+    }
+    
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(amount)
+    
+    return `${formattedAmount} ${currency || 'USD'}`
   }
 
   // Format amount display based on type

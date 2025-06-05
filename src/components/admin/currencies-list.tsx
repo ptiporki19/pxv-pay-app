@@ -125,7 +125,7 @@ export function CurrenciesList() {
           </div>
         ) : currencies.length > 0 ? (
           currencies.map((currency) => (
-            <div key={currency.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
+            <div key={currency.id} className="flex items-center justify-between px-4 py-3 hover:bg-background">
               <div className="w-1/4">{currency.name}</div>
               <div className="w-1/4">{currency.code}</div>
               <div className="w-1/4">{currency.symbol}</div>

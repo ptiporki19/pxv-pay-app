@@ -197,7 +197,7 @@ export function RealTimeTestPanel() {
                   {userPayments.map(payment => (
                     <div key={payment.id} className="border rounded-md p-3">
                       <div className="flex justify-between">
-                        <span className="font-medium">${payment.amount}</span>
+                        <span className="font-medium">{payment.amount} {payment.currency || 'USD'}</span>
                         <span className={`text-sm ${
                           payment.status === 'completed' ? 'text-green-600' : 
                           payment.status === 'pending' ? 'text-yellow-600' : 
@@ -255,7 +255,7 @@ export function RealTimeTestPanel() {
                   userPayments.filter(p => p.status === 'pending').map(payment => (
                     <div key={payment.id} className="border rounded-md p-3">
                       <div className="flex justify-between">
-                        <span className="font-medium">${payment.amount}</span>
+                        <span className="font-medium">{payment.amount} {payment.currency || 'USD'}</span>
                         <span className="text-sm text-yellow-600">pending</span>
                       </div>
                       <div className="text-sm text-muted-foreground">

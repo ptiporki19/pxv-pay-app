@@ -208,10 +208,9 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
           // Open in new tab
           window.open(url, '_blank', 'noopener,noreferrer')
           
-          // Show completion message after a short delay
+          // Instead of going to confirmation, go to proof upload
           setTimeout(() => {
-            setCurrentStep('confirmation')
-            setPaymentId('external-payment-' + Date.now())
+            setCurrentStep('proof-upload')
           }, 1000)
         } catch (error) {
           console.error('Error opening payment URL:', error)
@@ -516,7 +515,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                 <div className="pt-4 mt-auto">
                   <Button 
                     type="submit" 
-                    className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl h-12" 
+                    className="w-full btn-primary rounded-xl h-12" 
                     disabled={submitting}
                   >
                     {submitting ? (
@@ -580,7 +579,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                   </div>
                 )}
                 <div className="pt-4">
-                  <Button type="submit" className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl h-12" disabled={submitting}>
+                  <Button type="submit" className="w-full btn-primary rounded-xl h-12" disabled={submitting}>
                     {submitting ? (<><Spinner size="sm" className="mr-2" />Loading...</>) : 'CONTINUE'}
                   </Button>
                 </div>
@@ -592,7 +591,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                 {paymentMethods.length === 0 ? (
                   <div className="text-center py-8"><p className="text-gray-600">No payment methods available for {selectedCountryData?.name}</p></div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 min-h-[300px]">
                     {paymentMethods.sort((a,b) => a.display_order - b.display_order).map((method) => (
                       <div key={method.id} className={cn("rounded-2xl p-4 cursor-pointer transition-all duration-200", selectedPaymentMethod?.id === method.id ? "bg-gray-600 text-white" : "bg-gray-100 hover:bg-gray-200")} onClick={() => handlePaymentMethodSelect(method)}>
                           <div className="flex items-center gap-3">
@@ -600,7 +599,6 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                             {method.icon_url && (<img src={method.icon_url} alt={method.name} className="w-6 h-6 object-contain"/>)}
                             <div>
                               <h4 className={cn("font-medium text-sm", selectedPaymentMethod?.id === method.id ? "text-white" : "text-gray-900")}>{method.name}</h4>
-                              {method.description && (<p className={cn("text-xs mt-1", selectedPaymentMethod?.id === method.id ? "text-gray-200" : "text-gray-600")}>{method.description}</p>)}
                             </div>
                         </div>
                       </div>
@@ -608,7 +606,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                   </div>
                 )}
                 <div className="pt-4">
-                  <Button onClick={handleProceedToDetails} disabled={!selectedPaymentMethod} className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl h-12">
+                  <Button onClick={handleProceedToDetails} disabled={!selectedPaymentMethod} className="w-full btn-primary rounded-xl h-12">
                     {selectedPaymentMethod?.type === 'payment-link' ? (
                       <>Pay with {selectedPaymentMethod.name}<ArrowRight className="ml-2 h-4 w-4" /></>
                     ) : (
@@ -624,8 +622,20 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                   <p className="text-xl font-semibold text-gray-800 mb-1">{checkoutLink.amount_type === 'fixed' ? checkoutLink.amount : amount} {currency?.code}</p>
                   <p className="text-sm text-gray-500">{selectedPaymentMethod.name}</p>
                 </div>
+                
                 <div className="bg-gray-100 rounded-2xl p-5 space-y-4">
                   <h3 className="text-sm font-medium text-gray-700 text-center mb-3">Send payment to:</h3>
+                  
+                  {/* Display instructions if available */}
+                  {selectedPaymentMethod.instructions_for_checkout && (
+                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <h4 className="text-sm font-medium text-yellow-800 mb-2">Payment Instructions:</h4>
+                      <div className="text-sm text-yellow-700 whitespace-pre-line">
+                        {selectedPaymentMethod.instructions_for_checkout}
+                      </div>
+                    </div>
+                  )}
+                  
                   {selectedPaymentMethod.custom_fields && selectedPaymentMethod.custom_fields.length > 0 ? (
                     <div className="space-y-3">
                       {selectedPaymentMethod.custom_fields.map((field, index) => (
@@ -695,8 +705,22 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     </div>
                   )}
                 </div>
+                
+                {/* Important note about proof of payment - moved below payment details and styled in yellow */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-sm font-medium text-yellow-900 mb-1">Important Note</h4>
+                      <p className="text-sm text-yellow-800">
+                        After completing your payment using the details above, you will need to upload proof of payment (receipt, screenshot, etc.) on the next page for verification.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="pt-4">
-                  <Button onClick={handleProceedToUpload} className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl h-12">
+                  <Button onClick={handleProceedToUpload} className="w-full btn-primary rounded-xl h-12">
                     Continue to Upload Proof
                   </Button>
                 </div>
@@ -715,24 +739,56 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     </div>
                     <div>
                       <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Payment Proof</h3>
-                      <p className="text-sm text-gray-600 mb-4">Please upload a screenshot or photo showing your payment confirmation</p>
+                      <p className="text-sm text-gray-600 mb-4">Please upload a screenshot, photo, or PDF showing your payment confirmation</p>
+                      
+                      {/* Supported file types information */}
+                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800 font-medium mb-1">Supported File Types:</p>
+                        <div className="text-xs text-blue-700 space-y-1">
+                          <p>• Images: JPG, PNG, GIF, BMP, WebP, SVG</p>
+                          <p>• Documents: PDF</p>
+                          <p>• Maximum file size: 10MB</p>
+                        </div>
+                      </div>
+                      
                       <input
                         type="file"
                         accept="image/*,.pdf"
-                        onChange={(e) => setProofFile(e.target.files?.[0] || null)}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            // Check file size (10MB limit)
+                            const maxSize = 10 * 1024 * 1024 // 10MB in bytes
+                            if (file.size > maxSize) {
+                              setError('File size must be less than 10MB')
+                              e.target.value = '' // Clear the input
+                              return
+                            }
+                            setError(null)
+                            setProofFile(file)
+                          } else {
+                            setProofFile(null)
+                          }
+                        }}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-background file:text-gray-700 hover:file:bg-gray-100"
                         required
                       />
                     </div>
                     {proofFile && (
                       <div className="text-sm text-green-600 bg-green-50 rounded-lg p-3">
-                        ✓ Selected: {proofFile.name}
+                        <div className="flex items-center justify-center gap-2">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Selected: {proofFile.name}</span>
+                        </div>
+                        <p className="text-xs text-green-500 mt-1">
+                          File size: {(proofFile.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
                       </div>
                     )}
                   </div>
                 </div>
                 <div className="pt-4">
-                  <Button type="submit" className="w-full bg-gray-900 hover:bg-gray-800 text-white rounded-xl h-12" disabled={submitting || !proofFile}>
+                  <Button type="submit" className="w-full btn-primary rounded-xl h-12" disabled={submitting || !proofFile}>
                     {submitting ? (
                       <>
                         <Spinner size="sm" className="mr-2" />
@@ -756,7 +812,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     Thank you! Your payment has been submitted for review.
                   </p>
                   {paymentId && (
-                    <div className="bg-gray-50 rounded-lg p-4 text-left">
+                    <div className="bg-background rounded-lg p-4 text-left">
                       <p className="text-sm text-gray-600 mb-1">Reference ID:</p>
                       <p className="text-sm font-mono text-gray-900">{paymentId}</p>
                     </div>

@@ -161,10 +161,17 @@ export default function SuperAdminTransactionsPage() {
 
   const formatAmount = (amount: string, currency: string) => {
     const numAmount = parseFloat(amount)
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency
+    
+    if (isNaN(numAmount)) {
+      return `0 ${currency || 'USD'}`
+    }
+    
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(numAmount)
+    
+    return `${formattedAmount} ${currency || 'USD'}`
   }
 
   const getStatusBadgeClass = (status: string) => {
@@ -177,7 +184,7 @@ export default function SuperAdminTransactionsPage() {
       case 'failed':
         return "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
       default:
-        return "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
+        return "bg-background text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
     }
   }
 
@@ -217,7 +224,7 @@ export default function SuperAdminTransactionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -230,7 +237,7 @@ export default function SuperAdminTransactionsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Platform Transactions</h1>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <div className="p-6">
             {/* Filters and Search */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
@@ -266,7 +273,7 @@ export default function SuperAdminTransactionsPage() {
 
             {/* Transaction Summary */}
             <div className="mb-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="p-4 bg-background rounded-lg border border-gray-200">
                 <div className="text-sm text-gray-600">Total Transactions</div>
                 <div className="text-2xl font-bold text-gray-900">{transactions.length}</div>
               </div>
@@ -294,7 +301,7 @@ export default function SuperAdminTransactionsPage() {
             <div className="overflow-hidden border border-gray-200 rounded-lg">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-background">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -315,7 +322,7 @@ export default function SuperAdminTransactionsPage() {
                       </tr>
                     ) : filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction) => (
-                        <tr key={transaction.id} className="border-b hover:bg-gray-50 transition-colors">
+                        <tr key={transaction.id} className="border-b hover:bg-background transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
                               {transaction.id.slice(0, 8)}...
@@ -435,7 +442,7 @@ export default function SuperAdminTransactionsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Transaction ID</Label>
-                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded border text-sm">
+                    <div className="flex items-center justify-between p-2 bg-background rounded border text-sm">
                       <span className="font-mono">{selectedTransaction.id}</span>
                       <Button
                         variant="ghost"
@@ -458,13 +465,13 @@ export default function SuperAdminTransactionsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Amount</Label>
-                    <div className="p-2 bg-gray-50 rounded border text-sm font-medium">
+                    <div className="p-2 bg-background rounded border text-sm font-medium">
                       {formatAmount(selectedTransaction.amount, selectedTransaction.currency)}
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Payment Method</Label>
-                    <div className="p-2 bg-gray-50 rounded border text-sm">
+                    <div className="p-2 bg-background rounded border text-sm">
                       {selectedTransaction.payment_method}
                     </div>
                   </div>
@@ -472,7 +479,7 @@ export default function SuperAdminTransactionsPage() {
 
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Created At</Label>
-                  <div className="p-2 bg-gray-50 rounded border text-sm">
+                  <div className="p-2 bg-background rounded border text-sm">
                     {formatDate(selectedTransaction.created_at)}
                   </div>
                 </div>
@@ -480,7 +487,7 @@ export default function SuperAdminTransactionsPage() {
                 {selectedTransaction.customer_name && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Customer Name</Label>
-                    <div className="p-2 bg-gray-50 rounded border text-sm">
+                    <div className="p-2 bg-background rounded border text-sm">
                       {selectedTransaction.customer_name}
                     </div>
                   </div>
@@ -489,7 +496,7 @@ export default function SuperAdminTransactionsPage() {
                 {selectedTransaction.customer_email && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Customer Email</Label>
-                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded border text-sm">
+                    <div className="flex items-center justify-between p-2 bg-background rounded border text-sm">
                       <span>{selectedTransaction.customer_email}</span>
                       <Button
                         variant="ghost"
@@ -506,7 +513,7 @@ export default function SuperAdminTransactionsPage() {
                 {selectedTransaction.merchant_email && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Merchant Email</Label>
-                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded border text-sm">
+                    <div className="flex items-center justify-between p-2 bg-background rounded border text-sm">
                       <span>{selectedTransaction.merchant_email}</span>
                       <Button
                         variant="ghost"
@@ -523,7 +530,7 @@ export default function SuperAdminTransactionsPage() {
                 {selectedTransaction.description && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Description</Label>
-                    <div className="p-2 bg-gray-50 rounded border text-sm">
+                    <div className="p-2 bg-background rounded border text-sm">
                       {selectedTransaction.description}
                     </div>
                   </div>
@@ -532,7 +539,7 @@ export default function SuperAdminTransactionsPage() {
                 {selectedTransaction.reference && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Reference</Label>
-                    <div className="flex items-center justify-between p-2 bg-gray-50 rounded border text-sm">
+                    <div className="flex items-center justify-between p-2 bg-background rounded border text-sm">
                       <span className="font-mono">{selectedTransaction.reference}</span>
                       <Button
                         variant="ghost"

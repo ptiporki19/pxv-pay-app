@@ -136,7 +136,7 @@ export function ProfileContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -151,7 +151,7 @@ export function ProfileContent() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
@@ -165,7 +165,7 @@ export function ProfileContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -179,7 +179,7 @@ export function ProfileContent() {
         </div>
 
         {/* Content Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <div className="p-8 space-y-8">
             {/* Edit Profile Section */}
             <div className="flex justify-between items-center">
@@ -221,7 +221,7 @@ export function ProfileContent() {
                         className="h-11"
                       />
                     ) : (
-                      <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                      <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                         {profile.first_name || <span className="text-gray-500">Not provided</span>}
                       </div>
                     )}
@@ -237,7 +237,7 @@ export function ProfileContent() {
                         className="h-11"
                       />
                     ) : (
-                      <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                      <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                         {profile.last_name || <span className="text-gray-500">Not provided</span>}
                       </div>
                     )}
@@ -246,7 +246,7 @@ export function ProfileContent() {
 
                 <div className="space-y-2">
                   <Label className="text-sm font-medium text-gray-700">Email Address</Label>
-                  <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center gap-2 text-sm">
+                  <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center gap-2 text-sm">
                     <Mail className="h-4 w-4 text-gray-500" />
                     <span>{profile.email}</span>
                   </div>
@@ -264,7 +264,7 @@ export function ProfileContent() {
                         className="h-11"
                       />
                     ) : (
-                      <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                      <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                         {profile.phone || <span className="text-gray-500">Not provided</span>}
                       </div>
                     )}
@@ -280,7 +280,7 @@ export function ProfileContent() {
                         className="h-11"
                       />
                     ) : (
-                      <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                      <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                         {profile.organization || <span className="text-gray-500">Not provided</span>}
                       </div>
                     )}
@@ -297,7 +297,7 @@ export function ProfileContent() {
                       className="h-11"
                     />
                   ) : (
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone}
                     </div>
                   )}
@@ -332,7 +332,7 @@ export function ProfileContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Member Since</Label>
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center gap-2 text-sm">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center gap-2 text-sm">
                       <Calendar className="h-4 w-4 text-gray-500" />
                       <span>{formatDate(profile.created_at)}</span>
                     </div>
@@ -340,7 +340,7 @@ export function ProfileContent() {
 
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Last Updated</Label>
-                    <div className="h-11 px-3 py-2 bg-gray-50 border border-gray-200 rounded-md flex items-center text-sm">
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {formatDate(profile.updated_at)}
                     </div>
                   </div>
@@ -354,7 +354,7 @@ export function ProfileContent() {
                   <Link href="/settings" className="block">
                     <Button 
                       variant="outline" 
-                      className="w-full justify-start gap-2 h-11 hover:bg-gray-50 transition-colors"
+                      className="w-full justify-start gap-2 h-11 hover:bg-background transition-colors"
                     >
                       <User className="h-4 w-4" />
                       Settings

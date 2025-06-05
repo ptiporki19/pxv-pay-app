@@ -1,115 +1,165 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { TrendingUp, Users, Globe, CreditCard, Clock, Shield, Gauge } from 'lucide-react'
 
-const stats = [
+const primaryStats = [
   {
-    title: "Transactions Processed",
-    value: "$1 Billion+",
-    description: "Total value processed",
-    change: "+12.5%",
-    changeType: "positive",
+    icon: TrendingUp,
+    title: "$1.2B+",
+    description: "Transactions Processed",
+    metric: "Growing 35% monthly"
   },
   {
-    title: "Global Merchants",
-    value: "10,000+",
-    description: "Businesses using PXV Pay",
-    change: "+4",
-    changeType: "positive",
+    icon: Users,
+    title: "10,000+",
+    description: "Global Merchants",
+    metric: "In 180+ countries"
   },
   {
-    title: "Countries Supported",
-    value: "150+",
-    description: "Reaching customers worldwide",
-    change: "+5",
-    changeType: "positive",
+    icon: Globe,
+    title: "180+",
+    description: "Countries Supported",
+    metric: "All major markets"
   },
   {
-    title: "Payment Methods",
-    value: "300+",
-    description: "Diverse local options",
-    change: "+15",
-    changeType: "positive",
+    icon: CreditCard,
+    title: "300+",
+    description: "Payment Methods",
+    metric: "Local preferences"
   },
 ]
 
-const operationalStats = [
+const performanceStats = [
   {
-    title: "System Uptime",
-    value: "99.99%",
-    change: "Stable",
+    icon: Gauge,
+    title: "99.99%",
+    description: "System Uptime",
+    detail: "Enterprise-grade reliability"
   },
   {
-    title: "Avg. Response Time",
-    value: "120ms",
-    change: "Fast",
+    icon: Clock,
+    title: "120ms",
+    description: "Average Response",
+    detail: "Lightning fast processing"
   },
   {
-    title: "Fraud Prevention",
-    value: "98.5%",
-    change: "Industry Leading",
+    icon: Shield,
+    title: "98.5%",
+    description: "Fraud Prevention",
+    detail: "Industry-leading security"
   },
 ]
 
 const Stats = () => {
   return (
-    <section className="py-20 bg-white dark:bg-black">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
-            Unlocking Global Potential
+    <section className="py-32 bg-transparent dark:bg-transparent">
+      <div className="container mx-auto px-6">
+        {/* Header */}
+        <div className="text-center mb-20 space-y-6">
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-violet-100 dark:bg-violet-900 text-sm font-medium text-violet-700 dark:text-violet-300 backdrop-blur-sm">
+            <div className="w-2 h-2 bg-violet-500 rounded-full mr-2 animate-pulse"></div>
+            Trusted Globally
+          </div>
+          
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black dark:text-white">
+            Powering growth for
+            <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">thousands of businesses</span>
           </h2>
-          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            See how PXV Pay is driving growth and efficiency for businesses worldwide.
+          
+          <p className="max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+            Join the growing ecosystem of businesses that trust PXV Pay to handle their global payment infrastructure.
           </p>
-          <Separator className="mt-8 max-w-md mx-auto bg-gray-300 dark:bg-gray-700" />
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4 mb-16">
-          {stats.map((stat, i) => (
-            <Card key={i} className="border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow bg-gray-50 dark:bg-gray-900">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">{stat.title}</CardTitle>
-                {/* Icon placeholder if needed */}
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.description}</p>
-                <div className={`flex items-center pt-1 text-xs ${
-                  stat.changeType === 'positive' 
-                    ? 'text-green-600 dark:text-green-400' 
-                    : stat.changeType === 'negative'
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-gray-600 dark:text-gray-400'
-                }`}>
-                  {stat.changeType === 'positive' && <ArrowUpRight className="h-3 w-3 mr-1" />} 
-                  {stat.changeType === 'negative' && <ArrowDownRight className="h-3 w-3 mr-1" />} 
-                  {stat.change}
+        {/* Primary Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+          {primaryStats.map((stat, index) => (
+            <div 
+              key={index}
+              className="group text-center space-y-4 p-8 bg-white dark:bg-gray-900 rounded-2xl hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-1"
+            >
+              <div className="w-16 h-16 mx-auto bg-violet-100 dark:bg-violet-900 rounded-2xl flex items-center justify-center group-hover:bg-violet-500 transition-all duration-300 group-hover:scale-110">
+                <stat.icon className="w-8 h-8 text-violet-600 dark:text-violet-400 group-hover:text-white transition-colors duration-300" />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-4xl md:text-5xl font-bold text-black dark:text-white">
+                  {stat.title}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  {stat.description}
+                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
+                  {stat.metric}
+                </div>
+              </div>
+            </div>
           ))}
         </div>
         
-        {/* Operational Stats */}
-        <div className="grid gap-8 md:grid-cols-3">
-           {operationalStats.map((stat, i) => (
-            <Card key={i} className="border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow bg-gray-50 dark:bg-gray-900">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300">{stat.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stat.value}</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.change}</p>
-              </CardContent>
-            </Card>
+        {/* Performance Stats */}
+        <div className="bg-violet-50 dark:bg-violet-950/30 rounded-3xl p-12">
+          <div className="text-center mb-12">
+            <h3 className="text-2xl md:text-3xl font-bold text-black dark:text-white mb-4">
+              Performance & Reliability
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+              Built for scale with enterprise-grade infrastructure and monitoring
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {performanceStats.map((stat, index) => (
+              <div 
+                key={index}
+                className="group text-center space-y-4 p-6 bg-white dark:bg-gray-900 rounded-2xl hover:shadow-md transition-all duration-300"
+              >
+                <div className="w-12 h-12 mx-auto bg-violet-100 dark:bg-violet-900 rounded-xl flex items-center justify-center group-hover:bg-violet-500 transition-all duration-300">
+                  <stat.icon className="w-6 h-6 text-violet-600 dark:text-violet-400 group-hover:text-white transition-colors duration-300" />
+                </div>
+                
+                <div className="space-y-1">
+                  <div className="text-3xl font-bold text-black dark:text-white">
+                    {stat.title}
+                  </div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300">
+                    {stat.description}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {stat.detail}
+                  </div>
+                </div>
+              </div>
           ))}
+          </div>
         </div>
 
+        {/* Bottom CTA */}
+        <div className="text-center mt-20">
+          <div className="space-y-4">
+            <h3 className="text-2xl md:text-3xl font-bold text-black dark:text-white">
+              Ready to join them?
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">
+              Start accepting global payments in minutes, not months.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <a 
+                href="/signup" 
+                className="px-8 py-4 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-violet-500/25"
+              >
+                Start Free Trial
+              </a>
+              <a 
+                href="/features" 
+                className="px-8 py-4 bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 font-semibold rounded-xl hover:bg-violet-200 dark:hover:bg-violet-800 transition-all duration-300"
+              >
+                Learn More
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )

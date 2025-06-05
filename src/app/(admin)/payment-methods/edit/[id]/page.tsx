@@ -34,7 +34,7 @@ export default function EditPaymentMethodPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-lg">Loading payment method...</div>
@@ -46,7 +46,7 @@ export default function EditPaymentMethodPage() {
 
   if (error || !paymentMethod) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto p-6">
           <div className="mb-8 flex items-center justify-between">
             <Link href="/payment-methods">
@@ -69,7 +69,7 @@ export default function EditPaymentMethodPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
@@ -83,7 +83,7 @@ export default function EditPaymentMethodPage() {
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-card rounded-lg shadow-sm border">
           <PaymentMethodFormSimplified initialData={paymentMethod} />
         </div>
       </div>

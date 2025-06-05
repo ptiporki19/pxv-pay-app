@@ -354,10 +354,16 @@ export function UserProfile({ userId }: UserProfileProps) {
   }
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency
+    if (isNaN(amount)) {
+      return `0 ${currency}`
+    }
+    
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(amount)
+    
+    return `${formattedAmount} ${currency}`
   }
 
   const getRoleBadgeClass = (role: string) => {
@@ -687,15 +693,15 @@ export function UserProfile({ userId }: UserProfileProps) {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Business Overview */}
-            <div className="bg-white rounded-lg shadow-sm border">
+            <div className="bg-card rounded-lg shadow-sm border">
               <div className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Business Overview</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="p-4 bg-background rounded-lg border border-gray-200">
                     <div className="text-sm text-gray-600">Products Created</div>
                     <div className="text-2xl font-bold text-gray-900">{checkoutLinks.length}</div>
                   </div>
-                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <div className="p-4 bg-background rounded-lg border border-gray-200">
                     <div className="text-sm text-gray-600">Payment Methods</div>
                     <div className="text-2xl font-bold text-gray-900">{paymentMethods.length}</div>
                   </div>
@@ -731,7 +737,7 @@ export function UserProfile({ userId }: UserProfileProps) {
 
             {/* Transaction Analytics */}
             {payments.length > 0 && (
-              <div className="bg-white rounded-lg shadow-sm border">
+              <div className="bg-card rounded-lg shadow-sm border">
                 <div className="p-6">
                   <h3 className="text-lg font-semibold mb-4">Transaction Analytics</h3>
                   
@@ -746,7 +752,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                           return acc
                         }, {} as Record<string, number>)
                       ).map(([currency, amount]) => (
-                        <div key={currency} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
+                        <div key={currency} className="flex justify-between items-center p-2 bg-background rounded text-sm">
                           <span className="font-medium">{currency}</span>
                           <span className="font-mono">{formatCurrency(amount, currency)}</span>
                         </div>
@@ -765,7 +771,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                           return acc
                         }, {} as Record<string, number>)
                       ).slice(0, 5).map(([method, count]) => (
-                        <div key={method} className="flex justify-between items-center p-2 bg-gray-50 rounded text-sm">
+                        <div key={method} className="flex justify-between items-center p-2 bg-background rounded text-sm">
                           <span>{method}</span>
                           <span className="font-medium">{count} transactions</span>
                         </div>
@@ -780,7 +786,7 @@ export function UserProfile({ userId }: UserProfileProps) {
 
         {/* Transactions Tab */}
         <TabsContent value="transactions" className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="bg-card rounded-lg shadow-sm border">
             <div className="p-6">
               <div className="mb-4 flex justify-between items-center">
                 <div>
@@ -795,7 +801,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b bg-gray-50 dark:bg-gray-800/50">
+                      <tr className="border-b bg-background dark:bg-gray-800/50">
                         <th className="px-4 py-3 text-left font-medium">ID</th>
                         <th className="px-4 py-3 text-left font-medium">Date</th>
                         <th className="px-4 py-3 text-left font-medium">Customer</th>
@@ -808,7 +814,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                     <tbody>
                       {payments.length > 0 ? (
                         payments.slice(0, 10).map((payment) => (
-                          <tr key={payment.id} className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <tr key={payment.id} className="border-b transition-colors hover:bg-background dark:hover:bg-gray-800/50">
                             <td className="px-4 py-3 font-medium">
                               <div className="text-sm font-medium text-gray-900">
                                 {payment.id.slice(0, 8)}...
@@ -876,7 +882,7 @@ export function UserProfile({ userId }: UserProfileProps) {
 
         {/* Products Tab */}
         <TabsContent value="products" className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="bg-card rounded-lg shadow-sm border">
             <div className="p-6">
               <div className="mb-4 flex justify-between items-center">
                 <div>
@@ -892,7 +898,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b bg-gray-50 dark:bg-gray-800/50">
+                        <tr className="border-b bg-background dark:bg-gray-800/50">
                           <th className="px-4 py-3 text-left font-medium">Product Name</th>
                           <th className="px-4 py-3 text-left font-medium">Pricing</th>
                           <th className="px-4 py-3 text-left font-medium">URL Slug</th>
@@ -902,7 +908,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                       </thead>
                       <tbody>
                         {checkoutLinks.map((link) => (
-                          <tr key={link.id} className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <tr key={link.id} className="border-b transition-colors hover:bg-background dark:hover:bg-gray-800/50">
                             <td className="px-4 py-3 font-medium">{link.title}</td>
                             <td className="px-4 py-3">
                               {link.amount_type === 'fixed' 
@@ -951,7 +957,7 @@ export function UserProfile({ userId }: UserProfileProps) {
 
         {/* Checkout Links Tab */}
         <TabsContent value="checkout-links" className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="bg-card rounded-lg shadow-sm border">
             <div className="p-6">
               <div className="mb-4 flex justify-between items-center">
                 <div>
@@ -967,7 +973,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b bg-gray-50 dark:bg-gray-800/50">
+                        <tr className="border-b bg-background dark:bg-gray-800/50">
                           <th className="px-4 py-3 text-left font-medium">Link Title</th>
                           <th className="px-4 py-3 text-left font-medium">Amount</th>
                           <th className="px-4 py-3 text-left font-medium">Countries</th>
@@ -978,7 +984,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                       </thead>
                       <tbody>
                         {checkoutLinks.map((link) => (
-                          <tr key={link.id} className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <tr key={link.id} className="border-b transition-colors hover:bg-background dark:hover:bg-gray-800/50">
                             <td className="px-4 py-3 font-medium">{link.title}</td>
                             <td className="px-4 py-3">
                               {link.amount_type === 'fixed' 
@@ -1030,7 +1036,7 @@ export function UserProfile({ userId }: UserProfileProps) {
 
         {/* Payment Methods Tab */}
         <TabsContent value="payment-methods" className="space-y-6">
-          <div className="bg-white rounded-lg shadow-sm border">
+          <div className="bg-card rounded-lg shadow-sm border">
             <div className="p-6">
               <div className="mb-4 flex justify-between items-center">
                 <div>
@@ -1046,7 +1052,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b bg-gray-50 dark:bg-gray-800/50">
+                        <tr className="border-b bg-background dark:bg-gray-800/50">
                           <th className="px-4 py-3 text-left font-medium">Method Name</th>
                           <th className="px-4 py-3 text-left font-medium">Type</th>
                           <th className="px-4 py-3 text-left font-medium">Countries</th>
@@ -1057,7 +1063,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                       </thead>
                       <tbody>
                         {paymentMethods.map((method) => (
-                          <tr key={method.id} className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                          <tr key={method.id} className="border-b transition-colors hover:bg-background dark:hover:bg-gray-800/50">
                             <td className="px-4 py-3 font-medium">{method.name}</td>
                             <td className="px-4 py-3 capitalize">{method.type} payment</td>
                             <td className="px-4 py-3">
@@ -1196,7 +1202,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                 {selectedTransaction.description && (
                   <div className="mt-4">
                     <Label className="text-sm font-medium text-gray-700">Description:</Label>
-                    <div className="mt-1 p-3 bg-gray-50 rounded-md text-sm">
+                    <div className="mt-1 p-3 bg-background rounded-md text-sm">
                       {selectedTransaction.description}
                     </div>
                   </div>
@@ -1219,7 +1225,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                     </Button>
                   </div>
                   
-                  <div className="border rounded-lg p-4 bg-gray-50">
+                  <div className="border rounded-lg p-4 bg-background">
                     <div className="flex items-center justify-center min-h-[200px]">
                       <Image
                         src={selectedTransaction.payment_proof_url}
@@ -1238,7 +1244,7 @@ export function UserProfile({ userId }: UserProfileProps) {
               {!selectedTransaction.payment_proof_url && (
                 <div>
                   <h3 className="font-semibold mb-4">Payment Proof Image</h3>
-                  <div className="border rounded-lg p-8 bg-gray-50 text-center">
+                  <div className="border rounded-lg p-8 bg-background text-center">
                     <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                     <p className="text-gray-500">No proof of payment uploaded</p>
                   </div>
@@ -1251,14 +1257,14 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <h3 className="font-semibold mb-4">Transaction Breakdown</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {selectedTransaction.fee_amount && (
-                      <div className="p-3 bg-gray-50 rounded-md">
+                      <div className="p-3 bg-background rounded-md">
                         <Label className="text-sm font-medium text-gray-700">Transaction Fee:</Label>
                         <div className="text-lg font-medium">{formatCurrency(selectedTransaction.fee_amount, selectedTransaction.currency)}</div>
                       </div>
                     )}
                     
                     {selectedTransaction.net_amount && (
-                      <div className="p-3 bg-gray-50 rounded-md">
+                      <div className="p-3 bg-background rounded-md">
                         <Label className="text-sm font-medium text-gray-700">Net Amount:</Label>
                         <div className="text-lg font-medium text-green-600">{formatCurrency(selectedTransaction.net_amount, selectedTransaction.currency)}</div>
                       </div>

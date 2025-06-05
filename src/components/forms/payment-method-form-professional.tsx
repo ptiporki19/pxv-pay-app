@@ -354,7 +354,7 @@ export function PaymentMethodFormProfessional({ initialData, onSuccess }: Paymen
                             className="cursor-pointer text-base py-4 border-2 border-gray-300 focus:border-blue-500"
                           />
                           {previewUrl && (
-                            <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg border-2">
+                            <div className="flex items-center gap-4 p-4 bg-background rounded-lg border-2">
                               <img
                                 src={previewUrl}
                                 alt="Icon preview"
@@ -613,7 +613,7 @@ export function PaymentMethodFormProfessional({ initialData, onSuccess }: Paymen
                             control={form.control}
                             name={`custom_fields.${index}.required`}
                             render={({ field }) => (
-                              <FormItem className="flex flex-row items-center space-x-3 space-y-0 p-3 bg-gray-50 rounded">
+                              <FormItem className="flex flex-row items-center space-x-3 space-y-0 p-3 bg-background rounded">
                                 <FormControl>
                                   <Checkbox
                                     checked={field.value}

@@ -159,6 +159,14 @@ export function EnhancedCreateCheckoutLinkForm() {
       setLoadingCountries(true)
       const supabase = createClient()
       
+      // Get current user first
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        console.log('User not authenticated')
+        setLoadingCountries(false)
+        return
+      }
+      
       // Get countries that have payment methods assigned to them
       const { data, error } = await supabase
         .from('countries')
@@ -173,15 +181,16 @@ export function EnhancedCreateCheckoutLinkForm() {
 
       if (error) throw error
 
-      // For each country, check if it has payment methods
+      // For each country, check if it has USER-CREATED payment methods
       const countriesWithPaymentMethods: Country[] = []
       
       if (data && data.length > 0) {
         for (const country of data) {
-          // Check if this country is used in any payment methods for the current user
+          // Check if this country is used in any payment methods FOR THE CURRENT USER
           const { data: paymentMethods, error: pmError } = await supabase
             .from('payment_methods')
             .select('id, user_id')
+            .eq('user_id', user.id) // Only user's payment methods
             .contains('countries', [country.code])
             .eq('status', 'active')
             .limit(1)
@@ -191,7 +200,7 @@ export function EnhancedCreateCheckoutLinkForm() {
             continue
           }
 
-          // Only include countries that have at least one payment method
+          // Only include countries that have at least one USER payment method
           if (paymentMethods && paymentMethods.length > 0) {
             countriesWithPaymentMethods.push({
               ...country,
@@ -201,7 +210,7 @@ export function EnhancedCreateCheckoutLinkForm() {
         }
       }
 
-      console.log('Countries with payment methods:', countriesWithPaymentMethods)
+      console.log('Countries with user payment methods:', countriesWithPaymentMethods.length)
       setCountries(countriesWithPaymentMethods)
       
       if (countriesWithPaymentMethods.length === 0) {

@@ -184,7 +184,7 @@ export default function ProductManagementPage() {
           </div>
         ) : products.length > 0 ? (
           products.map((product) => (
-            <div key={product.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div key={product.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-background dark:hover:bg-gray-800">
               <div className="w-1/3 flex items-center space-x-3">
                 {product.featured_image && (
                   <img 
