@@ -1,0 +1,363 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme colors */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Professional Dark Theme Color System */
+    
+    /* Background Layers */
+    --bg-primary: 0 0% 4%;           /* #0a0a0a - Main app background */
+    --bg-secondary: 0 0% 8%;         /* #141414 - Content areas */
+    --bg-elevated: 0 0% 12%;         /* #1e1e1e - Cards, modals */
+    --bg-interactive: 0 0% 16%;      /* #2a2a2a - Hover states */
+    
+    /* Text Hierarchy */
+    --text-primary: 0 0% 96%;        /* #f5f5f5 - Primary text */
+    --text-secondary: 220 9% 63%;    /* #a1a1aa - Secondary text */
+    --text-muted: 218 11% 45%;       /* #71717a - Muted text */
+    --text-disabled: 216 12% 32%;    /* #52525b - Disabled text */
+    
+    /* Border System */
+    --border-primary: 0 0% 16%;      /* #2a2a2a - Hairline borders */
+    --border-secondary: 0 0% 25%;    /* #404040 - Standard borders */
+    --border-interactive: 0 0% 32%;  /* #525252 - Interactive borders */
+    
+    /* Status Colors for Dark */
+    --status-success: 142 71% 35%;   /* #22c55e muted */
+    --status-warning: 45 93% 40%;    /* #f59e0b muted */
+    --status-error: 0 72% 45%;       /* #ef4444 muted */
+    --status-info: 217 91% 50%;      /* #3b82f6 muted */
+    
+    /* Standard shadcn/ui dark variables */
+    --background: var(--bg-primary);
+    --foreground: var(--text-primary);
+    --card: var(--bg-elevated);
+    --card-foreground: var(--text-primary);
+    --popover: var(--bg-elevated);
+    --popover-foreground: var(--text-primary);
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: var(--bg-interactive);
+    --secondary-foreground: var(--text-primary);
+    --muted: var(--bg-secondary);
+    --muted-foreground: var(--text-muted);
+    --accent: var(--bg-interactive);
+    --accent-foreground: var(--text-primary);
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: var(--text-primary);
+    --border: var(--border-primary);
+    --input: var(--bg-secondary);
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* === FOUNDATION SYSTEM === */
+  
+  /* Background Utilities */
+  .bg-primary { @apply bg-[hsl(var(--bg-primary))]; }
+  .bg-secondary { @apply bg-[hsl(var(--bg-secondary))]; }
+  .bg-elevated { @apply bg-[hsl(var(--bg-elevated))]; }
+  .bg-interactive { @apply bg-[hsl(var(--bg-interactive))]; }
+  
+  /* Text Utilities */
+  .text-primary { @apply text-[hsl(var(--text-primary))]; }
+  .text-secondary { @apply text-[hsl(var(--text-secondary))]; }
+  .text-muted { @apply text-[hsl(var(--text-muted))]; }
+  .text-disabled { @apply text-[hsl(var(--text-disabled))]; }
+  
+  /* Border Utilities */
+  .border-primary { @apply border-[hsl(var(--border-primary))]; }
+  .border-secondary { @apply border-[hsl(var(--border-secondary))]; }
+  .border-interactive { @apply border-[hsl(var(--border-interactive))]; }
+
+  /* === DARK MODE OVERRIDES === */
+  
+  /* Fix hardcoded backgrounds */
+  .dark .bg-white { @apply bg-[hsl(var(--bg-elevated))] !important; }
+  .dark .bg-gray-50 { @apply bg-[hsl(var(--bg-secondary))] !important; }
+  .dark .bg-gray-100 { @apply bg-[hsl(var(--bg-interactive))] !important; }
+  .dark .bg-gray-200 { @apply bg-[hsl(var(--bg-interactive))] !important; }
+  .dark .bg-slate-50 { @apply bg-[hsl(var(--bg-secondary))] !important; }
+  .dark .bg-slate-100 { @apply bg-[hsl(var(--bg-interactive))] !important; }
+  
+  /* Fix hardcoded text colors */
+  .dark .text-gray-900 { @apply text-[hsl(var(--text-primary))] !important; }
+  .dark .text-gray-800 { @apply text-[hsl(var(--text-primary))] !important; }
+  .dark .text-gray-700 { @apply text-[hsl(var(--text-secondary))] !important; }
+  .dark .text-gray-600 { @apply text-[hsl(var(--text-secondary))] !important; }
+  .dark .text-gray-500 { @apply text-[hsl(var(--text-muted))] !important; }
+  .dark .text-black { @apply text-[hsl(var(--text-primary))] !important; }
+  .dark .text-slate-900 { @apply text-[hsl(var(--text-primary))] !important; }
+  .dark .text-slate-800 { @apply text-[hsl(var(--text-primary))] !important; }
+  .dark .text-slate-700 { @apply text-[hsl(var(--text-secondary))] !important; }
+  .dark .text-slate-600 { @apply text-[hsl(var(--text-secondary))] !important; }
+  
+  /* Fix hardcoded borders */
+  .dark .border-gray-200 { @apply border-[hsl(var(--border-primary))] !important; }
+  .dark .border-gray-300 { @apply border-[hsl(var(--border-secondary))] !important; }
+  .dark .border-slate-200 { @apply border-[hsl(var(--border-primary))] !important; }
+  .dark .border-slate-300 { @apply border-[hsl(var(--border-secondary))] !important; }
+
+  /* === PROFESSIONAL TABLE SYSTEM === */
+  .dark table {
+    @apply bg-[hsl(var(--bg-secondary))] border-collapse;
+    border-spacing: 0;
+  }
+  
+  .dark thead {
+    @apply bg-[hsl(var(--bg-interactive))];
+  }
+  
+  .dark thead th {
+    @apply bg-[hsl(var(--bg-interactive))] text-[hsl(var(--text-primary))] font-semibold text-sm;
+    @apply border-b border-[hsl(var(--border-secondary))] px-4 py-3;
+    border-width: 0.5px;
+  }
+  
+  .dark tbody tr {
+    @apply border-b border-[hsl(var(--border-primary))];
+    border-width: 0.5px;
+    transition: background-color 0.1s ease;
+  }
+  
+  .dark tbody tr:hover {
+    @apply bg-[hsl(var(--bg-interactive))];
+  }
+  
+  .dark tbody td {
+    @apply text-[hsl(var(--text-primary))] px-4 py-3 text-sm;
+  }
+  
+  /* Remove harsh table borders */
+  .dark table,
+  .dark table * {
+    border-color: hsl(var(--border-primary)) !important;
+  }
+
+  /* === PROFESSIONAL BUTTON SYSTEM === */
+  
+  /* Primary Button */
+  .dark .btn-primary,
+  .dark button[class*="bg-blue"],
+  .dark .bg-blue-600 {
+    @apply bg-blue-600 hover:bg-blue-700 text-white border-0;
+    @apply transition-all duration-150 ease-in-out;
+    @apply shadow-sm hover:shadow-md;
+    @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[hsl(var(--bg-primary))];
+  }
+  
+  /* Secondary Button */
+  .dark .btn-secondary {
+    @apply bg-[hsl(var(--bg-interactive))] hover:bg-[hsl(var(--border-secondary))];
+    @apply text-[hsl(var(--text-primary))] border border-[hsl(var(--border-secondary))];
+    @apply transition-all duration-150 ease-in-out;
+    @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[hsl(var(--bg-primary))];
+  }
+  
+  /* Ghost Button */
+  .dark .btn-ghost {
+    @apply bg-transparent hover:bg-[hsl(var(--bg-interactive))];
+    @apply text-[hsl(var(--text-secondary))] hover:text-[hsl(var(--text-primary))];
+    @apply border-0 transition-all duration-150 ease-in-out;
+  }
+  
+  /* Fix white-on-white button issues */
+  .dark button {
+    @apply border-[hsl(var(--border-secondary))];
+  }
+  
+  .dark button:not([class*="bg-"]):not([class*="text-"]) {
+    @apply bg-[hsl(var(--bg-interactive))] text-[hsl(var(--text-primary))];
+    @apply border border-[hsl(var(--border-secondary))];
+    @apply hover:bg-[hsl(var(--border-secondary))] transition-colors duration-150;
+  }
+
+  /* === PROFESSIONAL CARD SYSTEM === */
+  .dark .card,
+  .dark [class*="card"] {
+    @apply bg-[hsl(var(--bg-elevated))] border border-[hsl(var(--border-primary))];
+    @apply shadow-sm;
+    border-width: 0.5px;
+  }
+  
+  .dark .card:hover {
+    @apply border-[hsl(var(--border-secondary))];
+    @apply shadow-md;
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* === STATUS BADGE SYSTEM === */
+  .dark .badge-success {
+    @apply bg-[hsl(var(--status-success))/0.1] text-[hsl(var(--status-success))] border-[hsl(var(--status-success))/0.2];
+  }
+  
+  .dark .badge-warning {
+    @apply bg-[hsl(var(--status-warning))/0.1] text-[hsl(var(--status-warning))] border-[hsl(var(--status-warning))/0.2];
+  }
+  
+  .dark .badge-error {
+    @apply bg-[hsl(var(--status-error))/0.1] text-[hsl(var(--status-error))] border-[hsl(var(--status-error))/0.2];
+  }
+  
+  .dark .badge-info {
+    @apply bg-[hsl(var(--status-info))/0.1] text-[hsl(var(--status-info))] border-[hsl(var(--status-info))/0.2];
+  }
+  
+  /* Fix existing badge colors */
+  .dark .bg-green-100 { @apply bg-[hsl(var(--status-success))/0.1] !important; }
+  .dark .text-green-800 { @apply text-[hsl(var(--status-success))] !important; }
+  .dark .bg-yellow-100 { @apply bg-[hsl(var(--status-warning))/0.1] !important; }
+  .dark .text-yellow-800 { @apply text-[hsl(var(--status-warning))] !important; }
+  .dark .bg-red-100 { @apply bg-[hsl(var(--status-error))/0.1] !important; }
+  .dark .text-red-800 { @apply text-[hsl(var(--status-error))] !important; }
+
+  /* === ICON SYSTEM === */
+  .dark svg {
+    @apply text-[hsl(var(--text-secondary))];
+    transition: color 0.15s ease-in-out;
+  }
+  
+  .dark button:hover svg,
+  .dark [role="button"]:hover svg {
+    @apply text-[hsl(var(--text-primary))];
+  }
+  
+  /* Make sure icons aren't white blobs */
+  .dark svg:not([class*="text-"]) {
+    @apply text-[hsl(var(--text-secondary))];
+  }
+
+  /* === INPUT SYSTEM === */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    @apply bg-[hsl(var(--bg-secondary))] border-[hsl(var(--border-secondary))];
+    @apply text-[hsl(var(--text-primary))] placeholder:text-[hsl(var(--text-muted))];
+    @apply focus:border-[hsl(var(--border-interactive))] focus:ring-1 focus:ring-blue-500;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  
+  .dark input:focus,
+  .dark textarea:focus,
+  .dark select:focus {
+    @apply outline-none;
+  }
+
+  /* === TYPOGRAPHY HIERARCHY === */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    @apply text-[hsl(var(--text-primary))];
+  }
+  
+  .dark p {
+    @apply text-[hsl(var(--text-secondary))];
+  }
+  
+  .dark .text-sm {
+    @apply text-[hsl(var(--text-muted))];
+  }
+
+  /* === INTERACTIVE STATES === */
+  .dark [role="button"]:hover,
+  .dark button:hover,
+  .dark .hover-lift:hover {
+    transform: translateY(-1px);
+    transition: transform 0.15s ease-in-out;
+  }
+  
+  /* === SPACING UTILITIES === */
+  .space-professional > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  .space-compact > * + * {
+    margin-top: 0.75rem;
+  }
+
+  /* === MODAL/DIALOG OVERRIDES === */
+  .dark [role="dialog"],
+  .dark .modal {
+    @apply bg-[hsl(var(--bg-elevated))] border border-[hsl(var(--border-secondary))];
+    @apply shadow-2xl;
+  }
+  
+  /* === DROPDOWN/POPOVER OVERRIDES === */
+  .dark [role="menu"],
+  .dark .dropdown-content,
+  .dark .popover-content {
+    @apply bg-[hsl(var(--bg-elevated))] border border-[hsl(var(--border-primary))];
+    @apply shadow-lg;
+    border-width: 0.5px;
+  }
+  
+  .dark [role="menuitem"]:hover,
+  .dark .dropdown-item:hover {
+    @apply bg-[hsl(var(--bg-interactive))];
+  }
+
+  /* === FORM VALIDATION === */
+  .dark .error-message {
+    @apply text-[hsl(var(--status-error))];
+  }
+  
+  .dark .success-message {
+    @apply text-[hsl(var(--status-success))];
+  }
+
+  /* === LOADING STATES === */
+  .dark .loading-spinner {
+    border-color: hsl(var(--border-primary));
+    border-top-color: hsl(var(--text-primary));
+  }
+
+  /* === ACCESSIBILITY === */
+  .dark :focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-500;
+  }
+  
+  /* Ensure sufficient contrast for interactive elements */
+  .dark button:focus,
+  .dark [role="button"]:focus,
+  .dark a:focus {
+    @apply ring-2 ring-blue-500 ring-offset-2 ring-offset-[hsl(var(--bg-primary))];
+  }
+} 

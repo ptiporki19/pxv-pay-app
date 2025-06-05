@@ -1,0 +1,34 @@
+# PXV Pay Supabase, Data, and RLS Guidelines
+
+This document specifies how to interact with Supabase and manage data.
+
+**Backend:** Supabase is the primary backend BaaS.
+
+- Use Supabase client libraries for all database, auth, and storage interactions.
+- Implement backend logic in Next.js Server Actions or API Routes that interact with Supabase.
+
+**Database:** PostgreSQL managed by Supabase.
+
+- Adhere strictly to the defined database schema (refer to documentation/schema files).
+- Use appropriate data types.
+- Consider indexing for frequently queried columns.
+
+**Row Level Security (RLS):** **RLS IS CRITICAL FOR SECURITY.**
+
+- **ALL** tables containing sensitive data or requiring access control MUST have RLS enabled.
+- Define RLS policies based on the user's `role` column in the `users` table and potentially the `user_id` column on data rows (e.g., a user can only read/write *their own* settings or data).
+- Ensure RLS prevents unauthorized access even if frontend or backend checks are bypassed.
+- Super Admins should have broad access as defined in RBAC.
+- Public tables (like public blog posts, potentially read-only checkout settings) need appropriate public read RLS.
+
+**Supabase Storage:**
+
+- Use Supabase Storage for file uploads (proofs, icons).
+- Configure Storage security policies (like RLS for Storage) to restrict access based on user roles or relationships to data.
+
+**Key Directives for AI:**
+
+- When generating any backend code involving data access, ALWAYS include necessary Supabase client calls.
+- Assume RLS is the primary security layer and generate code that respects expected RLS behavior. Do not try to bypass RLS.
+- When generating SQL for schema or migrations, include RLS policy definitions.
+- When generating file upload/download code, use Supabase Storage APIs and consider storage security.
