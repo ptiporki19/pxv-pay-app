@@ -167,7 +167,13 @@ export function UserProfile({ userId }: UserProfileProps) {
       
       // First check if userId is valid
       if (!userId || userId.trim() === '') {
-        throw new Error('Invalid user ID provided')
+        throw new Error('Invalid user ID provided - user ID is required')
+      }
+      
+      // Additional validation for UUID format (basic check)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      if (!uuidRegex.test(userId)) {
+        throw new Error(`Invalid user ID format: ${userId}`)
       }
       
       console.log('Fetching user profile for ID:', userId)
@@ -180,7 +186,7 @@ export function UserProfile({ userId }: UserProfileProps) {
         .single()
 
       if (userError) {
-        console.error('User fetch error:', userError)
+        console.error('User fetch error:', userError || 'Unknown error')
         console.error('Failed to fetch user with ID:', userId)
         
         if (userError.code === 'PGRST116') {
@@ -189,8 +195,13 @@ export function UserProfile({ userId }: UserProfileProps) {
           throw new Error(`Multiple users found with ID: ${userId} (this should not happen)`)
         }
         
-        throw new Error(`Failed to fetch user: ${userError.message}`)
+        throw new Error(`Failed to fetch user: ${userError.message || 'Unknown database error'}`)
       }
+
+      if (!userData) {
+        throw new Error(`No user data returned for ID: ${userId}`)
+      }
+      
       setUser(userData)
 
       // Fetch ALL payments for this user - both as customer (user_id) and merchant (merchant_id)
