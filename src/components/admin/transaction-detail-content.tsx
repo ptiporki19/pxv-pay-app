@@ -19,18 +19,26 @@ interface TransactionDetail {
   status: 'pending' | 'completed' | 'failed' | 'refunded'
   payment_method: string
   customer_email?: string
+  customer_name?: string
+  customer_phone?: string
+  country?: string
   description?: string
   reference?: string
   metadata?: any
   fee_amount?: string
   net_amount?: string
+  payment_proof_url?: string
+  proof_of_payment_url?: string
+  proof_uploaded_at?: string
+  proof_verification_status?: string
 }
 
 interface TransactionDetailContentProps {
   transactionId: string
+  backUrl?: string
 }
 
-export function TransactionDetailContent({ transactionId }: TransactionDetailContentProps) {
+export function TransactionDetailContent({ transactionId, backUrl = "/transactions" }: TransactionDetailContentProps) {
   const [transaction, setTransaction] = useState<TransactionDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -49,34 +57,65 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
+      // Get user profile using email lookup (same pattern as other components)
       const { data: profile } = await supabase
         .from('users')
-        .select('role')
-        .eq('id', user.id)
+        .select('id, role')
+        .eq('email', user.email)
         .single()
+
+      if (!profile) {
+        console.error('User profile not found for email:', user.email)
+        return
+      }
 
       const isSuperAdmin = profile?.role === 'super_admin' || 
         user.email === 'admin@pxvpay.com' || 
         user.email === 'dev-admin@pxvpay.com' || 
         user.email === 'superadmin@pxvpay.com'
 
-      // Fetch transaction details
+      // Fetch transaction details with proof of payment fields
       const { data: transactionData, error } = await supabase
         .from('payments')
         .select(`
-          *,
-          user:users(email, first_name, last_name)
+          id,
+          created_at,
+          updated_at,
+          amount,
+          currency,
+          status,
+          payment_method,
+          customer_name,
+          customer_email,
+          customer_phone,
+          country,
+          description,
+          reference,
+          metadata,
+          fee_amount,
+          net_amount,
+          payment_proof_url,
+          proof_of_payment_url,
+          proof_uploaded_at,
+          proof_verification_status,
+          merchant_id,
+          user_id
         `)
         .eq('id', transactionId)
         .single()
 
       if (error) {
-        console.warn('Error loading transaction:', error.message)
+        console.error('Error loading transaction:', error)
+        return
+      }
+
+      if (!transactionData) {
+        console.error('Transaction not found:', transactionId)
         return
       }
 
       // Check if user has access to this transaction
-      if (!isSuperAdmin && transactionData.merchant_id !== user.id) {
+      if (!isSuperAdmin && transactionData.merchant_id !== profile.id) {
         console.error('User does not have access to this transaction')
         setTransaction(null)
         return
@@ -91,12 +130,19 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
         currency: transactionData.currency || 'USD',
         status: transactionData.status,
         payment_method: transactionData.payment_method || 'N/A',
-        customer_email: transactionData.user?.email,
+        customer_email: transactionData.customer_email,
+        customer_name: transactionData.customer_name,
+        customer_phone: transactionData.customer_phone,
+        country: transactionData.country,
         description: transactionData.description,
         reference: transactionData.reference,
         metadata: transactionData.metadata,
         fee_amount: transactionData.fee_amount,
-        net_amount: transactionData.net_amount
+        net_amount: transactionData.net_amount,
+        payment_proof_url: transactionData.payment_proof_url,
+        proof_of_payment_url: transactionData.proof_of_payment_url,
+        proof_uploaded_at: transactionData.proof_uploaded_at,
+        proof_verification_status: transactionData.proof_verification_status
       }
 
       setTransaction(formattedTransaction)
@@ -204,7 +250,7 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
             <div className="text-center">
               <p className="text-lg font-medium">Transaction not found</p>
               <p className="text-muted-foreground mb-4">The requested transaction could not be found.</p>
-              <Link href="/transactions">
+              <Link href={backUrl}>
                 <Button variant="outline">Back to Transactions</Button>
               </Link>
             </div>
@@ -219,7 +265,7 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
       <div className="max-w-7xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
-          <Link href="/transactions">
+          <Link href={backUrl}>
             <Button variant="outline" size="sm" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back to Transactions
@@ -334,13 +380,124 @@ export function TransactionDetailContent({ transactionId }: TransactionDetailCon
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Customer Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Full Name</Label>
+                    <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
+                      {transaction.customer_name || 'N/A'}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700">Email Address</Label>
                     <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
                       {transaction.customer_email || 'N/A'}
                     </div>
                   </div>
+
+                  {transaction.customer_phone && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Phone Number</Label>
+                      <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
+                        {transaction.customer_phone}
+                      </div>
+                    </div>
+                  )}
+
+                  {transaction.country && (
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Country</Label>
+                      <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
+                        {transaction.country}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
+
+              {/* Proof of Payment */}
+              {(transaction.payment_proof_url || transaction.proof_of_payment_url) && (
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Proof of Payment</h3>
+                  <div className="space-y-4">
+                    {transaction.proof_uploaded_at && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium text-gray-700">Uploaded At</Label>
+                          <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
+                            {formatDate(transaction.proof_uploaded_at)}
+                          </div>
+                        </div>
+
+                        {transaction.proof_verification_status && (
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium text-gray-700">Verification Status</Label>
+                            <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
+                              <Badge variant="outline" className={cn(
+                                transaction.proof_verification_status === 'verified' 
+                                  ? 'bg-green-50 text-green-700 border-green-200' 
+                                  : transaction.proof_verification_status === 'rejected'
+                                  ? 'bg-red-50 text-red-700 border-red-200'
+                                  : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                              )}>
+                                {transaction.proof_verification_status.toUpperCase()}
+                              </Badge>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Proof Image Display */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium text-gray-700">Payment Receipt/Screenshot</Label>
+                      <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                        <div className="max-w-md mx-auto">
+                          <img
+                            src={transaction.proof_of_payment_url || transaction.payment_proof_url}
+                            alt="Proof of Payment"
+                            className="w-full h-auto rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                            onClick={() => {
+                              const imageUrl = transaction.proof_of_payment_url || transaction.payment_proof_url
+                              if (imageUrl) {
+                                window.open(imageUrl, '_blank')
+                              }
+                            }}
+                          />
+                          <div className="mt-3 flex justify-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const imageUrl = transaction.proof_of_payment_url || transaction.payment_proof_url
+                                if (imageUrl) {
+                                  window.open(imageUrl, '_blank')
+                                }
+                              }}
+                              className="gap-2"
+                            >
+                              <Download className="h-4 w-4" />
+                              View Full Size
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const imageUrl = transaction.proof_of_payment_url || transaction.payment_proof_url
+                                if (imageUrl) {
+                                  copyToClipboard(imageUrl, 'Proof Image URL')
+                                }
+                              }}
+                              className="gap-2"
+                            >
+                              <Copy className="h-4 w-4" />
+                              Copy Link
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Financial Details */}
               {(transaction.fee_amount || transaction.net_amount) && (

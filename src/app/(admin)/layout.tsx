@@ -32,9 +32,8 @@ const merchantNavItems = [
   { label: 'Checkout Links', path: '/checkout-links', iconName: 'Link2' },
   { label: 'Payment Methods', path: '/payment-methods', iconName: 'CreditCard' },
   { label: 'Theme Customization', path: '/theme', iconName: 'Palette' },
-  { label: 'Product Management', path: '/content', iconName: 'ShoppingBag' },
+  { label: 'Product Management', path: '/content', iconName: 'Package' },
   { label: 'Payment Verification', path: '/verification', iconName: 'Shield' },
-  { label: 'Real-Time Test', path: '/test-realtime', iconName: 'Zap' },
 ]
 
 // Super admin only items - includes global data management
@@ -68,17 +67,21 @@ export default async function MerchantDashboardLayout({
   const { data: profile } = await supabase
     .from('users')
     .select('*')
-    .eq('id', session.user.id)
+    .eq('email', session.user.email)
     .single()
 
     // Get role from profile or use default
     userRole = (profile?.role as UserRole) || 'registered_user'
     
-    // Check if super admin (use both DB role and email check)
-    isSuperAdmin = userRole === 'super_admin' || 
-      (session.user.email === 'admin@pxvpay.com' || 
-       session.user.email === 'dev-admin@pxvpay.com' || 
-       session.user.email === 'superadmin@pxvpay.com')
+    // Check if super admin (use ONLY database role)
+    isSuperAdmin = userRole === 'super_admin'
+    
+    console.log('Admin Layout - User Role Check:', {
+      userEmail: session.user.email,
+      userId: session.user.id,
+      databaseRole: userRole,
+      isSuperAdmin
+    })
     
     userName = profile?.email?.split('@')[0] || session.user.email?.split('@')[0] || 'User'
     userEmail = profile?.email || session.user.email || ''

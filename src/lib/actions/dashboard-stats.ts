@@ -30,7 +30,7 @@ export async function getUserCount() {
     const { data: userProfile } = await supabase
       .from('users')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('email', session.user.email)
       .single()
 
     const isSuperAdminRole = userProfile?.role === 'super_admin'
@@ -86,7 +86,7 @@ export async function getPendingVerificationCount() {
     const { data: userProfile } = await supabase
       .from('users')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('email', session.user.email)
       .single()
 
     const isSuperAdminEmail = session.user.email === 'admin@pxvpay.com' ||
@@ -101,7 +101,16 @@ export async function getPendingVerificationCount() {
 
     // Super admins see all pending verifications, merchants see only their own
     if (!isSuperAdmin) {
-      query = query.eq('merchant_id', session.user.id)
+      // Get the user's database ID for merchant filtering
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', session.user.email)
+        .single()
+      
+      if (dbUser) {
+        query = query.eq('merchant_id', dbUser.id)
+      }
     }
 
     const { count, error } = await query
@@ -131,11 +140,22 @@ export async function getPaymentMethodsCount() {
       return { success: false, error: 'Not authenticated', count: 0 }
     }
 
+    // Get user's database ID for filtering
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', session.user.email)
+      .single()
+
+    if (!dbUser) {
+      return { success: false, error: 'User not found', count: 0 }
+    }
+
     // Filter by current user's payment methods only
     const { count, error } = await supabase
       .from('payment_methods')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id)
+      .eq('user_id', dbUser.id)
 
     if (error) {
       console.error('❌ Server: Payment methods query failed:', error)
@@ -162,11 +182,22 @@ export async function getCurrenciesCount() {
       return { success: false, error: 'Not authenticated', count: 0 }
     }
 
+    // Get user's database ID for filtering
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', session.user.email)
+      .single()
+
+    if (!dbUser) {
+      return { success: false, error: 'User not found', count: 0 }
+    }
+
     // Filter by current user's currencies only
     const { count, error } = await supabase
       .from('currencies')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id)
+      .eq('user_id', dbUser.id)
 
     if (error) {
       console.error('❌ Server: Currencies query failed:', error)
@@ -196,8 +227,8 @@ export async function getTotalPaymentsCount() {
     // Check if user is super admin to see all payments
     const { data: userProfile } = await supabase
       .from('users')
-      .select('role')
-      .eq('id', session.user.id)
+      .select('role, id')
+      .eq('email', session.user.email)
       .single()
 
     const isSuperAdminEmail = session.user.email === 'admin@pxvpay.com' ||
@@ -210,8 +241,8 @@ export async function getTotalPaymentsCount() {
       .select('*', { count: 'exact', head: true })
 
     // Super admins see all payments, merchants see only their own
-    if (!isSuperAdmin) {
-      query = query.eq('merchant_id', session.user.id)
+    if (!isSuperAdmin && userProfile?.id) {
+      query = query.eq('merchant_id', userProfile.id)
     }
 
     const { count, error } = await query
@@ -241,11 +272,22 @@ export async function getProductsCount() {
       return { success: false, error: 'Not authenticated', count: 0 }
     }
 
+    // Get user's database ID for filtering
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', session.user.email)
+      .single()
+
+    if (!dbUser) {
+      return { success: false, error: 'User not found', count: 0 }
+    }
+
     // Filter by current user's products only
     const { count, error } = await supabase
       .from('product_templates')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id)
+      .eq('user_id', dbUser.id)
 
     if (error) {
       console.error('❌ Server: Products query failed:', error)

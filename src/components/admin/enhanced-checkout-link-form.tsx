@@ -39,6 +39,8 @@ import { createClient } from "@/lib/supabase/client"
 import { z } from "zod"
 import { productTemplatesApi } from "@/lib/supabase/product-templates-api"
 import type { ProductTemplate } from "@/types/content"
+import { paymentMethodsApi } from "@/lib/supabase/client-api"
+import { countriesApi } from "@/lib/supabase/client-api"
 
 // Enhanced form validation schema
 const enhancedCheckoutLinkFormSchema = z.object({
@@ -157,60 +159,49 @@ export function EnhancedCreateCheckoutLinkForm() {
   const loadCountriesWithPaymentMethods = async () => {
     try {
       setLoadingCountries(true)
-      const supabase = createClient()
       
-      // Get current user first
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        console.log('User not authenticated')
-        setLoadingCountries(false)
+      // Get all user's payment methods first
+      const paymentMethods = await paymentMethodsApi.getAll()
+      
+      if (paymentMethods.length === 0) {
+        console.log('No payment methods found for user')
+        setCountries([])
         return
       }
       
-      // Get countries that have payment methods assigned to them
-      const { data, error } = await supabase
-        .from('countries')
-        .select(`
-          id,
-          name,
-          code,
-          currency_code
-        `)
-        .eq('status', 'active')
-        .order('name')
-
-      if (error) throw error
-
-      // For each country, check if it has USER-CREATED payment methods
+      // Get all unique country codes from payment methods
+      const countryCodesWithPaymentMethods = new Set<string>()
+      paymentMethods.forEach((pm: any) => {
+        if (pm.countries && Array.isArray(pm.countries)) {
+          pm.countries.forEach((countryCode: string) => countryCodesWithPaymentMethods.add(countryCode))
+        }
+      })
+      
+      if (countryCodesWithPaymentMethods.size === 0) {
+        console.log('No countries found in payment methods')
+        setCountries([])
+        return
+      }
+      
+      // Get all countries and filter to only those with payment methods
+      const allCountries = await countriesApi.getAll()
       const countriesWithPaymentMethods: Country[] = []
       
-      if (data && data.length > 0) {
-        for (const country of data) {
-          // Check if this country is used in any payment methods FOR THE CURRENT USER
-          const { data: paymentMethods, error: pmError } = await supabase
-            .from('payment_methods')
-            .select('id, user_id')
-            .eq('user_id', user.id) // Only user's payment methods
-            .contains('countries', [country.code])
-            .eq('status', 'active')
-            .limit(1)
-
-          if (pmError) {
-            console.error('Error checking payment methods for country:', country.code, pmError)
-            continue
-          }
-
-          // Only include countries that have at least one USER payment method
-          if (paymentMethods && paymentMethods.length > 0) {
-            countriesWithPaymentMethods.push({
-              ...country,
-              payment_methods_count: paymentMethods.length
-            })
-          }
+      allCountries.forEach((country: any) => {
+        if (countryCodesWithPaymentMethods.has(country.code)) {
+          countriesWithPaymentMethods.push({
+            id: country.id || '',
+            name: country.name,
+            code: country.code,
+            currency_code: country.currency_code || '',
+            payment_methods_count: paymentMethods.filter((pm: any) => 
+              pm.countries && pm.countries.includes(country.code)
+            ).length
+          })
         }
-      }
+      })
 
-      console.log('Countries with user payment methods:', countriesWithPaymentMethods.length)
+      console.log('Countries with payment methods:', countriesWithPaymentMethods.length)
       setCountries(countriesWithPaymentMethods)
       
       if (countriesWithPaymentMethods.length === 0) {
@@ -390,7 +381,26 @@ export function EnhancedCreateCheckoutLinkForm() {
         return
       }
 
-      console.log('User authenticated:', user.id)
+      console.log('Auth user found:', user.id)
+
+      // Get the database user ID using email lookup
+      const { data: dbUser, error: userError } = await supabase
+        .from('users')
+        .select('id, email, role')
+        .eq('email', user.email)
+        .single()
+
+      if (userError || !dbUser) {
+        console.error('Failed to get database user:', userError)
+        toast({
+          title: "Error",
+          description: "Unable to verify user account. Please try logging in again.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      console.log('Database user found:', dbUser.id)
 
       // Get currency from the first selected country
       const selectedCountry = countries.find(c => values.country_codes.includes(c.code))
@@ -437,7 +447,7 @@ export function EnhancedCreateCheckoutLinkForm() {
 
       // Prepare data based on checkout type
       const checkoutData: any = {
-        merchant_id: user.id,
+        merchant_id: dbUser.id,
         slug: slug,
         title: values.title,
         link_name: values.link_name,
@@ -490,16 +500,29 @@ export function EnhancedCreateCheckoutLinkForm() {
       
       router.push('/checkout-links')
     } catch (error) {
-      console.error("Full error object:", error)
-      console.error("Error message:", error instanceof Error ? error.message : 'Unknown error')
-      console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace')
+      console.error("Checkout link creation error:", {
+        error,
+        errorType: typeof error,
+        isErrorInstance: error instanceof Error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace',
+        stringified: JSON.stringify(error, null, 2)
+      })
       
       let errorMessage = "There was an error creating the checkout link"
       
       if (error instanceof Error) {
         errorMessage = error.message
       } else if (typeof error === 'object' && error !== null) {
-        errorMessage = JSON.stringify(error)
+        // Handle Supabase error objects
+        const supabaseError = error as any
+        if (supabaseError.message) {
+          errorMessage = supabaseError.message
+        } else if (supabaseError.error?.message) {
+          errorMessage = supabaseError.error.message
+        } else {
+          errorMessage = JSON.stringify(error)
+        }
       }
       
       toast({ 

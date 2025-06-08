@@ -166,7 +166,19 @@ export function SimpleProductForm({ initialData, onSuccess }: SimpleProductFormP
       }
     } catch (error: any) {
       console.error('Error saving product:', error)
-      showError('Error', error.message || 'Failed to save product')
+      
+      // Better error handling to show meaningful messages
+      let errorMessage = 'Failed to save product'
+      
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === 'object' && error !== null) {
+        errorMessage = error.message || error.error || 'Unknown error occurred'
+      } else if (typeof error === 'string') {
+        errorMessage = error
+      }
+      
+      showError('Error', errorMessage)
     } finally {
       setLoading(false)
     }

@@ -4,10 +4,8 @@ export default function CheckoutLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>
-        {children}
-      </body>
-    </html>
+    <div className="min-h-screen bg-gray-50">
+      {children}
+    </div>
   )
 } 

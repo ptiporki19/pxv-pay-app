@@ -14,7 +14,7 @@ export default async function DebugUserPage() {
     const { data, error } = await supabase
       .from('users')
       .select('*')
-      .eq('id', session.user.id)
+      .eq('email', session.user.email)
       .single()
     
     profile = data

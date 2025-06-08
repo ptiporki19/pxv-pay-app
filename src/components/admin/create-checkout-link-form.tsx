@@ -183,6 +183,23 @@ export function CreateCheckoutLinkForm() {
         return
       }
 
+      // Get the database user ID using email lookup (same fix as enhanced form)
+      const { data: dbUser, error: userError } = await supabase
+        .from('users')
+        .select('id, email, role')
+        .eq('email', user.email)
+        .single()
+
+      if (userError || !dbUser) {
+        console.error('Failed to get database user:', userError)
+        toast({
+          title: "Error",
+          description: "Unable to verify user account. Please try logging in again.",
+          variant: "destructive"
+        })
+        return
+      }
+
       // Get currency from the first selected country
       const selectedCountry = countries.find(c => values.country_codes.includes(c.code))
       if (!selectedCountry?.currency) {
@@ -203,7 +220,7 @@ export function CreateCheckoutLinkForm() {
       const { error } = await supabase
         .from('checkout_links')
         .insert({
-          merchant_id: user.id,
+          merchant_id: dbUser.id,
           slug: slug,
           title: values.title,
           link_name: values.link_name,

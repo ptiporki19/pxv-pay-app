@@ -14,7 +14,7 @@ export async function GET(
       .from('checkout_links')
       .select('active_country_codes')
       .eq('slug', slug)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .single()
 
     if (linkError || !checkoutLink) {
@@ -34,7 +34,7 @@ export async function GET(
         currency_code
       `)
       .in('code', checkoutLink.active_country_codes)
-      .eq('status', 'active')
+      .eq('active', true)
       .order('name')
 
     if (countriesError) {
@@ -53,7 +53,7 @@ export async function GET(
       .from('currencies')
       .select('id, name, code, symbol')
       .in('code', currencyCodes)
-      .eq('status', 'active')
+      .eq('active', true)
 
     if (currencyError) {
       console.error('Currency fetch error:', currencyError)

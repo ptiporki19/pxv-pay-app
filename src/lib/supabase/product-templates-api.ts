@@ -43,27 +43,45 @@ class ProductTemplatesAPI {
         .select('*')
         .order('created_at', { ascending: false })
 
-      // Apply filters
+      // Apply filters - map to actual column names
       if (filters?.category) {
         query = query.eq('category', filters.category)
       }
       
       if (filters?.is_active !== undefined) {
-        query = query.eq('is_active', filters.is_active)
-      }
-      
-      if (filters?.is_featured !== undefined) {
-        query = query.eq('is_featured', filters.is_featured)
+        query = query.eq('active', filters.is_active)
       }
       
       if (filters?.search) {
-        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,product_key.ilike.%${filters.search}%`)
+        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
       }
 
       const { data, error } = await query
 
       if (error) throw error
-      return data || []
+      
+      // Map the response data to expected format
+      const mappedData = (data || []).map(item => ({
+        ...item,
+        product_key: item.template_data?.product_key || '',
+        short_description: item.template_data?.short_description,
+        price: item.default_amount,
+        featured_image: item.image_url,
+        pricing_type: item.template_data?.pricing_type || 'fixed',
+        min_price: item.template_data?.min_price,
+        max_price: item.template_data?.max_price,
+        tags: item.template_data?.tags,
+        gallery_images: item.template_data?.gallery_images,
+        content_blocks: item.template_data?.content_blocks || [],
+        features: item.template_data?.features,
+        specifications: item.template_data?.specifications || {},
+        seo_title: item.template_data?.seo_title,
+        seo_description: item.template_data?.seo_description,
+        is_active: item.active,
+        is_featured: item.template_data?.is_featured || false,
+      }))
+      
+      return mappedData
     } catch (error) {
       console.error('Error fetching product templates:', error)
       throw error
@@ -79,7 +97,30 @@ class ProductTemplatesAPI {
         .single()
 
       if (error) throw error
-      return data
+      if (!data) return null
+      
+      // Map the response data to expected format
+      const mappedData = {
+        ...data,
+        product_key: data.template_data?.product_key || '',
+        short_description: data.template_data?.short_description,
+        price: data.default_amount,
+        featured_image: data.image_url,
+        pricing_type: data.template_data?.pricing_type || 'fixed',
+        min_price: data.template_data?.min_price,
+        max_price: data.template_data?.max_price,
+        tags: data.template_data?.tags,
+        gallery_images: data.template_data?.gallery_images,
+        content_blocks: data.template_data?.content_blocks || [],
+        features: data.template_data?.features,
+        specifications: data.template_data?.specifications || {},
+        seo_title: data.template_data?.seo_title,
+        seo_description: data.template_data?.seo_description,
+        is_active: data.active,
+        is_featured: data.template_data?.is_featured || false,
+      }
+      
+      return mappedData
     } catch (error) {
       console.error('Error fetching product template:', error)
       throw error
@@ -104,50 +145,222 @@ class ProductTemplatesAPI {
 
   async create(productData: CreateProductTemplateData): Promise<ProductTemplate> {
     try {
-      // Get current user
-      const { data: { user } } = await this.supabase.auth.getUser()
-      if (!user) throw new Error('User not authenticated')
+      // Get current user with better error handling
+      const { data: authData, error: authError } = await this.supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('Authentication error:', authError)
+        throw new Error(`Authentication failed: ${authError.message}`)
+      }
+      
+      if (!authData?.user) {
+        throw new Error('User not authenticated - please log in and try again')
+      }
 
-      // Check if product key already exists for this user
-      const { data: existing } = await this.supabase
-        .from('product_templates')
+      const authUser = authData.user
+      console.log('Creating product template for auth user:', authUser.id, authUser.email)
+
+      // Get the database user ID using email lookup (like other APIs)
+      const { data: userData, error: userError } = await this.supabase
+        .from('users')
         .select('id')
-        .eq('user_id', user.id)
-        .eq('product_key', productData.product_key)
+        .eq('email', authUser.email)
         .single()
 
-      if (existing) {
-        throw new Error('A product with this key already exists')
+      if (userError) {
+        console.error('Error fetching user data:', userError)
+        throw new Error('Failed to get user information')
       }
+
+      if (!userData) {
+        throw new Error('User not found in database')
+      }
+
+      console.log('Using database user ID:', userData.id)
+
+      // Map the input data to the actual database columns
+      const mappedData = {
+        user_id: userData.id,
+        name: productData.name,
+        description: productData.description,
+        category: productData.category,
+        default_amount: productData.price || null,
+        currency: productData.currency || 'USD',
+        image_url: productData.featured_image || null,
+        template_data: {
+          product_key: productData.product_key,
+          short_description: productData.short_description,
+          pricing_type: productData.pricing_type || 'fixed',
+          min_price: productData.min_price,
+          max_price: productData.max_price,
+          tags: productData.tags,
+          gallery_images: productData.gallery_images,
+          content_blocks: productData.content_blocks,
+          features: productData.features,
+          specifications: productData.specifications,
+          seo_title: productData.seo_title,
+          seo_description: productData.seo_description,
+        },
+        active: productData.is_active !== false, // Default to true if not specified
+      }
+
+      console.log('Inserting product template data:', mappedData)
 
       const { data, error } = await this.supabase
         .from('product_templates')
-        .insert({
-          ...productData,
-          user_id: user.id,
-        })
+        .insert(mappedData)
         .select()
         .single()
 
-      if (error) throw error
-      return data
+      if (error) {
+        console.error('Database insert error:', error)
+        
+        // Provide specific error messages for common issues
+        if (error.code === '42501') {
+          throw new Error('Permission denied - you do not have access to create product templates')
+        }
+        
+        if (error.code === '23505') {
+          throw new Error('A product template with this name already exists')
+        }
+        
+        if (error.message) {
+          throw new Error(`Database error: ${error.message}`)
+        }
+        
+        throw new Error('Failed to create product template - unknown database error')
+      }
+
+      if (!data) {
+        throw new Error('Product template creation failed - no data returned')
+      }
+      
+      console.log('Product template created successfully:', data.id)
+      
+      // Map the response back to the expected format
+      const responseData = {
+        ...data,
+        product_key: data.template_data?.product_key || '',
+        short_description: data.template_data?.short_description,
+        price: data.default_amount,
+        featured_image: data.image_url,
+        pricing_type: data.template_data?.pricing_type || 'fixed',
+        min_price: data.template_data?.min_price,
+        max_price: data.template_data?.max_price,
+        tags: data.template_data?.tags,
+        gallery_images: data.template_data?.gallery_images,
+        content_blocks: data.template_data?.content_blocks || [],
+        features: data.template_data?.features,
+        specifications: data.template_data?.specifications || {},
+        seo_title: data.template_data?.seo_title,
+        seo_description: data.template_data?.seo_description,
+        is_active: data.active,
+        is_featured: data.template_data?.is_featured || false,
+      }
+      
+      return responseData
     } catch (error) {
       console.error('Error creating product template:', error)
-      throw error
+      
+      // Ensure we always throw an Error object with a message
+      if (error instanceof Error) {
+        throw error
+      }
+      
+      // Handle cases where error might be empty object or weird format
+      if (typeof error === 'object' && error !== null) {
+        const errorMsg = (error as any).message || (error as any).error || JSON.stringify(error)
+        throw new Error(`Product template creation failed: ${errorMsg}`)
+      }
+      
+      throw new Error('Product template creation failed due to an unknown error')
     }
   }
 
   async update(id: string, productData: UpdateProductTemplateData): Promise<ProductTemplate> {
     try {
+      // Map the input data to the actual database columns
+      const mappedData: any = {}
+      
+      if (productData.name !== undefined) mappedData.name = productData.name
+      if (productData.description !== undefined) mappedData.description = productData.description
+      if (productData.category !== undefined) mappedData.category = productData.category
+      if (productData.price !== undefined) mappedData.default_amount = productData.price
+      if (productData.currency !== undefined) mappedData.currency = productData.currency
+      if (productData.featured_image !== undefined) mappedData.image_url = productData.featured_image
+      if (productData.is_active !== undefined) mappedData.active = productData.is_active
+      
+      // Handle template_data updates
+      if (productData.product_key !== undefined || 
+          productData.short_description !== undefined ||
+          productData.pricing_type !== undefined ||
+          productData.min_price !== undefined ||
+          productData.max_price !== undefined ||
+          productData.tags !== undefined ||
+          productData.gallery_images !== undefined ||
+          productData.content_blocks !== undefined ||
+          productData.features !== undefined ||
+          productData.specifications !== undefined ||
+          productData.seo_title !== undefined ||
+          productData.seo_description !== undefined) {
+        
+        // Get current template_data first
+        const { data: current } = await this.supabase
+          .from('product_templates')
+          .select('template_data')
+          .eq('id', id)
+          .single()
+        
+        const currentTemplateData = current?.template_data || {}
+        
+        mappedData.template_data = {
+          ...currentTemplateData,
+          ...(productData.product_key !== undefined && { product_key: productData.product_key }),
+          ...(productData.short_description !== undefined && { short_description: productData.short_description }),
+          ...(productData.pricing_type !== undefined && { pricing_type: productData.pricing_type }),
+          ...(productData.min_price !== undefined && { min_price: productData.min_price }),
+          ...(productData.max_price !== undefined && { max_price: productData.max_price }),
+          ...(productData.tags !== undefined && { tags: productData.tags }),
+          ...(productData.gallery_images !== undefined && { gallery_images: productData.gallery_images }),
+          ...(productData.content_blocks !== undefined && { content_blocks: productData.content_blocks }),
+          ...(productData.features !== undefined && { features: productData.features }),
+          ...(productData.specifications !== undefined && { specifications: productData.specifications }),
+          ...(productData.seo_title !== undefined && { seo_title: productData.seo_title }),
+          ...(productData.seo_description !== undefined && { seo_description: productData.seo_description }),
+        }
+      }
+
       const { data, error } = await this.supabase
         .from('product_templates')
-        .update(productData)
+        .update(mappedData)
         .eq('id', id)
         .select()
         .single()
 
       if (error) throw error
-      return data
+      
+      // Map the response back to the expected format
+      const responseData = {
+        ...data,
+        product_key: data.template_data?.product_key || '',
+        short_description: data.template_data?.short_description,
+        price: data.default_amount,
+        featured_image: data.image_url,
+        pricing_type: data.template_data?.pricing_type || 'fixed',
+        min_price: data.template_data?.min_price,
+        max_price: data.template_data?.max_price,
+        tags: data.template_data?.tags,
+        gallery_images: data.template_data?.gallery_images,
+        content_blocks: data.template_data?.content_blocks || [],
+        features: data.template_data?.features,
+        specifications: data.template_data?.specifications || {},
+        seo_title: data.template_data?.seo_title,
+        seo_description: data.template_data?.seo_description,
+        is_active: data.active,
+        is_featured: data.template_data?.is_featured || false,
+      }
+      
+      return responseData
     } catch (error) {
       console.error('Error updating product template:', error)
       throw error
@@ -185,13 +398,35 @@ class ProductTemplatesAPI {
     try {
       const { data, error } = await this.supabase
         .from('product_templates')
-        .update({ is_active: isActive })
+        .update({ active: isActive })
         .eq('id', id)
         .select()
         .single()
 
       if (error) throw error
-      return data
+      
+      // Map the response back to the expected format
+      const responseData = {
+        ...data,
+        product_key: data.template_data?.product_key || '',
+        short_description: data.template_data?.short_description,
+        price: data.default_amount,
+        featured_image: data.image_url,
+        pricing_type: data.template_data?.pricing_type || 'fixed',
+        min_price: data.template_data?.min_price,
+        max_price: data.template_data?.max_price,
+        tags: data.template_data?.tags,
+        gallery_images: data.template_data?.gallery_images,
+        content_blocks: data.template_data?.content_blocks || [],
+        features: data.template_data?.features,
+        specifications: data.template_data?.specifications || {},
+        seo_title: data.template_data?.seo_title,
+        seo_description: data.template_data?.seo_description,
+        is_active: data.active,
+        is_featured: data.template_data?.is_featured || false,
+      }
+      
+      return responseData
     } catch (error) {
       console.error('Error toggling product template status:', error)
       throw error
@@ -200,15 +435,51 @@ class ProductTemplatesAPI {
 
   async toggleFeatured(id: string, isFeatured: boolean): Promise<ProductTemplate> {
     try {
+      // Since is_featured column doesn't exist in current schema, we'll store it in template_data
+      const { data: current } = await this.supabase
+        .from('product_templates')
+        .select('template_data')
+        .eq('id', id)
+        .single()
+      
+      const currentTemplateData = current?.template_data || {}
+      
       const { data, error } = await this.supabase
         .from('product_templates')
-        .update({ is_featured: isFeatured })
+        .update({ 
+          template_data: {
+            ...currentTemplateData,
+            is_featured: isFeatured
+          }
+        })
         .eq('id', id)
         .select()
         .single()
 
       if (error) throw error
-      return data
+      
+      // Map the response back to the expected format
+      const responseData = {
+        ...data,
+        product_key: data.template_data?.product_key || '',
+        short_description: data.template_data?.short_description,
+        price: data.default_amount,
+        featured_image: data.image_url,
+        pricing_type: data.template_data?.pricing_type || 'fixed',
+        min_price: data.template_data?.min_price,
+        max_price: data.template_data?.max_price,
+        tags: data.template_data?.tags,
+        gallery_images: data.template_data?.gallery_images,
+        content_blocks: data.template_data?.content_blocks || [],
+        features: data.template_data?.features,
+        specifications: data.template_data?.specifications || {},
+        seo_title: data.template_data?.seo_title,
+        seo_description: data.template_data?.seo_description,
+        is_active: data.active,
+        is_featured: data.template_data?.is_featured || false,
+      }
+      
+      return responseData
     } catch (error) {
       console.error('Error toggling product template featured status:', error)
       throw error

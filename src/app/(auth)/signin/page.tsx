@@ -61,36 +61,56 @@ export default function SignInPage() {
         throw error
       }
       
-      // Fetch user profile to check role
-      const { data: userProfile, error: profileError } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', data.user.id)
-        .single()
-      
-      if (profileError) {
-        console.error('Error fetching user profile:', profileError)
-        // Fallback: redirect to regular dashboard if we can't determine role
+      console.log('✅ Authentication successful:', {
+        userId: data.user.id,
+        email: data.user.email
+      })
+
+      // Get user profile to determine role-based redirect
+      try {
+        const { data: profile, error: profileError } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', data.user.id)
+          .single()
+
+        console.log('📋 User profile check:', {
+          profileData: profile,
+          profileError: profileError?.message,
+          role: profile?.role
+        })
+
+        const isSuperAdmin = profile?.role === 'super_admin'
+        const redirectTo = isSuperAdmin ? '/super-admin' : '/dashboard'
+        
+        console.log('🎯 Redirect decision:', {
+          role: profile?.role,
+          isSuperAdmin,
+          redirectTo
+        })
+
+        toast.success('Signed in successfully', {
+          description: `Redirecting to ${isSuperAdmin ? 'super admin' : 'your'} dashboard...`,
+        })
+
+        // Direct redirect based on role
+        router.push(redirectTo)
+        router.refresh()
+        
+      } catch (profileError) {
+        console.error('❌ Profile fetch failed, using default redirect:', profileError)
+        
         toast.success('Signed in successfully', {
           description: 'Redirecting to your dashboard...',
         })
+        
+        // Fallback to default dashboard
         router.push('/dashboard')
         router.refresh()
-        return
       }
-
-      // Determine redirect path based on actual user role
-      const isSuperAdmin = userProfile.role === 'super_admin'
-      const redirectPath = isSuperAdmin ? '/super-admin' : '/dashboard'
-
-      toast.success('Signed in successfully', {
-        description: `Redirecting to your ${isSuperAdmin ? 'super admin ' : ''}dashboard...`,
-      })
-
-      // Redirect to the appropriate dashboard based on the user's role
-      router.push(redirectPath)
-      router.refresh()
+      
     } catch (error: any) {
+      console.error('❌ Sign in failed:', error)
       toast.error('Sign in failed', {
         description: error?.message || 'Failed to sign in. Please check your credentials.',
       })

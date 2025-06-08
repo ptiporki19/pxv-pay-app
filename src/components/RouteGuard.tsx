@@ -42,12 +42,6 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
           }
         } else {
           // Has session - check role and route accordingly
-          const userEmail = session.user.email || ''
-          
-          // Quick check - if email matches super admin, handle immediately
-          const isSuperAdminEmail = userEmail === 'admin@pxvpay.com' || 
-                                   userEmail === 'dev-admin@pxvpay.com' || 
-                                   userEmail === 'superadmin@pxvpay.com'
           
           // Get user profile from DB with better error handling
           let userProfile = null
@@ -55,7 +49,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
             const { data, error: profileError } = await supabase
               .from('users')
               .select('role')
-              .eq('id', session.user.id)
+              .eq('email', session.user.email)
               .single()
             
             if (profileError) {
@@ -67,8 +61,16 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
             console.warn('Profile fetch failed:', error)
           }
           
-          const isSuperAdminRole = userProfile?.role === 'super_admin'
-          const isSuperAdmin = isSuperAdminRole || isSuperAdminEmail
+          // ONLY use database role, no hardcoded emails
+          const isSuperAdmin = userProfile?.role === 'super_admin'
+          
+          console.log('Route Guard - User Role Check:', {
+            userEmail: session.user.email,
+            userId: session.user.id,
+            databaseRole: userProfile?.role,
+            isSuperAdmin,
+            currentPath: pathname
+          })
           
           // Redirect logic
           const path = pathname || ''

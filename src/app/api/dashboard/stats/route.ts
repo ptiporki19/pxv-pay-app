@@ -14,17 +14,24 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check if user is super admin
-    const { data: userProfile } = await supabase
+    // Get database user profile using email lookup
+    const { data: userProfile, error: userError } = await supabase
       .from('users')
-      .select('role')
-      .eq('id', session.user.id)
+      .select('id, email, role')
+      .eq('email', session.user.email)
       .single()
+
+    if (userError || !userProfile) {
+      return NextResponse.json(
+        { error: 'Unable to verify user account. Please try logging in again.' },
+        { status: 401 }
+      )
+    }
 
     const isSuperAdminEmail = session.user.email === 'admin@pxvpay.com' ||
                               session.user.email === 'dev-admin@pxvpay.com' ||
                               session.user.email === 'superadmin@pxvpay.com'
-    const isSuperAdmin = userProfile?.role === 'super_admin' || isSuperAdminEmail
+    const isSuperAdmin = userProfile.role === 'super_admin' || isSuperAdminEmail
 
     // Fetch stats based on user role
     let stats = {
@@ -86,11 +93,11 @@ export async function GET(request: NextRequest) {
         paymentMethodsCount
       ] = await Promise.all([
         // Total payments for this merchant
-        supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', session.user.id),
+        supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', userProfile.id),
         // Pending verification payments for this merchant  
-        supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', session.user.id).eq('status', 'pending_verification'),
+        supabase.from('payments').select('*', { count: 'exact', head: true }).eq('merchant_id', userProfile.id).eq('status', 'pending_verification'),
         // Payment methods for this user
-        supabase.from('payment_methods').select('*', { count: 'exact', head: true }).eq('user_id', session.user.id)
+        supabase.from('payment_methods').select('*', { count: 'exact', head: true }).eq('user_id', userProfile.id)
       ])
 
       stats = {

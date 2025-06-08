@@ -48,14 +48,26 @@ export function NotificationsPopover() {
       setLoading(true)
       
       const { data: sessionData } = await supabase.auth.getSession()
-      const userId = sessionData?.session?.user?.id
+      const userEmail = sessionData?.session?.user?.email
       
-      if (!userId) return
+      if (!userEmail) return
+      
+      // Get database user ID using email (same pattern as dashboard fix)
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', userEmail)
+        .single()
+      
+      if (userError || !userData) {
+        console.error('Failed to get user data:', userError)
+        return
+      }
       
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', userData.id)
         .order('created_at', { ascending: false })
         .limit(10)
       
@@ -78,34 +90,53 @@ export function NotificationsPopover() {
   useEffect(() => {
     fetchNotifications()
     
-    // Subscribe to new notifications
-    const subscription = supabase
-      .channel('notifications-channel')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'notifications',
-      }, (payload) => {
-        // Add the new notification to the list
-        const newNotification = payload.new as Notification
-        setNotifications(prev => [
-          {
-            ...newNotification,
-            time: getRelativeTime(newNotification.created_at)
-          },
-          ...prev
-        ])
-        
-        // Show toast notification
-        toast.info(newNotification.title, {
-          description: newNotification.message,
+    const setupSubscription = async () => {
+      const { data: sessionData } = await supabase.auth.getSession()
+      const userEmail = sessionData?.session?.user?.email
+      
+      if (!userEmail) return
+      
+      // Get database user ID for subscription filtering
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', userEmail)
+        .single()
+      
+      if (!userData) return
+      
+      // Subscribe to new notifications for this specific user
+      const subscription = supabase
+        .channel('notifications-channel')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userData.id}`
+        }, (payload) => {
+          // Add the new notification to the list
+          const newNotification = payload.new as Notification
+          setNotifications(prev => [
+            {
+              ...newNotification,
+              time: getRelativeTime(newNotification.created_at)
+            },
+            ...prev
+          ])
+          
+          // Show toast notification
+          toast.info(newNotification.title, {
+            description: newNotification.message,
+          })
         })
-      })
-      .subscribe()
-    
-    return () => {
-      supabase.removeChannel(subscription)
+        .subscribe()
+      
+      return () => {
+        supabase.removeChannel(subscription)
+      }
     }
+    
+    setupSubscription()
   }, [])
   
   // Convert timestamp to relative time
@@ -125,9 +156,18 @@ export function NotificationsPopover() {
   const markAllAsRead = async () => {
     try {
       const { data: sessionData } = await supabase.auth.getSession()
-      const userId = sessionData?.session?.user?.id
+      const userEmail = sessionData?.session?.user?.email
       
-      if (!userId) return
+      if (!userEmail) return
+      
+      // Get database user ID using email
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', userEmail)
+        .single()
+      
+      if (!userData) return
       
       // Update all unread notifications in Supabase
       const unreadIds = notifications

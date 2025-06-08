@@ -43,20 +43,16 @@ export function UsersList() {
         return
       }
 
-      // Check super admin status
-      const userEmail = session.user.email || ''
+      // Check super admin status (ONLY database role)
       const { data: userProfile } = await supabase
         .from('users')
         .select('role')
         .eq('id', session.user.id)
         .single()
 
-      const isSuperAdminEmail = userEmail === 'admin@pxvpay.com' || 
-                                userEmail === 'dev-admin@pxvpay.com' || 
-                                userEmail === 'superadmin@pxvpay.com'
       const isSuperAdminRole = userProfile?.role === 'super_admin'
       
-      if (!isSuperAdminRole && !isSuperAdminEmail) {
+      if (!isSuperAdminRole) {
         router.push('/dashboard')
         return
       }

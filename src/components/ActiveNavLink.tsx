@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useMerchantUIStore } from '@/lib/store'
-import { Home, Globe, DollarSign, CreditCard, Link2, Palette, FileText, Shield, Users, Activity, Clock, Zap, Crown } from 'lucide-react'
+import { Home, Globe, DollarSign, CreditCard, Link2, Palette, FileText, Shield, Users, Activity, Clock, Zap, Crown, Package } from 'lucide-react'
 import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -62,6 +62,8 @@ export function ActiveNavLink({ href, iconName, children }: ActiveNavLinkProps) 
         return <Zap className={className} />
       case 'Crown':
         return <Crown className={className} />
+      case 'Package':
+        return <Package className={className} />
       default:
         return <Home className={className} />
     }

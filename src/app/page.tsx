@@ -1,3 +1,6 @@
+'use client'
+
+import Link from 'next/link'
 import Header from '@/components/landing/Header'
 import Hero from '@/components/landing/Hero'
 import Features from '@/components/landing/Features'
@@ -35,4 +38,4 @@ export default function Home() {
       <Footer />
     </div>
   );
-}
+} 

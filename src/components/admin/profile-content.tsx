@@ -45,18 +45,22 @@ export function ProfileContent() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Get user profile
+      // Get user profile using email lookup (same pattern as other components)
       const { data: profileData, error } = await supabase
         .from('users')
         .select('*')
-        .eq('id', user.id)
+        .eq('email', user.email)
         .single()
 
       if (error) {
-        console.warn('Error loading profile:', error.message)
+        console.error('Error loading profile:', error)
         return
       }
 
+      if (!profileData) {
+        console.error('No profile data found for email:', user.email)
+        return
+      }
       setProfile(profileData)
       setFormData(profileData)
     } catch (error) {

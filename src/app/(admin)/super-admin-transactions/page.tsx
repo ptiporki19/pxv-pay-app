@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+
 import { toast } from "@/components/ui/use-toast"
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -34,8 +34,7 @@ export default function SuperAdminTransactionsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+
   
   const supabase = createClient()
 
@@ -188,10 +187,7 @@ export default function SuperAdminTransactionsPage() {
     }
   }
 
-  const openTransactionDialog = (transaction: Transaction) => {
-    setSelectedTransaction(transaction)
-    setIsDialogOpen(true)
-  }
+
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -378,9 +374,11 @@ export default function SuperAdminTransactionsPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => openTransactionDialog(transaction)}>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
+                                <DropdownMenuItem asChild>
+                                  <Link href={`/super-admin-transactions/${transaction.id}`}>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Details
+                                  </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
                                   <Download className="h-4 w-4 mr-2" />
@@ -425,137 +423,7 @@ export default function SuperAdminTransactionsPage() {
           </div>
         </div>
 
-        {/* Transaction Details Dialog */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                {selectedTransaction && getStatusIcon(selectedTransaction.status)}
-                Transaction Details
-              </DialogTitle>
-              <DialogDescription>
-                View detailed information about this transaction
-              </DialogDescription>
-            </DialogHeader>
-            {selectedTransaction && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Transaction ID</Label>
-                    <div className="flex items-center justify-between p-2 bg-background rounded border text-sm">
-                      <span className="font-mono">{selectedTransaction.id}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => copyToClipboard(selectedTransaction.id, "Transaction ID")}
-                      >
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Status</Label>
-                    <Badge variant="outline" className={cn(getStatusBadgeClass(selectedTransaction.status))}>
-                      {selectedTransaction.status.replace('_', ' ')}
-                    </Badge>
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Amount</Label>
-                    <div className="p-2 bg-background rounded border text-sm font-medium">
-                      {formatAmount(selectedTransaction.amount, selectedTransaction.currency)}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Payment Method</Label>
-                    <div className="p-2 bg-background rounded border text-sm">
-                      {selectedTransaction.payment_method}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Created At</Label>
-                  <div className="p-2 bg-background rounded border text-sm">
-                    {formatDate(selectedTransaction.created_at)}
-                  </div>
-                </div>
-
-                {selectedTransaction.customer_name && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Customer Name</Label>
-                    <div className="p-2 bg-background rounded border text-sm">
-                      {selectedTransaction.customer_name}
-                    </div>
-                  </div>
-                )}
-
-                {selectedTransaction.customer_email && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Customer Email</Label>
-                    <div className="flex items-center justify-between p-2 bg-background rounded border text-sm">
-                      <span>{selectedTransaction.customer_email}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => copyToClipboard(selectedTransaction.customer_email || '', "Customer Email")}
-                      >
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {selectedTransaction.merchant_email && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Merchant Email</Label>
-                    <div className="flex items-center justify-between p-2 bg-background rounded border text-sm">
-                      <span>{selectedTransaction.merchant_email}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => copyToClipboard(selectedTransaction.merchant_email || '', "Merchant Email")}
-                      >
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-
-                {selectedTransaction.description && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Description</Label>
-                    <div className="p-2 bg-background rounded border text-sm">
-                      {selectedTransaction.description}
-                    </div>
-                  </div>
-                )}
-
-                {selectedTransaction.reference && (
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Reference</Label>
-                    <div className="flex items-center justify-between p-2 bg-background rounded border text-sm">
-                      <span className="font-mono">{selectedTransaction.reference}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => copyToClipboard(selectedTransaction.reference || '', "Reference")}
-                      >
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   )

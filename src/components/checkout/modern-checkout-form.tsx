@@ -47,7 +47,7 @@ interface PaymentMethod {
   url?: string
   icon_url?: string
   display_order: number
-  custom_fields?: Array<{
+  account_details?: Array<{
     id: string
     label: string
     value: string
@@ -136,6 +136,13 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || 'Failed to validate checkout')
         if (!data.valid) throw new Error('Checkout link is not valid or inactive')
+        
+        console.log('Checkout validation response:', data)
+        console.log('Checkout link type:', data.checkout_link?.checkout_type)
+        console.log('Product name:', data.checkout_link?.product_name)
+        console.log('Product description:', data.checkout_link?.product_description?.substring(0, 100))
+        console.log('Product image:', data.checkout_link?.product_image_url)
+        
         setCheckoutData(data)
         const countriesResponse = await fetch(`/api/checkout/${slug}/countries`)
         const countriesData = await countriesResponse.json()
@@ -196,7 +203,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
       console.log('Payment method type:', selectedPaymentMethod.type)
       console.log('Payment method URL:', selectedPaymentMethod.url)
       
-      if (selectedPaymentMethod.type === 'payment-link' && selectedPaymentMethod.url) {
+      if (selectedPaymentMethod.type === 'payment_link' && selectedPaymentMethod.url) {
         // Ensure URL has proper protocol
         let url = selectedPaymentMethod.url.trim()
         if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -390,7 +397,18 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
           <h1 className="text-lg font-medium text-gray-900">Complete Your Payment</h1>
         </div>
 
-        {checkoutLink.checkout_type === 'product' && currentStep === 'details' ? (
+        {(() => {
+          const isProductCheckout = checkoutLink.checkout_type === 'product'
+          const isDetailsStep = currentStep === 'details'
+          console.log('Rendering decision:', {
+            checkout_type: checkoutLink.checkout_type,
+            currentStep,
+            isProductCheckout,
+            isDetailsStep,
+            willShowProductLayout: isProductCheckout && isDetailsStep
+          })
+          return isProductCheckout && isDetailsStep
+        })() ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
             {/* Product Information Card */}
             <div className="bg-white rounded-2xl p-6 flex flex-col h-[700px]">
@@ -420,9 +438,9 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     <span className="text-gray-600 text-sm font-medium">PRICE</span>
                     <span className="text-2xl font-bold text-gray-900">
                       {currency ? (
-                        `${checkoutLink.amount} ${currency.code}`
+                        `${checkoutLink.checkout_type === 'product' ? (checkoutLink.custom_price || checkoutLink.amount) : checkoutLink.amount} ${currency.code}`
                       ) : (
-                        `${checkoutLink.amount}`
+                        `${checkoutLink.checkout_type === 'product' ? (checkoutLink.custom_price || checkoutLink.amount) : checkoutLink.amount}`
                       )}
                     </span>
                   </div>
@@ -587,7 +605,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
             )}
             {currentStep === 'payment-methods' && (
               <div className="space-y-4">
-                <div className="text-center mb-4"><p className="text-gray-600 text-sm">Amount: {checkoutLink.amount_type === 'fixed' ? checkoutLink.amount : amount} {currency?.code}</p></div>
+                <div className="text-center mb-4"><p className="text-gray-600 text-sm">Amount: {checkoutLink.amount_type === 'fixed' ? (checkoutLink.checkout_type === 'product' ? (checkoutLink.custom_price || checkoutLink.amount) : checkoutLink.amount) : amount} {currency?.code}</p></div>
                 {paymentMethods.length === 0 ? (
                   <div className="text-center py-8"><p className="text-gray-600">No payment methods available for {selectedCountryData?.name}</p></div>
                 ) : (
@@ -607,7 +625,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                 )}
                 <div className="pt-4">
                   <Button onClick={handleProceedToDetails} disabled={!selectedPaymentMethod} className="w-full btn-primary rounded-xl h-12">
-                    {selectedPaymentMethod?.type === 'payment-link' ? (
+                    {selectedPaymentMethod?.type === 'payment_link' ? (
                       <>Pay with {selectedPaymentMethod.name}<ArrowRight className="ml-2 h-4 w-4" /></>
                     ) : (
                       <>Continue<ArrowRight className="ml-2 h-4 w-4" /></>
@@ -619,7 +637,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
             {currentStep === 'payment-details' && selectedPaymentMethod && (
               <div className="space-y-6">
                 <div className="text-center">
-                  <p className="text-xl font-semibold text-gray-800 mb-1">{checkoutLink.amount_type === 'fixed' ? checkoutLink.amount : amount} {currency?.code}</p>
+                  <p className="text-xl font-semibold text-gray-800 mb-1">{checkoutLink.amount_type === 'fixed' ? (checkoutLink.checkout_type === 'product' ? (checkoutLink.custom_price || checkoutLink.amount) : checkoutLink.amount) : amount} {currency?.code}</p>
                   <p className="text-sm text-gray-500">{selectedPaymentMethod.name}</p>
                 </div>
                 
@@ -636,9 +654,9 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     </div>
                   )}
                   
-                  {selectedPaymentMethod.custom_fields && selectedPaymentMethod.custom_fields.length > 0 ? (
+                  {selectedPaymentMethod.account_details && selectedPaymentMethod.account_details.length > 0 ? (
                     <div className="space-y-3">
-                      {selectedPaymentMethod.custom_fields.map((field, index) => (
+                      {selectedPaymentMethod.account_details.map((field, index) => (
                         <div key={field.id || index} className="flex items-stretch space-x-2 min-h-[44px]">
                           <div className="bg-white rounded-lg px-3 py-2 text-sm text-gray-700 w-2/5 flex items-center overflow-hidden">
                             <span className="truncate" title={field.label}>{field.label}</span>
@@ -667,38 +685,6 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                         </div>
                       )}
                     </div>
-                  ) : selectedPaymentMethod.instructions_for_checkout ? (
-                    <div className="space-y-2">
-                      {parseInstructions(selectedPaymentMethod.instructions_for_checkout).map((item, index) => (
-                        item.type === 'pair' ? (
-                          <div key={index} className="flex items-stretch space-x-2 min-h-[44px]">
-                            <div className="bg-white rounded-lg px-3 py-2 text-sm text-gray-700 w-2/5 flex items-center overflow-hidden">
-                              <span className="truncate" title={item.label}>{item.label}</span>
-                            </div>
-                            <div className="flex-1 bg-white rounded-lg px-3 py-2 text-sm text-gray-900 font-medium flex items-center justify-between min-w-0 overflow-hidden">
-                              <span 
-                                className={`flex-1 truncate ${isTruncated(item.value || '') ? 'font-mono text-xs' : ''} mr-2`} 
-                                title={isTruncated(item.value || '') ? `Full value: ${item.value}` : item.value}
-                              >
-                                {formatValueForDisplay(item.value || '')}
-                              </span>
-                              <button 
-                                type="button" 
-                                onClick={() => handleCopy(item.value || '')} 
-                                className="flex-shrink-0 p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors" 
-                                title={`Copy ${isTruncated(item.value || '') ? 'full value' : 'value'} to clipboard`}
-                              >
-                                <Copy className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div key={index} className="bg-white rounded-lg px-3 py-2 text-sm text-gray-900">
-                            {item.text}
-                      </div>
-                        )
-                      ))}
-                </div>
                   ) : (
                     <div className="text-center text-gray-500">
                       <p>Payment method information will be displayed here</p>

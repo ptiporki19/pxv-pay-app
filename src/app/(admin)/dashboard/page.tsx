@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { 
   ExternalLink,
   Info,
-  CreditCard
+  CreditCard,
+  Plus
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -13,18 +14,10 @@ import { createClient } from '@/lib/supabase/server'
 import { 
   PendingVerificationWidget,
   PaymentMethodsWidget,
-  CurrenciesWidget,
   TotalPaymentsWidget,
   ProductsWidget
 } from '@/components/dashboard/merchant-stats-widgets'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+
 
 export const metadata: Metadata = {
   title: 'Dashboard - PXV Pay',
@@ -51,11 +44,11 @@ export default async function DashboardPage() {
     const userId = session?.user?.id
     
     if (userId) {
-      // Fetch user data
+      // Fetch user data using email for reliable lookup
       const { data: userResult } = await supabase
         .from('users')
         .select('*')
-        .eq('id', userId)
+        .eq('email', session?.user?.email)
         .single()
       
       userData = userResult
@@ -73,9 +66,9 @@ export default async function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(10)
 
-      // If not super admin, filter by merchant_id to show only their own transactions
-      if (!isSuperAdmin) {
-        paymentsQuery = paymentsQuery.eq('merchant_id', userId)
+      // If not super admin, filter by merchant_id using the correct database ID
+      if (!isSuperAdmin && userData?.id) {
+        paymentsQuery = paymentsQuery.eq('merchant_id', userData.id)
       }
 
       const { data: recentPayments } = await paymentsQuery
@@ -111,10 +104,10 @@ export default async function DashboardPage() {
       <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back, {userData?.email?.split('@')[0] || 'User'}</p>
         </div>
-        <Button variant="outline" size="sm" className="gap-2" asChild>
-          <Link href="/transactions">
-            <ExternalLink className="h-4 w-4" />
-            View Recent Activity
+        <Button size="sm" className="gap-2" asChild>
+          <Link href="/checkout-links/create">
+            <Plus className="h-4 w-4" />
+            Create Checkout Link
           </Link>
         </Button>
       </div>
@@ -136,10 +129,9 @@ export default async function DashboardPage() {
       {/* Real-Time Dashboard Stats */}
       <div>
         <h2 className="text-xl font-semibold mb-4">Dashboard Stats</h2>
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <PendingVerificationWidget />
           <PaymentMethodsWidget />
-          <CurrenciesWidget />
           <TotalPaymentsWidget />
           <ProductsWidget />
         </div>
@@ -194,79 +186,13 @@ export default async function DashboardPage() {
                       <td className="px-4 py-3">{payment.country}</td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
-                          {/* Transaction Details Dialog */}
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <Info className="h-4 w-4" />
-                                <span className="sr-only">View Transaction Details</span>
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>Transaction Details</DialogTitle>
-                                <DialogDescription>
-                                  Complete information for transaction {payment.id.slice(0, 8)}...
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="mt-4 space-y-6">
-                                {/* Transaction Info */}
-                                <div className="p-4 bg-gray-50 rounded-lg">
-                                  <h3 className="font-semibold mb-3">Transaction Information</h3>
-                                  <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div>
-                                      <span className="font-medium">Transaction ID:</span>
-                                      <div className="font-mono text-xs">{payment.fullId}</div>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Amount:</span>
-                                      <div className="text-lg font-semibold">{payment.amount} {payment.currency}</div>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Customer:</span>
-                                      <div>{payment.customer}</div>
-                                      <div className="text-gray-600">{payment.customerEmail}</div>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Payment Method:</span>
-                                      <div>{payment.method}</div>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Country:</span>
-                                      <div>{payment.country}</div>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Date:</span>
-                                      <div>{payment.date}</div>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium">Status:</span>
-                                      <div>
-                                        <Badge variant="outline" className={cn(
-                                          payment.status === 'completed' && "bg-green-50 text-green-700 border-green-200",
-                                          payment.status === 'pending_verification' && "bg-yellow-50 text-yellow-700 border-yellow-200",
-                                          payment.status === 'pending' && "bg-yellow-50 text-yellow-700 border-yellow-200",
-                                          payment.status === 'failed' && "bg-red-50 text-red-700 border-red-200"
-                                        )}>
-                                          {payment.status.replace('_', ' ')}
-                                        </Badge>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                {/* Link to full transaction details */}
-                                <div className="flex justify-center">
-                                  <Button asChild>
-                                    <Link href={`/transactions/${payment.fullId}`}>
-                                      View Full Transaction Details
-                                      <ExternalLink className="h-4 w-4 ml-2" />
-                                    </Link>
-                                  </Button>
-                                </div>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                          {/* Transaction Details Link */}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                            <Link href={`/transactions/${payment.fullId}`}>
+                              <Info className="h-4 w-4" />
+                              <span className="sr-only">View Transaction Details</span>
+                            </Link>
+                          </Button>
 
                           <Badge variant="outline" className={cn(
                             payment.status === 'completed' && "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",

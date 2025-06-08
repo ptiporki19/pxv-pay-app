@@ -73,7 +73,7 @@ export async function POST(
       .select('*, merchant_id')
       .eq('slug', slug)
       .eq('id', checkoutLinkId)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .single()
 
     if (linkError || !checkoutLink) {
@@ -108,7 +108,7 @@ export async function POST(
         .from('currencies')
         .select('id, name, code, symbol')
         .eq('code', countryData.currency_code)
-        .eq('status', 'active')
+        .eq('active', true)
         .single()
 
       if (!currencyError && currency) {

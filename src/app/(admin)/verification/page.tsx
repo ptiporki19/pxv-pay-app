@@ -172,9 +172,21 @@ export default function VerificationPage() {
                 src={proofUrl}
                 alt="Payment proof"
                 className="w-full h-auto max-h-96 object-contain"
+                crossOrigin="anonymous"
+                loading="lazy"
                 onError={(e) => {
                   console.error('Image load error for URL:', proofUrl);
                   const target = e.target as HTMLImageElement
+                  
+                  // Try to reload the image once with cache-busting
+                  if (!target.dataset.retried) {
+                    target.dataset.retried = 'true'
+                    setTimeout(() => {
+                      target.src = proofUrl + '?t=' + Date.now()
+                    }, 1000)
+                    return
+                  }
+                  
                   target.style.display = 'none'
                   const errorDiv = target.nextElementSibling as HTMLElement;
                   if (errorDiv) {
@@ -246,6 +258,8 @@ export default function VerificationPage() {
                     alt="Full size payment proof"
                     className="w-full h-auto rounded border shadow-lg"
                     style={{ maxWidth: 'none', objectFit: 'contain' }}
+                    crossOrigin="anonymous"
+                    loading="eager"
                     onError={(e) => {
                       console.error('Full size image load error for URL:', proofUrl);
                       toast.error('Failed to load full size image');

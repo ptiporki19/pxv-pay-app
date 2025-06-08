@@ -45,13 +45,30 @@ export function CheckoutLinksList() {
           return
         }
 
+        // Get the database user ID using email lookup
+        const { data: dbUser, error: userError } = await supabase
+          .from('users')
+          .select('id, email, role')
+          .eq('email', user.email)
+          .single()
+
+        if (userError || !dbUser) {
+          console.error('Failed to get database user:', userError)
+          toast({
+            title: "Error",
+            description: "Unable to verify user account. Please try logging in again.",
+            variant: "destructive"
+          })
+          return
+        }
+
         const { data, error } = await supabase
           .from('checkout_links')
           .select(`
             *,
             payments:payments(count)
           `)
-          .eq('merchant_id', user.id)
+          .eq('merchant_id', dbUser.id)
           .order('created_at', { ascending: false })
 
         if (error) throw error

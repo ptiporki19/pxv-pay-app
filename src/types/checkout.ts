@@ -14,7 +14,6 @@ export interface CheckoutLink {
   currency: string // Currency code (USD, EUR, etc.) - derived from selected country
   status: 'active' | 'inactive' | 'expired' | 'draft' // Link status
   active_country_codes: string[]
-  is_active: boolean
   
   // Checkout type and product fields
   checkout_type: 'simple' | 'product' // Type of checkout: simple payment or product sales
@@ -74,7 +73,7 @@ export interface CreateCheckoutLinkData {
 }
 
 export interface UpdateCheckoutLinkData extends Partial<CreateCheckoutLinkData> {
-  is_active?: boolean
+  status?: 'active' | 'inactive' | 'expired' | 'draft'
 }
 
 // Form data types for checkout settings

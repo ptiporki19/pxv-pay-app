@@ -165,6 +165,13 @@ export function UserProfile({ userId }: UserProfileProps) {
     try {
       setIsLoading(true)
       
+      // First check if userId is valid
+      if (!userId || userId.trim() === '') {
+        throw new Error('Invalid user ID provided')
+      }
+      
+      console.log('Fetching user profile for ID:', userId)
+      
       // Fetch user details
       const { data: userData, error: userError } = await supabase
         .from('users')
@@ -174,6 +181,14 @@ export function UserProfile({ userId }: UserProfileProps) {
 
       if (userError) {
         console.error('User fetch error:', userError)
+        console.error('Failed to fetch user with ID:', userId)
+        
+        if (userError.code === 'PGRST116') {
+          throw new Error(`No user found with ID: ${userId}`)
+        } else if (userError.code === 'PGRST102') {
+          throw new Error(`Multiple users found with ID: ${userId} (this should not happen)`)
+        }
+        
         throw new Error(`Failed to fetch user: ${userError.message}`)
       }
       setUser(userData)
@@ -539,6 +554,93 @@ export function UserProfile({ userId }: UserProfileProps) {
 
   const getUserInitials = (email: string) => {
     return email.slice(0, 2).toUpperCase()
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <Link href="/users">
+            <Button variant="outline" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Users
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900">User Profile</h1>
+        </div>
+        
+        {/* Loading Card */}
+        <Card className="border-2">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 bg-gray-200 animate-pulse rounded-full"></div>
+              <div className="space-y-2">
+                <div className="h-6 w-48 bg-gray-200 animate-pulse rounded"></div>
+                <div className="h-4 w-32 bg-gray-200 animate-pulse rounded"></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading user profile...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state if no user found
+  if (!user) {
+    return (
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <Link href="/users">
+            <Button variant="outline" size="sm" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Users
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900">User Profile</h1>
+        </div>
+        
+        {/* Error Card */}
+        <Card className="border-2 border-red-200">
+          <CardContent className="p-6">
+            <div className="text-center py-8">
+              <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="h-8 w-8 text-red-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">User Not Found</h2>
+              <p className="text-gray-600 mb-4">
+                The user with ID "{userId}" could not be found in the database.
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                This could happen if:
+              </p>
+              <ul className="text-sm text-gray-500 text-left max-w-md mx-auto mb-6">
+                <li>• The user ID is invalid or malformed</li>
+                <li>• The user has been deleted</li>
+                <li>• There's a database connectivity issue</li>
+              </ul>
+              <div className="flex gap-2 justify-center">
+                <Link href="/users">
+                  <Button variant="outline">
+                    Back to Users List
+                  </Button>
+                </Link>
+                <Button onClick={() => fetchUserProfile()} variant="default">
+                  Retry
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (

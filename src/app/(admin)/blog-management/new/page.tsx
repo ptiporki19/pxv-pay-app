@@ -18,21 +18,17 @@ export default async function NewBlogPostPage() {
     redirect('/signin')
   }
 
-  // Get user profile including role and email for super admin check
+  // Get user profile including role for super admin check
   const { data: profile } = await supabase
     .from('users')
     .select('*')
     .eq('id', session.user.id)
     .single()
 
-  // Check if user is super admin (using both role and direct email check)
-  const userEmail = session.user.email || ''
-  const isSuperAdminEmail = userEmail === 'admin@pxvpay.com' || 
-                            userEmail === 'dev-admin@pxvpay.com' || 
-                            userEmail === 'superadmin@pxvpay.com'
-  const isSuperAdminRole = profile?.role === 'super_admin'
+  // Check if user is super admin (use ONLY database role)
+  const isSuperAdmin = profile?.role === 'super_admin'
   
-  if (!isSuperAdminRole && !isSuperAdminEmail) {
+  if (!isSuperAdmin) {
     redirect('/dashboard')
   }
 

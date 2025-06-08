@@ -3,15 +3,86 @@ import { toast } from '@/components/ui/use-toast'
 
 const supabase = createClient()
 
-// Helper function to get current user - returns null if not authenticated
+// Helper function to get current user - returns user from users table, not auth.users
 async function getCurrentUser() {
   try {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) {
+    const { data: { user: authUser }, error } = await supabase.auth.getUser()
+    if (error || !authUser) {
       console.error('Auth error:', error)
       return null
     }
-    return user
+    
+    console.log('Auth user found:', { id: authUser.id, email: authUser.email })
+    
+    // Get the user from the users table using the auth user's email
+    const { data: dbUser, error: dbError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', authUser.email)
+      .single()
+    
+    if (dbError) {
+      console.error('Database error when fetching user:', {
+        error: dbError,
+        code: dbError.code,
+        message: dbError.message,
+        details: dbError.details,
+        hint: dbError.hint,
+        authEmail: authUser.email
+      })
+      
+      // If user not found, try to find by auth user ID or create one
+      if (dbError.code === 'PGRST116') {
+        console.log('User not found by email, trying by auth ID...')
+        
+        // Try to find user by auth ID
+        const { data: userByAuthId, error: authIdError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', authUser.id)
+          .single()
+        
+        if (!authIdError && userByAuthId) {
+          console.log('Found user by auth ID:', userByAuthId)
+          return userByAuthId
+        }
+        
+        console.log('User not found in users table, creating...')
+        try {
+          const { data: newUser, error: createError } = await supabase
+            .from('users')
+            .insert([{
+              id: authUser.id,
+              email: authUser.email,
+              role: 'registered_user',
+              active: true
+            }])
+            .select()
+            .single()
+          
+          if (createError) {
+            console.error('Failed to create user:', createError)
+            return null
+          }
+          
+          console.log('User created successfully:', newUser)
+          return newUser
+        } catch (createErr) {
+          console.error('Exception creating user:', createErr)
+          return null
+        }
+      }
+      
+      return null
+    }
+    
+    if (!dbUser) {
+      console.error('No user data returned from users table')
+      return null
+    }
+    
+    console.log('Database user found:', { id: dbUser.id, email: dbUser.email, role: dbUser.role })
+    return dbUser
   } catch (error) {
     console.error('Failed to get current user:', error)
     return null
@@ -105,19 +176,12 @@ export interface Payment {
 // Countries API
 export const countriesApi = {
   getAll: async (): Promise<Country[]> => {
-    const user = await getCurrentUser()
-    if (!user) {
-      // Return empty array if user not authenticated, let auth flow handle it
-      console.log('User not authenticated, returning empty countries list')
-      return []
-    }
-    
     try {
-      // Fetch both user-specific and global countries
+      // Fetch all active countries (global data - no user filtering needed)
       const { data, error } = await supabase
         .from('countries')
         .select('*')
-        .or(`user_id.eq.${user.id},user_id.is.null`)
+        .eq('active', true)
         .order('name', { ascending: true })
       
       if (error) {
@@ -140,11 +204,10 @@ export const countriesApi = {
         return data
       }
       
-      // Fetch currencies separately (both user-specific and global)
+      // Fetch currencies separately (global data)
       const { data: currencies, error: currenciesError } = await supabase
         .from('currencies')
         .select('id, name, code, symbol')
-        .or(`user_id.eq.${user.id},user_id.is.null`)
         .in('code', currencyCodes)
       
       if (currenciesError) {
@@ -333,25 +396,23 @@ export const countriesApi = {
 // Currencies API
 export const currenciesApi = {
   getAll: async (): Promise<Currency[]> => {
-    const user = await getCurrentUser()
-    if (!user) {
-      console.log('User not authenticated, returning empty currencies list')
-      return []
+    try {
+      // Fetch all currencies (global data - no user filtering needed)
+      const { data, error } = await supabase
+        .from('currencies')
+        .select('*')
+        .order('name', { ascending: true })
+      
+      if (error) {
+        console.error('Error fetching currencies:', error)
+        throw new Error(error.message)
+      }
+      
+      return data || []
+    } catch (error) {
+      console.error('Error in getAll currencies:', error)
+      throw error
     }
-    
-    // Fetch both user-specific and global currencies
-    const { data, error } = await supabase
-      .from('currencies')
-      .select('*')
-      .or(`user_id.eq.${user.id},user_id.is.null`)
-      .order('name', { ascending: true })
-    
-    if (error) {
-      console.error('Error fetching currencies:', error)
-      throw new Error(error.message)
-    }
-    
-    return data || []
   },
   
   getById: async (id: string): Promise<Currency> => {
@@ -528,7 +589,24 @@ export const paymentMethodsApi = {
       throw new Error(error.message)
     }
     
-    return data || []
+    // Map database columns to interface
+    const mappedData = (data || []).map(item => ({
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      icon: item.icon_url,
+      description: item.description,
+      instructions: item.instructions,
+      custom_fields: item.account_details,
+      countries: item.countries,
+      status: item.status,
+      display_order: item.sort_order,
+      user_id: item.user_id,
+      created_at: item.created_at,
+      updated_at: item.updated_at
+    }))
+    
+    return mappedData
   },
   
   getById: async (id: string): Promise<PaymentMethod> => {
@@ -549,7 +627,24 @@ export const paymentMethodsApi = {
       throw new Error(error.message)
     }
     
-    return data
+    // Map database columns to interface
+    const mappedData: PaymentMethod = {
+      id: data.id,
+      name: data.name,
+      type: data.type,
+      icon: data.icon_url,
+      description: data.description,
+      instructions: data.instructions,
+      custom_fields: data.account_details,
+      countries: data.countries,
+      status: data.status,
+      display_order: data.sort_order,
+      user_id: data.user_id,
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    }
+    
+    return mappedData
   },
   
   create: async (method: PaymentMethod): Promise<PaymentMethod> => {
@@ -559,16 +654,30 @@ export const paymentMethodsApi = {
     }
     
     // Handle icon upload if provided
+    let iconUrl = null
     if (method.icon && method.icon.startsWith('data:')) {
-      const iconPath = await uploadIcon(method.icon, method.name)
-      method.icon = iconPath
+      iconUrl = await uploadIcon(method.icon, method.name)
+    } else if (method.icon) {
+      iconUrl = method.icon
     }
     
-    const methodWithUser = { ...method, user_id: user.id }
+    // Map interface fields to database columns
+    const dbMethod = {
+      user_id: user.id,
+      name: method.name,
+      type: method.type,
+      icon_url: iconUrl,
+      description: method.description || null,
+      instructions: method.instructions || null,
+      account_details: method.custom_fields || null,
+      countries: method.countries || [],
+      status: method.status,
+      sort_order: method.display_order || 0
+    }
     
     const { data, error } = await supabase
       .from('payment_methods')
-      .insert([methodWithUser])
+      .insert([dbMethod])
       .select()
       .single()
     
@@ -597,7 +706,24 @@ export const paymentMethodsApi = {
       throw new Error(error.message || 'Failed to create payment method. Please try again.')
     }
     
-    return data
+    // Map database columns back to interface
+    const mappedData: PaymentMethod = {
+      id: data.id,
+      name: data.name,
+      type: data.type,
+      icon: data.icon_url,
+      description: data.description,
+      instructions: data.instructions,
+      custom_fields: data.account_details,
+      countries: data.countries,
+      status: data.status,
+      display_order: data.sort_order,
+      user_id: data.user_id,
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    }
+    
+    return mappedData
   },
   
   update: async (id: string, method: Partial<PaymentMethod>): Promise<PaymentMethod> => {
@@ -607,13 +733,24 @@ export const paymentMethodsApi = {
     }
     
     // Handle icon upload if provided
+    let iconUrl = undefined
     if (method.icon && method.icon.startsWith('data:')) {
-      const iconPath = await uploadIcon(method.icon, id)
-      method.icon = iconPath
+      iconUrl = await uploadIcon(method.icon, id)
+    } else if (method.icon !== undefined) {
+      iconUrl = method.icon
     }
     
-    // Remove user_id from the update object to prevent conflicts
-    const { user_id, ...updateData } = method
+    // Map interface fields to database columns
+    const updateData: any = {}
+    if (method.name !== undefined) updateData.name = method.name
+    if (method.type !== undefined) updateData.type = method.type
+    if (iconUrl !== undefined) updateData.icon_url = iconUrl
+    if (method.description !== undefined) updateData.description = method.description
+    if (method.instructions !== undefined) updateData.instructions = method.instructions
+    if (method.custom_fields !== undefined) updateData.account_details = method.custom_fields
+    if (method.countries !== undefined) updateData.countries = method.countries
+    if (method.status !== undefined) updateData.status = method.status
+    if (method.display_order !== undefined) updateData.sort_order = method.display_order
     
     const { data, error } = await supabase
       .from('payment_methods')
@@ -645,7 +782,24 @@ export const paymentMethodsApi = {
       throw new Error('Payment method not found or you do not have permission to update it')
     }
     
-    return data
+    // Map database columns back to interface
+    const mappedData: PaymentMethod = {
+      id: data.id,
+      name: data.name,
+      type: data.type,
+      icon: data.icon_url,
+      description: data.description,
+      instructions: data.instructions,
+      custom_fields: data.account_details,
+      countries: data.countries,
+      status: data.status,
+      display_order: data.sort_order,
+      user_id: data.user_id,
+      created_at: data.created_at,
+      updated_at: data.updated_at
+    }
+    
+    return mappedData
   },
   
   delete: async (id: string): Promise<void> => {
@@ -939,10 +1093,22 @@ export const paymentsApi = {
       return []
     }
     
+    // Get database user ID using email lookup
+    const { data: dbUser, error: userError } = await supabase
+      .from('users')
+      .select('id, email, role')
+      .eq('email', user.email)
+      .single()
+
+    if (userError || !dbUser) {
+      console.error('Failed to get database user for merchant payments:', userError)
+      throw new Error('Unable to verify user account')
+    }
+    
     const { data, error } = await supabase
       .from('payments')
       .select('*')
-      .eq('merchant_id', user.id)
+      .eq('merchant_id', dbUser.id)
       .order('created_at', { ascending: false })
     
     if (error) {
@@ -961,10 +1127,22 @@ export const paymentsApi = {
       return []
     }
     
+    // Get database user ID using email lookup
+    const { data: dbUser, error: userError } = await supabase
+      .from('users')
+      .select('id, email, role')
+      .eq('email', user.email)
+      .single()
+
+    if (userError || !dbUser) {
+      console.error('Failed to get database user for merchant payments by status:', userError)
+      throw new Error('Unable to verify user account')
+    }
+    
     const { data, error } = await supabase
       .from('payments')
       .select('*')
-      .eq('merchant_id', user.id)
+      .eq('merchant_id', dbUser.id)
       .eq('status', status)
       .order('created_at', { ascending: false })
     
@@ -983,11 +1161,23 @@ export const paymentsApi = {
       throw new Error('User not authenticated')
     }
     
+    // Get database user ID using email lookup
+    const { data: dbUser, error: userError } = await supabase
+      .from('users')
+      .select('id, email, role')
+      .eq('email', user.email)
+      .single()
+
+    if (userError || !dbUser) {
+      console.error('Failed to get database user for payment status update:', userError)
+      throw new Error('Unable to verify user account')
+    }
+    
     const { data, error } = await supabase
       .from('payments')
       .update({ status })
       .eq('id', id)
-      .eq('merchant_id', user.id)
+      .eq('merchant_id', dbUser.id)
       .select()
       .single()
     
@@ -1059,14 +1249,28 @@ export const themesApi = {
   getAll: async (): Promise<Theme[]> => {
     const user = await getCurrentUser()
     if (!user) {
-      console.log('User not authenticated, returning empty themes list')
-      return []
+      console.log('User not authenticated, returning system themes only')
+      
+      // Return system themes for unauthenticated users
+      const { data, error } = await supabase
+        .from('themes')
+        .select('*')
+        .eq('is_system_theme', true)
+        .order('name', { ascending: true })
+      
+      if (error) {
+        console.error('Error fetching system themes:', error)
+        return []
+      }
+      
+      return data || []
     }
-    
+ 
+    // Get both user themes and system themes for authenticated users
     const { data, error } = await supabase
       .from('themes')
       .select('*')
-      .eq('user_id', user.id)
+      .or(`user_id.eq.${user.id},is_system_theme.eq.true`)
       .order('name', { ascending: true })
     
     if (error) {
@@ -1545,12 +1749,16 @@ export const checkoutLinksApi = {
       throw new Error('User not authenticated')
     }
 
-    // Remove merchant_id from checkoutLink object since it will be set automatically
+    // Explicitly set merchant_id to the database user ID (not relying on RLS)
     const { merchant_id, ...checkoutLinkData } = checkoutLink
+    const finalCheckoutData = {
+      ...checkoutLinkData,
+      merchant_id: user.id  // Use database user ID explicitly
+    }
     
     const { data, error } = await supabase
       .from('checkout_links')
-      .insert([checkoutLinkData])
+      .insert([finalCheckoutData])
       .select()
       .single()
     
@@ -1581,14 +1789,14 @@ export const checkoutLinksApi = {
       throw new Error('User not authenticated')
     }
     
-    // Remove merchant_id from the update object to prevent conflicts
+    // Use database user ID for filtering (not auth ID)
     const { merchant_id, ...updateData } = checkoutLink
     
     const { data, error } = await supabase
       .from('checkout_links')
       .update(updateData)
       .eq('id', id)
-      .eq('merchant_id', user.id)
+      .eq('merchant_id', user.id)  // user.id is already the database user ID
       .select()
       .single()
     

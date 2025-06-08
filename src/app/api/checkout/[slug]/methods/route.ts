@@ -23,7 +23,7 @@ export async function GET(
       .from('checkout_links')
       .select('active_country_codes, merchant_id')
       .eq('slug', slug)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .single()
 
     if (linkError || !checkoutLink) {
@@ -44,9 +44,9 @@ export async function GET(
     // Get the country and its currency
     const { data: country, error: countryError } = await supabase
       .from('countries')
-      .select('id, currency_id')
+      .select('id, currency_code')
       .eq('code', countryCode)
-      .eq('status', 'active')
+      .eq('active', true)
       .single()
 
     if (countryError || !country) {
@@ -56,26 +56,12 @@ export async function GET(
       )
     }
 
-    // Get payment methods that support this country - include URL and country-specific details
+    // Get payment methods that support this country
     const { data: paymentMethods, error: methodsError } = await supabase
       .from('payment_methods')
-      .select(`
-        id,
-        name,
-        type,
-        description,
-        instructions_for_checkout,
-        icon,
-        url,
-        display_order,
-        countries,
-        country_specific_details,
-        custom_fields
-      `)
+      .select('*')
       .eq('user_id', checkoutLink.merchant_id)
       .eq('status', 'active')
-      .contains('countries', [countryCode])
-      .order('display_order')
 
     if (methodsError) {
       console.error('Payment methods fetch error:', methodsError)
@@ -85,40 +71,41 @@ export async function GET(
       )
     }
 
-    // Format the payment methods with country-specific details
-    const formattedMethods = (paymentMethods || []).map((method: any) => {
-      // Get country-specific details for this country
-      const countrySpecific = method.country_specific_details?.[countryCode]
-      
-      // Determine effective values (country-specific overrides general)
-      const effectiveInstructions = countrySpecific?.instructions || method.instructions_for_checkout
-      const effectiveCustomFields = countrySpecific?.custom_fields || method.custom_fields
-      const effectiveUrl = countrySpecific?.url || method.url
-      const effectiveAdditionalInfo = countrySpecific?.additional_info
-      
-      // Normalize URL - ensure it has proper protocol
-      let normalizedUrl = effectiveUrl
-      if (normalizedUrl && normalizedUrl.trim().length > 0) {
-        normalizedUrl = normalizedUrl.trim()
-        if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
-          normalizedUrl = 'https://' + normalizedUrl
+    // Filter methods that support the country in JavaScript instead of SQL
+    const filteredMethods = (paymentMethods || []).filter((method: any) => 
+      method.countries && Array.isArray(method.countries) && method.countries.includes(countryCode)
+    )
+
+    // Format the payment methods with proper data extraction
+    const formattedMethods = (filteredMethods || []).map((method: any) => {
+      // Parse account_details if they're stored as JSON string
+      let accountDetails = method.account_details || []
+      if (typeof accountDetails === 'string') {
+        try {
+          accountDetails = JSON.parse(accountDetails)
+        } catch {
+          accountDetails = []
         }
       }
       
-      // If there's a URL, treat as payment-link
-      const effectiveType = (normalizedUrl && normalizedUrl.trim().length > 0) ? 'payment-link' : method.type
+      // For payment_link type, ensure URL is properly extracted
+      let finalUrl = method.url || ''
+      if (method.type === 'payment_link' && !finalUrl && Array.isArray(accountDetails)) {
+        const urlField = accountDetails.find((field: any) => field.id === 'payment_url' || field.type === 'url')
+        finalUrl = urlField?.value || ''
+      }
       
       return {
         id: method.id,
         name: method.name,
-        type: effectiveType,
+        type: method.type,
         description: method.description,
-        instructions_for_checkout: effectiveInstructions,
-        url: normalizedUrl,
-        icon_url: method.icon,
-        display_order: method.display_order || 0,
-        custom_fields: effectiveCustomFields,
-        additional_info: effectiveAdditionalInfo
+        instructions_for_checkout: method.instructions || '',
+        url: finalUrl,
+        icon_url: method.icon_url,
+        display_order: method.sort_order || 0,
+        account_details: Array.isArray(accountDetails) ? accountDetails : [],
+        additional_info: ''
       }
     })
 

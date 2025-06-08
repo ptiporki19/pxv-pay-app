@@ -364,26 +364,29 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
         }
       }
       
-      // Build country-specific details
-      const countrySpecificDetails: Record<string, any> = {}
+      // Build country-specific details and extract main custom_fields
       const countryCodes: string[] = []
+      let mainCustomFields: CustomField[] = []
+      let mainInstructions = ''
       
       configuredCountries.forEach(country => {
         countryCodes.push(country.code)
-        countrySpecificDetails[country.code] = {
-          custom_fields: country.fields,
-          instructions: country.instructions,
-          url: country.type === 'payment-link' ? country.url : null,
-          additional_info: ""
+        
+        // Use the first country's fields as the main custom_fields
+        // This works for most cases where users create single-country payment methods
+        if (mainCustomFields.length === 0 && country.fields.length > 0) {
+          mainCustomFields = country.fields
+          mainInstructions = country.instructions || ''
         }
       })
 
       const paymentMethodData = {
         ...values,
-        type: overallType, // Use determined type instead of hardcoded 'manual'
-        url: mainUrl, // Set main URL for payment-link types
+        type: overallType,
+        url: mainUrl,
         countries: countryCodes,
-        country_specific_details: countrySpecificDetails,
+        custom_fields: mainCustomFields, // Set the main custom_fields for the API
+        instructions: mainInstructions || values.instructions, // Use country instructions or form instructions
         display_order: 0
       }
 

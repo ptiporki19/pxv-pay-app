@@ -47,17 +47,28 @@ export function TransactionsContent() {
     try {
       setIsLoading(true)
       
-      // Get current user and role
+      // Get current auth user
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        console.log('User not authenticated, aborting transaction load.')
+        setIsLoading(false)
+        return
+      }
 
-      const { data: profile } = await supabase
+      // Get database profile to determine role and get the correct ID
+      const { data: dbUser, error: profileError } = await supabase
         .from('users')
-        .select('role')
-        .eq('id', user.id)
+        .select('id, role')
+        .eq('email', user.email) // Use email for reliable lookup
         .single()
 
-      const isSuperAdmin = profile?.role === 'super_admin' || 
+      if (profileError || !dbUser) {
+        console.warn('Error loading user profile:', profileError?.message)
+        setIsLoading(false)
+        return
+      }
+
+      const isSuperAdmin = dbUser.role === 'super_admin' || 
         user.email === 'admin@pxvpay.com' || 
         user.email === 'dev-admin@pxvpay.com' || 
         user.email === 'superadmin@pxvpay.com'
@@ -67,9 +78,9 @@ export function TransactionsContent() {
       // Build query based on user role
       let query = supabase.from('payments').select('*')
       
-      // If not super admin, filter by merchant_id to show only merchant's own transactions
+      // If not super admin, filter by the correct database merchant_id
       if (!isSuperAdmin) {
-        query = query.eq('merchant_id', user.id)
+        query = query.eq('merchant_id', dbUser.id) // Use the correct database ID
       }
       
       const { data: transactionsData, error } = await query
