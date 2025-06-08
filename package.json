@@ -13,7 +13,13 @@
     "migrate": "node scripts/apply-migrations.js",
     "test:payment-methods": "node scripts/test-payment-methods.js",
     "test:user-isolation": "node scripts/test-user-isolation.js",
-    "create:test-payment": "node scripts/create-test-payment.js"
+    "create:test-payment": "node scripts/create-test-payment.js",
+    "env:check": "node environment-detector.js",
+    "backup": "node backup-system/comprehensive-backup.js",
+    "deploy:check": "node deployment-checklist.js",
+    "docs:procedures": "cat DEPLOYMENT-PROCEDURES.md",
+    "docs:environment": "cat ENVIRONMENT-RULES.md",
+    "docs:git": "cat GIT-WORKFLOW.md"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
