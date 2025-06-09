@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationProvider } from "@/providers/notification-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
-import ConditionalFloatingChat from "@/components/ui/conditional-floating-chat";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,7 +44,6 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="system" storageKey="pxv-theme">
           <NotificationProvider>
             {children}
-            <ConditionalFloatingChat />
             <Toaster
               position="top-right"
               expand={true}

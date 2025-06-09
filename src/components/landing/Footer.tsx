@@ -5,6 +5,7 @@ import {
   Linkedin, 
   Github, 
   Mail,
+  Phone,
   ArrowUpRight
 } from 'lucide-react'
 
@@ -31,9 +32,7 @@ const footerLinks = [
     title: 'Support',
     links: [
       { name: 'Help Center', href: '/support' },
-      { name: 'Developer Hub', href: '/developers' },
-      { name: 'Community', href: '/community' },
-      { name: 'Tutorials', href: '/tutorials' },
+      { name: 'Contact', href: '/contact' },
     ],
   },
   {
@@ -81,6 +80,14 @@ const Footer = () => {
                 >
                   <Mail className="w-4 h-4 mr-2" />
                   <span>hello@pxvpay.com</span>
+                  <ArrowUpRight className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </a>
+                <a 
+                  href="tel:+1234567890" 
+                  className="flex items-center text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors duration-300 group"
+                >
+                  <Phone className="w-4 h-4 mr-2" />
+                  <span>+1 (234) 567-8900</span>
                   <ArrowUpRight className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </a>
             </div>

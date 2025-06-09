@@ -168,8 +168,8 @@ export default function GlobalCoveragePage() {
               </h1>
               
               <p className="max-w-3xl mx-auto text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed">
-                Expand your business worldwide with PXV Pay's comprehensive global payment infrastructure. 
-                Accept payments in 180+ countries with localized experiences and multi-currency support.
+                No matter where you are in the world, PXV Pay works for your business. 
+                Every country, every currency, every business type - we're built for global accessibility.
               </p>
             </div>
           </div>

@@ -182,8 +182,8 @@ export default function CustomizationPage() {
               </h1>
               
               <p className="max-w-3xl mx-auto text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed">
-                Create custom checkout experiences for selling any type of product. Configure different flows 
-                for various products and business use cases with complete customization control.
+                Customize your payment experience to match your brand. Create product-specific checkout flows 
+                and tailor the interface to fit your business needs perfectly.
               </p>
             </div>
           </div>

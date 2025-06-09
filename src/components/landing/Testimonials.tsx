@@ -3,28 +3,28 @@ import { Quote, Star, ArrowRight } from 'lucide-react'
 
 const testimonials = [
   {
-    quote: "PXV Pay eliminated the complexity of global payments. We went from months of setup to accepting payments worldwide in just hours. The local payment method integration boosted our conversion by 40%.",
-    author: "Sarah Chen",
-    position: "CFO",
-    company: "TechFlow Solutions",
+    quote: "PXV Pay made setting up our online payment system very straightforward. The interface is clean and the customization options work well for our business needs.",
+    author: "Amara Okonkwo",
+    position: "Business Owner",
+    company: "Naija Crafts",
     rating: 5,
-    metric: "+40% conversion"
+    metric: "Easy Setup"
   },
   {
-    quote: "The simplicity is remarkable. Set up payment methods, create checkout links, and we're instantly global. No country configurations, no technical headaches. Just seamless payment collection.",
-    author: "Michael Rodriguez",
+    quote: "As a small business, we needed something simple but professional. PXV Pay gives us the tools to accept payments without the complexity. Perfect for growing businesses.",
+    author: "Kwame Asante",
     position: "Founder",
-    company: "Novus Commerce",
+    company: "Accra Tech Hub",
     rating: 5,
-    metric: "5-minute setup"
+    metric: "Small Business Friendly"
   },
   {
-    quote: "Real-time settlement changed our cash flow completely. Instead of waiting days, we get paid instantly. The analytics dashboard gives us insights we never had access to before.",
-    author: "Aisha Johnson",
-    position: "Head of Finance",
-    company: "Global Ventures",
+    quote: "The ability to customize payment methods for our customers is exactly what we needed. Support has been helpful and the platform is reliable for our daily operations.",
+    author: "Fatima Adebayo",
+    position: "Operations Manager",
+    company: "Lagos Digital",
     rating: 5,
-    metric: "Instant settlement"
+    metric: "Great Support"
   },
 ]
 
@@ -104,56 +104,18 @@ const Testimonials = () => {
           ))}
         </div>
 
-        {/* Social proof stats */}
-        <div className="text-center space-y-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
-            <div className="space-y-2 p-6 bg-violet-50 dark:bg-violet-950/30 rounded-2xl">
-              <div className="text-3xl font-bold text-violet-600 dark:text-violet-400">
-                1,000+
-              </div>
-              <div className="text-gray-600 dark:text-gray-400 text-sm">
-                Happy Clients
-              </div>
-            </div>
-            <div className="space-y-2 p-6 bg-violet-50 dark:bg-violet-950/30 rounded-2xl">
-              <div className="text-3xl font-bold text-violet-600 dark:text-violet-400">
-                $1.2B+
-              </div>
-              <div className="text-gray-600 dark:text-gray-400 text-sm">
-                Processed
-              </div>
-            </div>
-            <div className="space-y-2 p-6 bg-violet-50 dark:bg-violet-950/30 rounded-2xl">
-              <div className="text-3xl font-bold text-violet-600 dark:text-violet-400">
-                99.99%
-              </div>
-              <div className="text-gray-600 dark:text-gray-400 text-sm">
-                Uptime
-              </div>
-            </div>
-            <div className="space-y-2 p-6 bg-violet-50 dark:bg-violet-950/30 rounded-2xl">
-              <div className="text-3xl font-bold text-violet-600 dark:text-violet-400">
-                180+
-              </div>
-              <div className="text-gray-600 dark:text-gray-400 text-sm">
-                Countries
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom CTA */}
-          <div className="pt-8">
-            <div className="inline-flex items-center space-x-4 text-gray-600 dark:text-gray-400">
-              <span className="text-lg font-medium">Ready to join them?</span>
-              <div className="w-16 h-px bg-violet-300 dark:bg-violet-700" />
-              <a 
-                href="/signup" 
-                className="text-lg font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors duration-300 group"
-              >
-                Start your free trial
-                <ArrowRight className="inline w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-              </a>
-            </div>
+        {/* Bottom CTA */}
+        <div className="text-center pt-8">
+          <div className="inline-flex items-center space-x-4 text-gray-600 dark:text-gray-400">
+            <span className="text-lg font-medium">Ready to join us?</span>
+            <div className="w-16 h-px bg-violet-300 dark:bg-violet-700" />
+            <a 
+              href="/signup" 
+              className="text-lg font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors duration-300 group"
+            >
+              Start your free trial
+              <ArrowRight className="inline w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+            </a>
           </div>
         </div>
       </div>

@@ -42,9 +42,9 @@ const features = [
   },
   {
     icon: CreditCard,
-    title: 'Developer-First API',
-    description: 'Modern REST API with comprehensive SDKs, webhooks, and extensive documentation for quick integration.',
-    highlight: 'Modern API'
+    title: 'Developer API',
+    description: 'Comprehensive REST API with SDKs and webhooks for seamless integration. Coming soon to enhance your development experience.',
+    highlight: 'Coming Soon'
   },
 ]
 

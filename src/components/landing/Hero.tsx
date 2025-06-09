@@ -37,7 +37,7 @@ const Hero = () => {
           <div className="space-y-6">
             <div className="inline-flex items-center px-4 py-2 rounded-full border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/50 text-sm font-medium text-violet-700 dark:text-violet-300 mb-8 backdrop-blur-sm">
               <div className="w-2 h-2 bg-violet-500 rounded-full mr-2 animate-pulse"></div>
-              Modern Payment Infrastructure
+              Payment Solutions for Business
             </div>
 
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-black dark:text-white leading-[0.9]">
@@ -53,7 +53,7 @@ const Hero = () => {
           {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/signup">
-              <Button size="lg" className="bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white font-semibold px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-violet-500/25 group border-0">
+              <Button size="lg" className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl group border-0">
                 Get Started Free
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                 </Button>
@@ -70,17 +70,17 @@ const Hero = () => {
             <div className="flex items-center justify-center space-x-6 text-gray-500 dark:text-gray-400">
                <div className="flex items-center -space-x-2">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-gradient-to-br from-violet-100 to-violet-200 dark:from-violet-900 dark:to-violet-800 flex items-center justify-center text-violet-600 dark:text-violet-400 text-sm font-medium">
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-violet-100 dark:bg-violet-900 flex items-center justify-center text-violet-600 dark:text-violet-400 text-sm font-medium">
                     {String.fromCharCode(65 + i - 1)}
                   </div>
                 ))}
-                <div className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-gradient-to-br from-violet-600 to-violet-700 flex items-center justify-center text-white text-xs font-bold">
-                  +1K
+                <div className="w-10 h-10 rounded-full border-2 border-white dark:border-black bg-violet-600 flex items-center justify-center text-white text-xs font-bold">
+                  +
                   </div>
               </div>
               <div className="text-center">
-                <div className="font-semibold text-black dark:text-white">Trusted by 1,000+ businesses</div>
-                <div className="text-sm">Processing $10M+ monthly</div>
+                <div className="font-semibold text-black dark:text-white">Growing community of merchants</div>
+                <div className="text-sm">Building the future of payments</div>
               </div>
             </div>
 

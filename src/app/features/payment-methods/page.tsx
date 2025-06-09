@@ -142,8 +142,8 @@ export default function PaymentMethodsPage() {
               </h1>
               
               <p className="max-w-3xl mx-auto text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed">
-                Set up and configure any payment method or processor that works for your business. 
-                Our platform adapts to your preferred payment solutions and integrates with your chosen providers.
+                Create a customizable payment experience where your customers can pay exactly how they want. 
+                You define the payment methods, we handle the rest. Perfect for businesses that want flexibility.
               </p>
             </div>
           </div>

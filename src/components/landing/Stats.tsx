@@ -5,28 +5,28 @@ import { TrendingUp, Users, Globe, CreditCard, Clock, Shield, Gauge } from 'luci
 
 const primaryStats = [
   {
-    icon: TrendingUp,
-    title: "$1.2B+",
-    description: "Transactions Processed",
-    metric: "Growing 35% monthly"
-  },
-  {
-    icon: Users,
-    title: "10,000+",
-    description: "Global Merchants",
-    metric: "In 180+ countries"
+    icon: Clock,
+    title: "24/7",
+    description: "Support Available",
+    metric: "Always here to help"
   },
   {
     icon: Globe,
     title: "180+",
-    description: "Countries Supported",
-    metric: "All major markets"
+    description: "Currencies Supported",
+    metric: "Accept global payments"
   },
   {
     icon: CreditCard,
-    title: "300+",
+    title: "Unlimited",
     description: "Payment Methods",
-    metric: "Local preferences"
+    metric: "Customize your experience"
+  },
+  {
+    icon: Users,
+    title: "Growing",
+    description: "Merchant Community",
+    metric: "Join the movement"
   },
 ]
 
@@ -63,12 +63,12 @@ const Stats = () => {
           </div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black dark:text-white">
-            Powering growth for
-            <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">thousands of businesses</span>
+            Built for
+            <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">global businesses</span>
           </h2>
           
           <p className="max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
-            Join the growing ecosystem of businesses that trust PXV Pay to handle their global payment infrastructure.
+            Experience a payment platform designed for the modern business, with features that scale with your growth.
           </p>
         </div>
 
@@ -139,7 +139,7 @@ const Stats = () => {
         <div className="text-center mt-20">
           <div className="space-y-4">
             <h3 className="text-2xl md:text-3xl font-bold text-black dark:text-white">
-              Ready to join them?
+              Ready to join us?
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-8">
               Start accepting global payments in minutes, not months.
@@ -147,7 +147,7 @@ const Stats = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a 
                 href="/signup" 
-                className="px-8 py-4 bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-violet-500/25"
+                className="px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 Start Free Trial
               </a>

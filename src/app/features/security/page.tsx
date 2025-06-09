@@ -97,24 +97,19 @@ const compliance = [
 
 const threatProtection = [
   {
-    threat: 'Card Testing',
-    protection: 'Rate limiting and pattern detection',
-    description: 'Prevent fraudsters from testing stolen card data through small transactions.'
+    threat: 'Fake Payment Proofs',
+    protection: 'Payment verification system',
+    description: 'Verify payment proofs instantly to detect fraudulent or manipulated payment documents.'
   },
   {
     threat: 'Account Takeover',
-    protection: 'Behavioral analysis and device fingerprinting',
-    description: 'Detect unusual login patterns and unauthorized account access attempts.'
+    protection: 'Secure authentication',
+    description: 'Protect user accounts with secure login systems and access controls.'
   },
   {
-    threat: 'Transaction Laundering',
-    protection: 'Transaction monitoring and reporting',
-    description: 'Identify suspicious transaction patterns and comply with anti-money laundering regulations.'
-  },
-  {
-    threat: 'Chargeback Fraud',
-    protection: 'Intelligent dispute management',
-    description: 'Automated evidence collection and response to reduce false chargebacks.'
+    threat: 'Data Breaches',
+    protection: 'End-to-end encryption',
+    description: 'All sensitive data is encrypted and securely stored following industry standards.'
   }
 ]
 
