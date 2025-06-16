@@ -225,7 +225,7 @@ export default function SignUpPage() {
           
           <Button 
             type="submit" 
-            className="w-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white font-medium transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/25 border-0 mt-2" 
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/25 border-0 mt-2" 
             disabled={isLoading}
           >
             {isLoading ? 'Creating account...' : 'Create account'}
@@ -233,7 +233,7 @@ export default function SignUpPage() {
           </Button>
           
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-4">
-            By creating an account, you'll get access to PXV Pay's global payment platform, enabling you to accept payments in 180+ countries with 300+ local payment methods.
+            By creating an account, you'll gain access to PXV Pay's payment platform where you can configure payment methods and accept payments from customers globally.
           </div>
         </form>
       </Form>

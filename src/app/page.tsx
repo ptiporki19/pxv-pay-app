@@ -27,14 +27,35 @@ export default function Home() {
       
       <Header />
       <main>
+        {/* 1. Hero - No background (shows animations) */}
         <Hero />
-        <Features />
+        
+        {/* 2. Features - Light violet background */}
+        <div className="bg-violet-50 dark:bg-violet-950/30">
+          <Features />
+        </div>
+        
+        {/* 3. Stats - No background (shows animations) */}
         <Stats />
-        <HowItWorks />
+        
+        {/* 4. HowItWorks - Light violet background */}
+        <div className="bg-violet-50 dark:bg-violet-950/30">
+          <HowItWorks />
+        </div>
+        
+        {/* 5. Testimonials - No background (shows animations) */}
         <Testimonials />
-        <BlogBlocks />
+        
+        {/* 6. BlogBlocks - Light violet background */}
+        <div className="bg-violet-50 dark:bg-violet-950/30">
+          <BlogBlocks />
+        </div>
+        
+        {/* 7. CTA - No background (shows animations) */}
         <CTA />
       </main>
+      
+      {/* Footer - Always has light violet background */}
       <Footer />
     </div>
   );

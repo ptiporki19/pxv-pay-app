@@ -6,8 +6,8 @@ const steps = [
     icon: Settings,
     number: '01',
     title: 'Set Up Payment Methods',
-    description: 'Configure your preferred payment methods through our intuitive admin dashboard. Choose from 300+ local and global payment options.',
-    highlight: '300+ Methods'
+    description: 'Configure your preferred payment methods through our intuitive admin dashboard. Connect with your chosen payment processors and set up local payment options.',
+    highlight: 'Easy Setup'
   },
   {
     icon: Link2,

@@ -684,7 +684,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                           <p className="text-sm text-blue-800">{selectedPaymentMethod.additional_info}</p>
                         </div>
                       )}
-                    </div>
+                </div>
                   ) : (
                     <div className="text-center text-gray-500">
                       <p>Payment method information will be displayed here</p>

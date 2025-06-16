@@ -5,49 +5,49 @@ import { TrendingUp, Users, Globe, CreditCard, Clock, Shield, Gauge } from 'luci
 
 const primaryStats = [
   {
-    icon: Clock,
-    title: "24/7",
-    description: "Support Available",
-    metric: "Always here to help"
-  },
-  {
     icon: Globe,
     title: "180+",
-    description: "Currencies Supported",
-    metric: "Accept global payments"
+    description: "Countries Supported",
+    metric: "Global reach"
   },
   {
     icon: CreditCard,
     title: "Unlimited",
     description: "Payment Methods",
-    metric: "Customize your experience"
+    metric: "You configure them"
   },
   {
-    icon: Users,
-    title: "Growing",
-    description: "Merchant Community",
-    metric: "Join the movement"
+    icon: Clock,
+    title: "24/7",
+    description: "Customer Support",
+    metric: "Always available"
+  },
+  {
+    icon: Shield,
+    title: "100%",
+    description: "Secure Verification",
+    metric: "Payment proof system"
   },
 ]
 
 const performanceStats = [
   {
     icon: Gauge,
-    title: "99.99%",
+    title: "99.9%",
     description: "System Uptime",
-    detail: "Enterprise-grade reliability"
+    detail: "Reliable infrastructure"
   },
   {
     icon: Clock,
-    title: "120ms",
-    description: "Average Response",
-    detail: "Lightning fast processing"
+    title: "Instant",
+    description: "Payment Verification",
+    detail: "Real-time processing"
   },
   {
     icon: Shield,
-    title: "98.5%",
-    description: "Fraud Prevention",
-    detail: "Industry-leading security"
+    title: "Bank-Grade",
+    description: "Security Standards",
+    detail: "Advanced protection"
   },
 ]
 
@@ -59,16 +59,16 @@ const Stats = () => {
         <div className="text-center mb-20 space-y-6">
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-violet-100 dark:bg-violet-900 text-sm font-medium text-violet-700 dark:text-violet-300 backdrop-blur-sm">
             <div className="w-2 h-2 bg-violet-500 rounded-full mr-2 animate-pulse"></div>
-            Trusted Globally
+            Built for Scale
           </div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black dark:text-white">
-            Built for
-            <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">global businesses</span>
+            Everything you need for
+            <span className="block text-violet-600 dark:text-violet-400">global payment success</span>
           </h2>
           
           <p className="max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
-            Experience a payment platform designed for the modern business, with features that scale with your growth.
+            PXV Pay provides the infrastructure and tools you need to accept payments from customers worldwide.
           </p>
         </div>
 
@@ -77,7 +77,7 @@ const Stats = () => {
           {primaryStats.map((stat, index) => (
             <div 
               key={index}
-              className="group text-center space-y-4 p-8 bg-white dark:bg-gray-900 rounded-2xl hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-1"
+              className="group text-center space-y-4 p-8 bg-white dark:bg-gray-800 rounded-2xl hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-1"
             >
               <div className="w-16 h-16 mx-auto bg-violet-100 dark:bg-violet-900 rounded-2xl flex items-center justify-center group-hover:bg-violet-500 transition-all duration-300 group-hover:scale-110">
                 <stat.icon className="w-8 h-8 text-violet-600 dark:text-violet-400 group-hover:text-white transition-colors duration-300" />
@@ -105,7 +105,7 @@ const Stats = () => {
               Performance & Reliability
             </h3>
             <p className="text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-              Built for scale with enterprise-grade infrastructure and monitoring
+              Built with enterprise-grade infrastructure for maximum reliability
             </p>
           </div>
 
@@ -113,7 +113,7 @@ const Stats = () => {
             {performanceStats.map((stat, index) => (
               <div 
                 key={index}
-                className="group text-center space-y-4 p-6 bg-white dark:bg-gray-900 rounded-2xl hover:shadow-md transition-all duration-300"
+                className="group text-center space-y-4 p-6 bg-white dark:bg-gray-800 rounded-2xl hover:shadow-md transition-all duration-300"
               >
                 <div className="w-12 h-12 mx-auto bg-violet-100 dark:bg-violet-900 rounded-xl flex items-center justify-center group-hover:bg-violet-500 transition-all duration-300">
                   <stat.icon className="w-6 h-6 text-violet-600 dark:text-violet-400 group-hover:text-white transition-colors duration-300" />
@@ -147,7 +147,7 @@ const Stats = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <a 
                 href="/signup" 
-                className="px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                className="px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-violet-500/25"
               >
                 Start Free Trial
               </a>

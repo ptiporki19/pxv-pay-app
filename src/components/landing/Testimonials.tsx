@@ -3,28 +3,28 @@ import { Quote, Star, ArrowRight } from 'lucide-react'
 
 const testimonials = [
   {
-    quote: "PXV Pay made setting up our online payment system very straightforward. The interface is clean and the customization options work well for our business needs.",
-    author: "Amara Okonkwo",
-    position: "Business Owner",
-    company: "Naija Crafts",
-    rating: 5,
-    metric: "Easy Setup"
-  },
-  {
-    quote: "As a small business, we needed something simple but professional. PXV Pay gives us the tools to accept payments without the complexity. Perfect for growing businesses.",
+    quote: "Setting up payment collection for my business was so simple with PXV Pay. I can now accept payments from customers across Africa and beyond. The setup took just a few minutes.",
     author: "Kwame Asante",
-    position: "Founder",
-    company: "Accra Tech Hub",
+    position: "Business Owner",
+    company: "Asante Trading Co.",
     rating: 5,
-    metric: "Small Business Friendly"
+    metric: "Quick setup"
   },
   {
-    quote: "The ability to customize payment methods for our customers is exactly what we needed. Support has been helpful and the platform is reliable for our daily operations.",
-    author: "Fatima Adebayo",
-    position: "Operations Manager",
-    company: "Lagos Digital",
+    quote: "The payment verification feature is amazing. I can instantly confirm when my customers have paid, which helps me process orders faster and avoid disputes.",
+    author: "Amara Diallo",
+    position: "Founder",
+    company: "Diallo Fashion",
     rating: 5,
-    metric: "Great Support"
+    metric: "Instant verification"
+  },
+  {
+    quote: "As a small business, I appreciate how easy it is to customize my payment methods. I can add the local payment options my customers prefer most.",
+    author: "Chinedu Okafor",
+    position: "Managing Director",
+    company: "Okafor Electronics",
+    rating: 5,
+    metric: "Easy customization"
   },
 ]
 
@@ -36,16 +36,16 @@ const Testimonials = () => {
         <div className="text-center mb-20 space-y-6">
           <div className="inline-flex items-center px-4 py-2 rounded-full bg-violet-100 dark:bg-violet-900 text-sm font-medium text-violet-700 dark:text-violet-300 backdrop-blur-sm">
             <div className="w-2 h-2 bg-violet-500 rounded-full mr-2 animate-pulse"></div>
-            Client Success
+            Customer Stories
           </div>
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black dark:text-white">
             Trusted by businesses
-            <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">around the world</span>
+            <span className="block text-violet-600 dark:text-violet-400">across Africa and beyond</span>
           </h2>
           
           <p className="max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
-            See how companies of all sizes use PXV Pay to streamline their global payment operations and accelerate growth.
+            See how businesses use PXV Pay to streamline their payment operations and grow their customer base.
           </p>
         </div>
 
@@ -104,18 +104,48 @@ const Testimonials = () => {
           ))}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="text-center pt-8">
-          <div className="inline-flex items-center space-x-4 text-gray-600 dark:text-gray-400">
-            <span className="text-lg font-medium">Ready to join us?</span>
-            <div className="w-16 h-px bg-violet-300 dark:bg-violet-700" />
-            <a 
-              href="/signup" 
-              className="text-lg font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors duration-300 group"
-            >
-              Start your free trial
-              <ArrowRight className="inline w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-            </a>
+        {/* Social proof stats */}
+        <div className="text-center space-y-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
+            <div className="space-y-2 p-6 bg-violet-50 dark:bg-violet-950/30 rounded-2xl">
+              <div className="text-3xl font-bold text-violet-600 dark:text-violet-400">
+                24/7
+              </div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm">
+                Support Available
+              </div>
+            </div>
+            <div className="space-y-2 p-6 bg-violet-50 dark:bg-violet-950/30 rounded-2xl">
+              <div className="text-3xl font-bold text-violet-600 dark:text-violet-400">
+                180+
+              </div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm">
+                Countries Supported
+              </div>
+            </div>
+            <div className="space-y-2 p-6 bg-violet-50 dark:bg-violet-950/30 rounded-2xl">
+              <div className="text-3xl font-bold text-violet-600 dark:text-violet-400">
+                Unlimited
+              </div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm">
+                Payment Methods
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="pt-8">
+            <div className="inline-flex items-center space-x-4 text-gray-600 dark:text-gray-400">
+              <span className="text-lg font-medium">Ready to join us?</span>
+              <div className="w-16 h-px bg-violet-300 dark:bg-violet-700" />
+              <a 
+                href="/signup" 
+                className="text-lg font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors duration-300 group"
+              >
+                Start your free trial
+                <ArrowRight className="inline w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+              </a>
+            </div>
           </div>
         </div>
       </div>

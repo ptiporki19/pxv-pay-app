@@ -124,7 +124,7 @@ export default function SignInPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome Back</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-          Sign in to your PXV Pay account to manage your global payment operations
+          Sign in to your PXV Pay account to manage your payment operations
         </p>
       </div>
       
@@ -188,7 +188,7 @@ export default function SignInPage() {
           
           <Button 
             type="submit" 
-            className="w-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-700 hover:to-violet-800 text-white font-medium transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/25 border-0 mt-2" 
+            className="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/25 border-0 mt-2" 
             disabled={isLoading}
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
@@ -226,7 +226,7 @@ export default function SignInPage() {
           href="/signup"
           className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium transition-colors duration-200"
         >
-          Sign up for PXV Pay
+          Create your account
         </Link>
       </div>
     </div>

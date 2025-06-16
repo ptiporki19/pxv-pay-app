@@ -32,7 +32,7 @@ export default function AuthLayout({
             <div className="w-full space-y-8">
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center space-x-2 group">
-                  <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-violet-700 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-lg shadow-violet-500/25">
+                  <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-lg shadow-violet-500/25">
                     <span className="text-white font-bold text-lg">P</span>
                   </div>
                   <span className="text-xl font-bold text-black dark:text-white tracking-tight">PXV Pay</span>
@@ -52,21 +52,21 @@ export default function AuthLayout({
           
           {/* Right side - Branded content */}
           <div className="hidden md:flex md:col-span-3 relative">
-            <div className="w-full h-full bg-gradient-to-br from-violet-600/90 to-violet-800/90 backdrop-blur-sm rounded-3xl overflow-hidden border border-violet-500/20 shadow-xl">
+            <div className="w-full h-full bg-violet-600/90 backdrop-blur-sm rounded-3xl overflow-hidden border border-violet-500/20 shadow-xl">
               {/* Background pattern */}
               <div className="absolute inset-0 opacity-[0.03]">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:24px_24px]" />
               </div>
               
               {/* Violet accent orbs */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-400/30 to-transparent rounded-full blur-3xl"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-violet-500/20 to-transparent rounded-full blur-2xl"></div>
+              <div className="absolute top-0 right-0 w-64 h-64 bg-violet-400/30 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-violet-500/20 rounded-full blur-2xl"></div>
               
               <div className="relative z-10 flex flex-col items-center justify-center p-12 h-full text-white">
                 <div className="max-w-md space-y-8 text-center">
                   <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-sm font-medium text-violet-100 mb-6">
                     <div className="w-2 h-2 bg-violet-300 rounded-full mr-2 animate-pulse"></div>
-                    Trusted by 10,000+ businesses
+                    Ready to get started
                   </div>
                   
                   <h2 className="text-4xl font-bold">
@@ -75,7 +75,7 @@ export default function AuthLayout({
                   </h2>
                   
                   <p className="text-lg text-violet-100">
-                    Collect payments from customers worldwide with their preferred local payment methods. PXV Pay simplifies cross-border transactions for businesses of all sizes.
+                    Accept payments from customers worldwide with their preferred local payment methods. PXV Pay makes global payment collection simple and accessible.
                   </p>
                   
                   <div className="space-y-6 pt-6">
@@ -86,18 +86,18 @@ export default function AuthLayout({
                       </div>
                       <div className="h-12 w-px bg-white/20"></div>
                       <div className="text-center">
-                        <div className="text-3xl font-bold">300+</div>
+                        <div className="text-3xl font-bold">Unlimited</div>
                         <div className="text-sm text-violet-200">Payment Methods</div>
                       </div>
                       <div className="h-12 w-px bg-white/20"></div>
                       <div className="text-center">
-                        <div className="text-3xl font-bold">99.9%</div>
-                        <div className="text-sm text-violet-200">Uptime</div>
+                        <div className="text-3xl font-bold">24/7</div>
+                        <div className="text-sm text-violet-200">Support</div>
                       </div>
                     </div>
                     
                     <div className="pt-6 text-sm text-violet-200 font-medium">
-                      "PXV Pay revolutionized how we collect payments globally. Setup took minutes, not months."
+                      "Setting up payment collection for my business was incredibly simple with PXV Pay."
                     </div>
                   </div>
                 </div>

@@ -14,9 +14,8 @@ const footerLinks = [
     title: 'Product',
     links: [
       { name: 'Features', href: '/features' },
-      { name: 'API Docs', href: '/docs' },
-      { name: 'Security', href: '/security' },
-      { name: 'Status', href: '/status' },
+      { name: 'Security', href: '/features/security' },
+      { name: 'Global Coverage', href: '/features/global-coverage' },
     ],
   },
   {
@@ -24,7 +23,6 @@ const footerLinks = [
     links: [
       { name: 'About', href: '/about' },
       { name: 'Blog', href: '/blog' },
-      { name: 'Careers', href: '/careers' },
       { name: 'Contact', href: '/contact' },
     ],
   },
@@ -32,7 +30,7 @@ const footerLinks = [
     title: 'Support',
     links: [
       { name: 'Help Center', href: '/support' },
-      { name: 'Contact', href: '/contact' },
+      { name: 'Contact Us', href: '/contact' },
     ],
   },
   {
@@ -40,8 +38,6 @@ const footerLinks = [
     links: [
       { name: 'Privacy', href: '/privacy' },
       { name: 'Terms', href: '/terms' },
-      { name: 'Compliance', href: '/compliance' },
-      { name: 'Cookies', href: '/cookies' },
     ],
   },
 ]
@@ -54,7 +50,7 @@ const socialLinks = [
 
 const Footer = () => {
   return (
-    <footer className="bg-transparent dark:bg-transparent">
+    <footer className="bg-violet-50 dark:bg-violet-950/30">
       <div className="container mx-auto px-6">
         {/* Main footer content */}
         <div className="py-16">
@@ -63,13 +59,13 @@ const Footer = () => {
             <div className="lg:col-span-2 space-y-6">
               <div>
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-violet-700 rounded-lg flex items-center justify-center">
+                  <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-lg">P</span>
                   </div>
                   <span className="text-2xl font-bold text-black dark:text-white">PXV Pay</span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                  Modern payment infrastructure for global businesses. Accept payments worldwide with local methods.
+                  Customizable payment infrastructure for global businesses. Configure your own payment methods and accept payments worldwide.
                 </p>
               </div>
               
@@ -83,11 +79,11 @@ const Footer = () => {
                   <ArrowUpRight className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </a>
                 <a 
-                  href="tel:+1234567890" 
+                  href="tel:+1-555-PXV-PAY" 
                   className="flex items-center text-gray-600 dark:text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 transition-colors duration-300 group"
                 >
                   <Phone className="w-4 h-4 mr-2" />
-                  <span>+1 (234) 567-8900</span>
+                  <span>+1 (555) PXV-PAY</span>
                   <ArrowUpRight className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </a>
             </div>
@@ -119,7 +115,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom section */}
-        <div className="border-t border-gray-200 dark:border-gray-800 py-8">
+        <div className=" py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-gray-500 dark:text-gray-400 text-sm">
             © {new Date().getFullYear()} PXV Pay. All rights reserved.

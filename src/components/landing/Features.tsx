@@ -5,7 +5,7 @@ import {
   ShieldCheck, 
   BarChart3, 
   Palette, 
-  Zap,
+  Clock,
   ArrowRight
 } from 'lucide-react'
 
@@ -13,39 +13,39 @@ const features = [
   {
     icon: Globe,
     title: 'Global Payment Methods',
-    description: 'Accept payments in 180+ countries with local payment methods. From credit cards to mobile money, we support them all.',
+    description: 'Accept payments in 180+ countries with customizable payment methods. Configure the payment options that work best for your business.',
     highlight: '180+ Countries'
   },
   {
-    icon: Zap,
-    title: 'Instant Settlement',
-    description: 'Get your money immediately after transactions. No more waiting 2-5 business days for settlement.',
+    icon: ShieldCheck,
+    title: 'Instant Verification',
+    description: 'Verify payments instantly with our proof of payment system. Know immediately when customers have completed their payments.',
     highlight: 'Real-time'
   },
   {
-    icon: ShieldCheck,
-    title: 'Bank-Grade Security',
-    description: 'PCI DSS Level 1 compliant with advanced fraud protection and encryption for all transactions.',
-    highlight: 'PCI Compliant'
-  },
-  {
     icon: BarChart3,
-    title: 'Advanced Analytics',
-    description: 'Deep insights into payment performance, conversion rates, and customer behavior with real-time dashboards.',
+    title: 'Payment Analytics',
+    description: 'Track your payment performance with detailed analytics and insights into your payment collection patterns.',
     highlight: 'Real-time Data'
   },
   {
     icon: Palette,
     title: 'Full Customization',
-    description: 'Tailor the entire payment experience to match your brand with custom checkout flows and UI.',
+    description: 'Customize your payment experience to match your brand. Configure checkout flows and payment methods for different products.',
     highlight: 'Your Brand'
   },
   {
     icon: CreditCard,
-    title: 'Developer API',
-    description: 'Comprehensive REST API with SDKs and webhooks for seamless integration. Coming soon to enhance your development experience.',
-    highlight: 'Coming Soon'
+    title: 'Secure Processing',
+    description: 'Bank-grade security with advanced fraud detection and encrypted payment processing for all transactions.',
+    highlight: 'Bank-grade Security'
   },
+  {
+    icon: Clock,
+    title: 'Developer API',
+    description: 'Integrate PXV Pay into your applications with our comprehensive API. Full documentation and support available.',
+    highlight: 'Coming Soon'
+  }
 ]
 
 const Features = () => {
@@ -61,15 +61,15 @@ const Features = () => {
           
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black dark:text-white">
             Everything you need for
-            <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">global payments</span>
+            <span className="block text-violet-600 dark:text-violet-400">global payments</span>
           </h2>
           
           <p className="max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
-            PXV Pay provides a complete payment infrastructure that scales with your business, from startups to enterprise.
+            PXV Pay provides a complete payment infrastructure that adapts to your business needs, from simple checkouts to complex operations.
           </p>
         </div>
 
-        {/* Features Grid */}
+        {/* Features Grid - Now 2x3 instead of 3x4 */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <div 
@@ -97,14 +97,18 @@ const Features = () => {
                 </p>
                 
                 <div className="pt-2">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 group-hover:bg-violet-500 group-hover:text-white transition-all duration-300">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all duration-300 ${
+                    feature.highlight === 'Coming Soon' 
+                      ? 'bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 group-hover:bg-orange-500 group-hover:text-white'
+                      : 'bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 group-hover:bg-violet-500 group-hover:text-white'
+                  }`}>
                     {feature.highlight}
                   </span>
                 </div>
               </div>
 
               {/* Hover effect overlay */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <div className="absolute inset-0 rounded-2xl bg-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>
           ))}
         </div>

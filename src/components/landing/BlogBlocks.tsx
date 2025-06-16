@@ -109,7 +109,7 @@ export default function BlogBlocks() {
 
   if (isLoading) {
     return (
-      <section className="py-20 bg-transparent dark:bg-transparent">
+      <section className="py-20">
         <div className="container mx-auto px-6">
           <div className="text-center space-y-6 mb-16">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-violet-100 dark:bg-violet-900 text-sm font-medium text-violet-700 dark:text-violet-300 backdrop-blur-sm">
@@ -117,7 +117,7 @@ export default function BlogBlocks() {
               Latest Insights
             </div>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-black dark:text-white">
-              Latest from our <span className="bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">Blog</span>
+              Latest from our <span className="text-violet-600 dark:text-violet-400">Blog</span>
             </h2>
           </div>
           
@@ -144,7 +144,7 @@ export default function BlogBlocks() {
   }
 
   return (
-    <section className="py-20 bg-transparent dark:bg-transparent">
+    <section className="py-20">
       <div className="container mx-auto px-6">
         {/* Header */}
         <div className="text-center space-y-6 mb-16">
@@ -154,7 +154,7 @@ export default function BlogBlocks() {
           </div>
           
           <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-black dark:text-white">
-            Latest from our <span className="bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">Blog</span>
+            Latest from our <span className="text-violet-600 dark:text-violet-400">Blog</span>
           </h2>
           
           <p className="max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-400 leading-relaxed">

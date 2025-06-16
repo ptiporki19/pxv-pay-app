@@ -9,137 +9,61 @@ import Header from '@/components/landing/Header'
 import Footer from '@/components/landing/Footer'
 import { 
   Palette, 
-  Code,
-  Smartphone,
-  Settings,
+  Settings, 
+  ShoppingBag,
   ArrowRight,
   CheckCircle,
-  ArrowLeft,
-  Zap,
-  Eye,
+  Layout,
   Brush,
-  Monitor
+  Target
 } from 'lucide-react'
 
-const customizationOptions = [
+const customizationFeatures = [
   {
-    icon: Code,
-    title: 'Product Checkout Flows',
-    description: 'Create custom checkout experiences for different products. Configure unique flows for physical goods, digital products, subscriptions, and services.',
-    features: [
-      'Product-specific checkout',
-      'Digital delivery options',
-      'Subscription billing',
-      'Service booking flows'
-    ],
-    preview: 'Tailored checkout for every product type'
-  },
-  {
-    icon: Settings,
-    title: 'Multi-Use Case Configuration',
-    description: 'Set up different checkout experiences for various business models - e-commerce, services, bookings, donations, and more.',
-    features: [
-      'E-commerce checkout',
-      'Service appointments',
-      'Event ticketing',
-      'Donation campaigns'
-    ],
-    preview: 'One platform for all business models'
+    icon: ShoppingBag,
+    title: 'Product Customization',
+    description: 'Configure your products for different use cases. Whether you\'re selling physical goods, digital products, or services, customize the checkout experience for each product type.',
+    benefits: ['Product-specific settings', 'Multiple product types', 'Flexible configurations']
   },
   {
     icon: Palette,
-    title: 'Brand Customization',
-    description: 'Make the payment experience seamlessly integrate with your brand identity and design system.',
-    features: [
-      'Custom colors and themes',
-      'Logo and brand assets',
-      'Font and typography',
-      'CSS customization'
-    ],
-    preview: 'Customize colors, fonts, logos, and overall visual identity'
+    title: 'Brand Matching',
+    description: 'Make your payment experience match your brand. Customize colors, styling, and visual elements to create a cohesive experience for your customers.',
+    benefits: ['Custom colors', 'Brand styling', 'Visual consistency']
   },
   {
-    icon: Smartphone,
-    title: 'Mobile-First Design',
-    description: 'Optimize product selling for mobile devices with responsive design and mobile wallet integration.',
-    features: [
-      'Mobile-optimized UI',
-      'Touch-friendly controls',
-      'Mobile wallet integration',
-      'Progressive web app'
-    ],
-    preview: 'Perfect mobile selling experience'
-  }
+    icon: Layout,
+    title: 'Checkout Flow Design',
+    description: 'Design checkout flows that work for your business model. Create different flows for different products or customer types to optimize conversions.',
+    benefits: ['Custom flows', 'Multiple layouts', 'Conversion optimization']
+  },
+  {
+    icon: Settings,
+    title: 'Payment Method Configuration',
+    description: 'Configure which payment methods to offer for different products or regions. Give your customers the payment options they prefer most.',
+    benefits: ['Method selection', 'Regional preferences', 'Customer choice']
+  },
 ]
 
-const integrationMethods = [
+const customizationTypes = [
   {
-    method: 'Drop-in UI',
-    description: 'Pre-built payment components that can be embedded into your website with minimal code.',
-    difficulty: 'Easy',
-    timeToImplement: '30 minutes',
-    features: ['Pre-built components', 'Automatic updates', 'Mobile responsive', 'Theme customization']
+    icon: Brush,
+    title: 'Visual Customization',
+    description: 'Make it look like your brand',
+    features: ['Custom colors and themes', 'Logo placement', 'Typography choices', 'Layout preferences']
   },
   {
-    method: 'Custom Integration',
-    description: 'Full API access for complete control over the payment experience and user interface.',
-    difficulty: 'Advanced',
-    timeToImplement: '2-4 weeks',
-    features: ['Complete control', 'Custom UI/UX', 'Advanced features', 'Full API access']
+    icon: Target,
+    title: 'Functional Customization',
+    description: 'Make it work for your business',
+    features: ['Product configurations', 'Payment method selection', 'Checkout flow design', 'Customer experience']
   },
   {
-    method: 'Payment Links',
-    description: 'Share payment links via email, SMS, or social media for quick and easy transactions.',
-    difficulty: 'No Code',
-    timeToImplement: '5 minutes',
-    features: ['No coding required', 'Share anywhere', 'Mobile optimized', 'Quick setup']
-  }
-]
-
-const designSystem = [
-  {
-    category: 'Colors',
-    options: ['Primary colors', 'Secondary colors', 'Success/error states', 'Background colors'],
-    description: 'Match your brand colors perfectly'
+    icon: Settings,
+    title: 'Business Logic',
+    description: 'Adapt to your business model',
+    features: ['Different product types', 'Pricing strategies', 'Customer segments', 'Regional settings']
   },
-  {
-    category: 'Typography',
-    options: ['Font families', 'Font sizes', 'Font weights', 'Line heights'],
-    description: 'Consistent typography across your brand'
-  },
-  {
-    category: 'Layout',
-    options: ['Container widths', 'Spacing', 'Border radius', 'Shadows'],
-    description: 'Seamless integration with your design'
-  },
-  {
-    category: 'Components',
-    options: ['Button styles', 'Input fields', 'Cards', 'Loading states'],
-    description: 'Customizable UI components'
-  }
-]
-
-const examples = [
-  {
-    title: 'E-commerce Store',
-    description: 'Seamless integration with product pages and shopping cart',
-    features: ['Product-specific checkout', 'Inventory integration', 'Shipping options', 'Tax calculation']
-  },
-  {
-    title: 'SaaS Platform',
-    description: 'Subscription management and recurring billing integration',
-    features: ['Subscription tiers', 'Usage-based billing', 'Trial periods', 'Plan upgrades']
-  },
-  {
-    title: 'Marketplace',
-    description: 'Multi-vendor payments with split transactions',
-    features: ['Vendor payouts', 'Commission tracking', 'Escrow payments', 'Dispute resolution']
-  },
-  {
-    title: 'Mobile App',
-    description: 'Native mobile payment experience with app integration',
-    features: ['In-app purchases', 'Mobile wallets', 'Biometric auth', 'Offline payments']
-  }
 ]
 
 export default function CustomizationPage() {
@@ -160,82 +84,77 @@ export default function CustomizationPage() {
         {/* Hero Section */}
         <section className="relative pt-32 pb-20 bg-transparent dark:bg-transparent">
           <div className="container mx-auto px-6">
-            {/* Breadcrumb */}
-            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-8">
-              <Link href="/features" className="hover:text-black dark:hover:text-white transition-colors duration-300 flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-1" />
-                Features
-              </Link>
-              <span>/</span>
-              <span className="text-black dark:text-white">Customization</span>
-            </div>
-            
-            <div className="text-center space-y-8 mb-20">
+            <div className="max-w-4xl mx-auto text-center space-y-8">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-violet-100 dark:bg-violet-900 text-sm font-medium text-violet-700 dark:text-violet-300 backdrop-blur-sm">
                 <div className="w-2 h-2 bg-violet-500 rounded-full mr-2 animate-pulse"></div>
-                Sell Products & Customize
+                Customization
               </div>
               
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-black dark:text-white leading-tight">
-                <span className="block">Sell products with</span>
-                <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-700 bg-clip-text text-transparent">custom checkout flows</span>
+                <span className="block">Make It</span>
+                <span className="block text-violet-600 dark:text-violet-400">Your Own</span>
               </h1>
               
               <p className="max-w-3xl mx-auto text-xl md:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed">
-                Customize your payment experience to match your brand. Create product-specific checkout flows 
-                and tailor the interface to fit your business needs perfectly.
+                Customize your payment experience to match your brand and business needs. 
+                From visual styling to product configurations, make PXV Pay work exactly how you want it.
               </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/signup">
+                  <Button size="lg" className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-violet-500/25 group border-0">
+                    Get Started Free
+                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                  </Button>
+                </Link>
+                <Link href="/features">
+                  <Button variant="outline" size="lg" className="border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/50 hover:border-violet-500 dark:hover:border-violet-500 font-semibold px-8 py-6 text-lg transition-all duration-300 backdrop-blur-sm">
+                    View All Features
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Customization Options */}
-        <section className="py-20 bg-transparent dark:bg-transparent">
+        {/* Customization Features Section */}
+        <section className="py-20 bg-violet-50 dark:bg-violet-950/30">
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
-                Endless Customization
+                What You Can Customize
               </h2>
               <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Tailor every aspect of the payment experience to match your brand and user needs
+                PXV Pay gives you control over every aspect of your payment experience
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {customizationOptions.map((option, index) => (
+              {customizationFeatures.map((feature, index) => (
                 <div 
                   key={index}
-                  className="bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-950/30 dark:to-violet-900/20 rounded-2xl p-8 hover:shadow-2xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-2"
+                  className="group bg-white dark:bg-gray-800 rounded-2xl p-8 hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-2"
                 >
-                  <div className="space-y-6">
-                    {/* Icon and Title */}
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900/50 dark:to-violet-900/50 rounded-2xl flex items-center justify-center">
-                        <option.icon className="w-8 h-8 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <h3 className="text-xl font-bold text-black dark:text-white">
-                        {option.title}
-                      </h3>
+                  <div className="mb-6">
+                    <div className="w-14 h-14 bg-violet-100 dark:bg-violet-900 rounded-2xl flex items-center justify-center group-hover:bg-violet-500 transition-all duration-300 group-hover:scale-110">
+                      <feature.icon className="w-7 h-7 text-violet-600 dark:text-violet-400 group-hover:text-white transition-colors duration-300" />
                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-2xl font-bold text-black dark:text-white">
+                      {feature.title}
+                    </h3>
                     
-                    {/* Description */}
-                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                      {option.description}
+                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
+                      {feature.description}
                     </p>
                     
-                    {/* Preview */}
-                    <div className="bg-white/60 dark:bg-black/60 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                      <p className="text-sm text-gray-700 dark:text-gray-300 italic">
-                        {option.preview}
-                      </p>
-                    </div>
-                    
-                    {/* Features */}
                     <div className="space-y-2">
-                      {option.features.map((feature, i) => (
-                        <div key={i} className="flex items-center space-x-2">
-                          <CheckCircle className="w-4 h-4 text-violet-500 flex-shrink-0" />
-                          <span className="text-sm text-gray-600 dark:text-gray-400">{feature}</span>
+                      {feature.benefits.map((benefit, i) => (
+                        <div key={i} className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                          <CheckCircle className="w-4 h-4 text-violet-500 mr-2 flex-shrink-0" />
+                          {benefit}
                         </div>
                       ))}
                     </div>
@@ -246,53 +165,44 @@ export default function CustomizationPage() {
           </div>
         </section>
 
-        {/* Integration Methods */}
+        {/* Customization Types Section */}
         <section className="py-20 bg-transparent dark:bg-transparent">
           <div className="container mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
-                Integration Options
+                Three Levels of Customization
               </h2>
               <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Choose the integration method that best fits your technical requirements and timeline
+                From visual styling to business logic, customize at the level that makes sense for your needs
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {integrationMethods.map((method, index) => (
+              {customizationTypes.map((type, index) => (
                 <div 
                   key={index}
-                  className="bg-violet-50 dark:bg-violet-950/30 backdrop-blur-sm rounded-2xl p-8 hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-1"
+                  className="group text-center bg-white dark:bg-gray-900 rounded-2xl p-8 hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-2"
                 >
-                  <div className="space-y-6">
-                    {/* Header */}
-                    <div className="space-y-2">
-                      <h3 className="text-xl font-bold text-black dark:text-white">
-                        {method.method}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                        {method.description}
-                      </p>
+                  <div className="mb-6">
+                    <div className="w-16 h-16 mx-auto bg-violet-100 dark:bg-violet-900 rounded-2xl flex items-center justify-center group-hover:bg-violet-500 transition-all duration-300 group-hover:scale-110">
+                      <type.icon className="w-8 h-8 text-violet-600 dark:text-violet-400 group-hover:text-white transition-colors duration-300" />
                     </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-bold text-black dark:text-white">
+                      {type.title}
+                    </h3>
                     
-                    {/* Metrics */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Difficulty</div>
-                        <div className="font-semibold text-black dark:text-white">{method.difficulty}</div>
-                      </div>
-                      <div className="text-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Setup Time</div>
-                        <div className="font-semibold text-black dark:text-white">{method.timeToImplement}</div>
-                      </div>
-                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
+                      {type.description}
+                    </p>
                     
-                    {/* Features */}
                     <div className="space-y-2">
-                      {method.features.map((feature, i) => (
-                        <div key={i} className="flex items-center space-x-2">
-                          <CheckCircle className="w-4 h-4 text-violet-500 flex-shrink-0" />
-                          <span className="text-sm text-gray-600 dark:text-gray-400">{feature}</span>
+                      {type.features.map((feature, i) => (
+                        <div key={i} className="flex items-center text-sm text-gray-500 dark:text-gray-400 justify-center">
+                          <CheckCircle className="w-3 h-3 text-violet-500 mr-2 flex-shrink-0" />
+                          {feature}
                         </div>
                       ))}
                     </div>
@@ -303,92 +213,50 @@ export default function CustomizationPage() {
           </div>
         </section>
 
-        {/* Design System */}
-        <section className="py-20 bg-transparent dark:bg-transparent">
+        {/* Use Cases Section */}
+        <section className="py-20 bg-violet-50 dark:bg-violet-950/30">
           <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
-                Design System Integration
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Seamlessly integrate with your existing design system and style guide
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {designSystem.map((system, index) => (
-                <div 
-                  key={index}
-                  className="text-center space-y-4 p-6 bg-white dark:bg-gray-900 rounded-2xl hover:shadow-lg hover:shadow-violet-500/10 transition-all duration-300"
-                >
-                  <div className="w-12 h-12 bg-gray-100 dark:bg-gray-900 rounded-xl flex items-center justify-center mx-auto">
-                    <Brush className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+            <div className="max-w-4xl mx-auto text-center space-y-12">
+              <div className="space-y-6">
+                <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white">
+                  Real Customization Examples
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                  See how different businesses use PXV Pay's customization features
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-left">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-xl flex items-center justify-center mb-4">
+                    <ShoppingBag className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <h3 className="text-lg font-bold text-black dark:text-white">
-                    {system.category}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {system.description}
+                  <h3 className="text-xl font-bold text-black dark:text-white mb-4">E-commerce Store</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    "We customized our checkout to match our brand colors and created different flows for digital vs physical products."
                   </p>
-                  <div className="space-y-1">
-                    {system.options.map((option, i) => (
-                      <div key={i} className="text-xs text-gray-500 dark:text-gray-400">
-                        {option}
-                      </div>
-                    ))}
-                  </div>
+                  <ul className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+                    <li>• Brand color matching</li>
+                    <li>• Product-specific flows</li>
+                    <li>• Regional payment methods</li>
+                  </ul>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* Use Case Examples */}
-        <section className="py-20 bg-transparent dark:bg-transparent">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
-                Real-World Examples
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                See how different business types customize their payment experiences
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {examples.map((example, index) => (
-                <div 
-                  key={index}
-                  className="bg-white dark:bg-gray-900 rounded-2xl p-8 hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-1"
-                >
-                  <div className="space-y-6">
-                    {/* Icon and Title */}
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-900 rounded-xl flex items-center justify-center">
-                        <Monitor className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-black dark:text-white">
-                          {example.title}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">
-                          {example.description}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    {/* Features */}
-                    <div className="space-y-2">
-                      {example.features.map((feature, i) => (
-                        <div key={i} className="flex items-center space-x-2">
-                          <CheckCircle className="w-4 h-4 text-violet-500 flex-shrink-0" />
-                          <span className="text-sm text-gray-600 dark:text-gray-400">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 text-left">
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-4">
+                    <Target className="w-6 h-6 text-green-600 dark:text-green-400" />
                   </div>
+                  <h3 className="text-xl font-bold text-black dark:text-white mb-4">Service Business</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    "We configured different payment options for consultations vs project work, making it easier for clients to pay."
+                  </p>
+                  <ul className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+                    <li>• Service-specific configurations</li>
+                    <li>• Custom pricing displays</li>
+                    <li>• Client-friendly flows</li>
+                  </ul>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </section>
@@ -396,24 +264,25 @@ export default function CustomizationPage() {
         {/* CTA Section */}
         <section className="py-20 bg-transparent dark:bg-transparent">
           <div className="container mx-auto px-6">
-            <div className="text-center space-y-8">
+            <div className="max-w-3xl mx-auto text-center space-y-8">
               <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white">
-                Create your perfect payment experience
+                Ready to make it your own?
               </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Start customizing your payment flow to match your brand and optimize for conversions.
-              </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+                Start customizing your payment experience to match your brand and business needs.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/signup">
-                  <Button size="lg" className="bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 font-semibold px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl group">
-                    Start Customizing
+                  <Button size="lg" className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-violet-500/25 group border-0">
+                    Start Free Trial
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                   </Button>
                 </Link>
-                <Link href="/features">
-                  <Button variant="outline" size="lg" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-900 hover:border-black dark:hover:border-white font-semibold px-8 py-6 text-lg transition-all duration-300">
-                    Explore More Features
+                <Link href="/contact">
+                  <Button variant="outline" size="lg" className="border-violet-300 dark:border-violet-700 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/50 hover:border-violet-500 dark:hover:border-violet-500 font-semibold px-8 py-6 text-lg transition-all duration-300">
+                    Contact Sales
                   </Button>
                 </Link>
               </div>
