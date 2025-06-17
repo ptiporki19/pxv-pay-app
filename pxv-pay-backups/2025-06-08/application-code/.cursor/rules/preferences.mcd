@@ -1,0 +1,49 @@
+This document outlines specific preferences for coding patterns and development practices to maintain a clean, simple, and consistent codebase across different environments.
+
+**General Approach:**
+
+- **Simplicity:** Always prefer the simplest possible solution that meets the requirements. Avoid unnecessary complexity or over-engineering.
+- **DRY (Don't Repeat Yourself):** Actively avoid duplication of code. Before writing new code, check if similar functionality already exists elsewhere in the codebase. Reuse or refactor as needed.
+- **Codebase Cleanliness:** Keep the codebase well-organized, consistent, and easy to read. Follow logical file and folder structures.
+
+**Environment Awareness (dev, test, prod):**
+
+- Write code that is conscious of the environment it's running in. Use environment variables for configuration differences.
+- Avoid hardcoding environment-specific values directly in logic files.
+- Ensure logging, error reporting, and feature flags can be configured per environment.
+
+**Change Management:**
+
+- Be careful to only make changes that are explicitly requested in the prompt or that are clearly understood and directly related to the task at hand.
+- If there is ambiguity in a request, seek clarification before implementing significant changes or making assumptions about patterns or scope.
+
+**Bug Fixing and Refactoring:**
+
+- When fixing an issue or bug, prioritize using existing coding patterns and architectural approaches already present in the codebase.
+- If a new pattern or technology is deemed necessary after exhausting options with the existing implementation, ensure the old implementation or logic is completely removed afterwards to avoid duplicate or conflicting code paths.
+
+**File Management:**
+
+- Avoid writing one-off scripts directly within application logic files, especially if the script is likely only to be run once (e.g., data migration scripts). Find appropriate places for such scripts or use environment-specific tools.
+- **Maintain Reasonable File Sizes:** Aim to keep files under 200-300 lines of code. If a file grows beyond this, consider refactoring it into smaller, more focused modules or components.
+
+**Data Handling (Mocking & Stubbing):**
+
+- **Mocking:** Mocking data is **only** to be used within automated tests (unit, integration, etc.).
+- **NEVER** implement mocking logic or use mocked data directly in code that is intended to run in `dev` or `prod` environments.
+- **Stubbing/Fake Data:** **NEVER** add code patterns for stubbing or generating fake data that would affect the behavior or data visible in the `dev` or `prod` environments. Development and production environments should interact with realistic data sources (actual Supabase database, external APIs, etc.).
+
+**Environment Files:**
+
+- **NEVER** directly modify or overwrite the contents of `.env` files or similar environment configuration files. If changes to environment configuration are needed, clearly state the required changes or variables without attempting to write to or modify the `.env` file.
+
+**Key Directives for AI:**
+
+- Adhere strictly to the 'General Approach' principles (Simplicity, DRY, Cleanliness).
+- Implement code with environment considerations, using environment variables appropriately.
+- Be cautious about the scope of changes; stick to the requested task.
+- Follow the guidelines for bug fixing and pattern introduction/removal.
+- Avoid single-use scripts in application files.
+- Structure code to keep files concise; identify potential refactoring points if files become too large.
+- **STRICTLY** avoid generating code that includes mocking, stubbing, or fake data patterns for `dev` or `prod` environments.
+- **NEVER** attempt to modify or provide code that overwrites `.env` files.

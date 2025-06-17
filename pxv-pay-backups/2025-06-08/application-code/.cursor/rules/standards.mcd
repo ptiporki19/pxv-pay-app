@@ -1,0 +1,39 @@
+This document outlines the coding guidelines to follow for PXV Pay development.
+
+**Language:** TypeScript.
+
+- Use types rigorously. Avoid `any` unless strictly necessary with justification.
+- Define interfaces and types for data structures.
+
+**Code Quality:**
+
+- Write clean, readable, and self-documenting code.
+- Use meaningful variable and function names.
+- Keep functions and components focused on a single responsibility.
+- Include comments for complex logic or non-obvious code sections.
+
+**Formatting:**
+
+- Adhere to standard TypeScript/JavaScript formatting (e.g., using Prettier). Consistent indentation, spacing, etc.
+
+**Error Handling:**
+
+- Implement robust error handling using `try...catch` blocks for asynchronous operations (API calls, database interactions).
+- Log errors appropriately (e.g., console.error on the server, user-friendly messages on the frontend).
+- Provide clear and informative error messages to the user on the frontend using Shadcn UI components like `Toast`.
+
+**Component Design:**
+
+- Favor functional components in React.
+- Use hooks for state and side effects.
+
+**Version Control:**
+
+- Follow a standard Git workflow (feature branches, clear commit messages).
+
+**Key Directives for AI:**
+
+- Generate code that strictly follows these TypeScript and code quality standards.
+- Include necessary type definitions.
+- Implement comprehensive error handling.
+- Add comments where the logic is complex.

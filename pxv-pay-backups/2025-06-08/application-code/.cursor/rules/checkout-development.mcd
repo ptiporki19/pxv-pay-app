@@ -1,0 +1,272 @@
+# Checkout System Development Rules - CRITICAL
+
+This document establishes strict rules for developing the checkout system while preserving existing functionality.
+
+## ABSOLUTE PROHIBITIONS
+
+**NEVER** perform the following operations during checkout development:
+
+- Delete or remove existing dashboard components, pages, or functionality
+- Modify existing database tables without adding new columns (no column deletion/renaming)
+- Remove existing API routes or server actions that are currently in use
+- Delete existing RLS policies that are working
+- Remove existing navigation items from merchant or super admin dashboards
+- Modify existing authentication or authorization flows
+- Delete existing components from the components directory
+- Remove existing types, interfaces, or validation schemas that are in use
+
+## ENHANCEMENT-ONLY APPROACH
+
+### Database Modifications
+**ONLY ALLOWED**:
+- Add new tables (checkout_links, merchant_checkout_settings)
+- Add new columns to existing tables (payments, payment_methods)
+- Add new RLS policies (never modify existing working ones)
+- Add new indexes for performance
+- Add new constraints that don't break existing data
+
+**STRICTLY FORBIDDEN**:
+- Dropping existing tables
+- Removing existing columns
+- Modifying existing column types
+- Changing existing constraints that might break current functionality
+- Altering existing RLS policies that are working
+
+### Dashboard Integration
+**ENHANCEMENT STRATEGY**:
+- Add new navigation items (don't remove existing ones)
+- Extend existing pages with new sections (don't replace entire pages)
+- Add new components alongside existing ones
+- Enhance existing forms with additional fields (don't rebuild from scratch)
+- Add new tabs or sections to existing interfaces
+
+**EXAMPLES**:
+```typescript
+// ✅ CORRECT: Adding new navigation item
+const merchantNavItems = [
+  ...existingItems, // Keep all existing items
+  { label: 'Checkout Links', path: '/checkout-links', iconName: 'Link' }, // Add new
+]
+
+// ❌ WRONG: Replacing navigation
+const merchantNavItems = [
+  { label: 'Checkout Links', path: '/checkout-links', iconName: 'Link' }, // Missing existing items
+]
+```
+
+### Component Development
+**REUSE EXISTING COMPONENTS**:
+- Use existing UI components from @/components/ui/
+- Extend existing form components rather than creating new ones
+- Reuse existing layout structures
+- Leverage existing styling patterns and classes
+- Use existing validation schemas as base for new ones
+
+**CREATE NEW ONLY WHEN**:
+- Functionality doesn't exist in current codebase
+- Existing components can't be reasonably extended
+- New component serves a completely different purpose
+
+### API and Server Actions
+**ADDITIVE APPROACH**:
+- Create new API routes for checkout functionality
+- Add new server actions for checkout operations
+- Extend existing actions with new parameters (maintain backward compatibility)
+- Add new utility functions without modifying existing ones
+
+**BACKWARD COMPATIBILITY**:
+- All existing API routes must continue to work
+- Existing server actions must maintain their current signatures
+- New optional parameters only (never change required parameters)
+
+## SPECIFIC CHECKOUT DEVELOPMENT GUIDELINES
+
+### 1. Payment Methods Enhancement
+**ALLOWED**:
+- Add `instructions_for_checkout` column to payment_methods table
+- Add `display_order` column to payment_methods table
+- Enhance payment method forms with new fields
+- Add checkout-specific validation
+
+**FORBIDDEN**:
+- Modifying existing payment method creation flow
+- Changing existing payment method data structure
+- Removing existing payment method fields or functionality
+
+### 2. Theme Customization Enhancement
+**ALLOWED**:
+- Add new sections for checkout appearance settings
+- Add logo upload functionality for checkout
+- Add new customization options
+
+**FORBIDDEN**:
+- Removing existing theme customization features
+- Changing existing theme structure
+- Modifying existing color scheme functionality
+
+### 3. Payment Verification Enhancement
+**ALLOWED**:
+- Add new columns to display customer information
+- Add proof viewing functionality
+- Add rejection reason fields
+- Add filtering by checkout link
+
+**FORBIDDEN**:
+- Removing existing payment verification workflow
+- Changing existing payment status management
+- Modifying existing payment display logic
+
+### 4. Dashboard Layout Preservation
+**CRITICAL REQUIREMENTS**:
+- Maintain existing sidebar navigation structure
+- Preserve existing header functionality
+- Keep existing user profile and settings access
+- Maintain existing responsive design patterns
+- Preserve existing notification system
+
+## TESTING REQUIREMENTS
+
+### Before Any Deployment
+**MANDATORY CHECKS**:
+- All existing dashboard pages load without errors
+- All existing forms submit successfully
+- All existing API routes respond correctly
+- All existing user flows work as before
+- No existing functionality is broken or missing
+
+### Regression Testing
+**REQUIRED TESTS**:
+- Super admin dashboard full functionality test
+- Merchant dashboard complete workflow test
+- Existing payment creation and verification flow
+- User authentication and authorization
+- All existing CRUD operations
+
+## MODIFICATION PATTERNS
+
+### Safe Enhancement Pattern
+```typescript
+// ✅ CORRECT: Extending existing interface
+interface ExistingPaymentMethod {
+  // ... existing fields
+}
+
+interface EnhancedPaymentMethod extends ExistingPaymentMethod {
+  instructions_for_checkout?: string; // New optional field
+  display_order?: number; // New optional field
+}
+```
+
+### Safe Component Extension
+```typescript
+// ✅ CORRECT: Extending existing component
+function EnhancedPaymentMethodForm({ 
+  initialData, 
+  onSuccess,
+  showCheckoutFields = false // New optional prop
+}: ExistingProps & { showCheckoutFields?: boolean }) {
+  // Existing functionality preserved
+  // New checkout-specific fields added conditionally
+}
+```
+
+### Safe Database Migration
+```sql
+-- ✅ CORRECT: Adding new columns
+ALTER TABLE payment_methods 
+ADD COLUMN IF NOT EXISTS instructions_for_checkout TEXT,
+ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
+
+-- ❌ WRONG: Modifying existing columns
+-- ALTER TABLE payment_methods ALTER COLUMN name TYPE VARCHAR(500);
+```
+
+## INTEGRATION STRATEGY
+
+### Phase 1: Foundation (No Existing Modifications)
+- Create new tables only
+- Add new API routes only
+- Create new components only
+- Set up new file storage buckets only
+
+### Phase 2: Safe Enhancements
+- Add new columns to existing tables
+- Extend existing forms with new optional fields
+- Add new navigation items
+- Enhance existing pages with new sections
+
+### Phase 3: Integration
+- Connect new checkout flow with existing payment verification
+- Integrate new notifications with existing notification system
+- Link new customization options with existing theme system
+
+## ERROR PREVENTION
+
+### Code Review Checklist
+**BEFORE MERGING ANY CODE**:
+- [ ] No existing files deleted
+- [ ] No existing functions removed
+- [ ] No existing database columns dropped
+- [ ] No existing API routes removed
+- [ ] All existing tests still pass
+- [ ] No breaking changes to existing interfaces
+- [ ] Backward compatibility maintained
+
+### Rollback Strategy
+**IF EXISTING FUNCTIONALITY BREAKS**:
+1. Immediately revert the breaking changes
+2. Identify the specific modification that caused the issue
+3. Implement the enhancement using additive approach only
+4. Test thoroughly before redeployment
+
+## COMMUNICATION PROTOCOL
+
+### When Modifications Are Needed
+**IF EXISTING CODE MUST BE CHANGED**:
+1. Document exactly what needs to be modified and why
+2. Propose alternative additive approaches first
+3. Get explicit approval before making any changes to existing functionality
+4. Create backup of existing functionality
+5. Implement changes with full rollback plan
+
+### Documentation Requirements
+**FOR ALL NEW FEATURES**:
+- Document how new features integrate with existing ones
+- Explain any dependencies on existing functionality
+- Provide clear migration path if needed
+- Document any new environment variables or configuration
+
+## SUCCESS CRITERIA
+
+### Development Success
+- All existing functionality works exactly as before
+- New checkout functionality works seamlessly
+- No performance degradation in existing features
+- No security vulnerabilities introduced
+- Clean integration between old and new features
+
+### User Experience Success
+- Merchants can use all existing features without confusion
+- New checkout features feel native to existing interface
+- No learning curve for existing functionality
+- Smooth transition between existing and new workflows
+
+## ENFORCEMENT
+
+### Automated Checks
+- Pre-commit hooks to prevent deletion of existing files
+- Database migration validation
+- API route compatibility testing
+- Component dependency analysis
+
+### Manual Reviews
+- All pull requests must be reviewed for existing functionality impact
+- Database changes require special approval
+- UI changes must preserve existing user workflows
+- Performance impact assessment for all modifications
+
+---
+
+**REMEMBER**: The goal is to ADD value, not REPLACE existing value. Every line of code should enhance the platform while preserving what already works perfectly.
+
+This rule set ensures that our checkout system development strengthens the platform without compromising the solid foundation already built. 
