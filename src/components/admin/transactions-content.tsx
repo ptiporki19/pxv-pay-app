@@ -260,15 +260,15 @@ export function TransactionsContent() {
             <div className="enhanced-table">
               <div className="overflow-x-auto">
                 <div className="border rounded-lg">
-                  {/* Table Header */}
-                  <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
-                    <div className="w-[140px]">Transaction ID</div>
+                  {/* Table Header - Match dashboard exactly */}
+                  <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                    <div className="w-[120px]">Transaction ID</div>
                     <div className="w-[100px]">Date</div>
                     <div className="w-[160px]">Customer</div>
                     <div className="w-[100px]">Amount</div>
                     <div className="w-[120px]">Method</div>
-                    <div className="w-[100px]">Status</div>
-                    <div className="w-[80px] text-right">Actions</div>
+                    <div className="w-[80px]">Country</div>
+                    <div className="w-[140px] text-right">View / Status</div>
                   </div>
                   
                   {/* Table Body */}
@@ -279,65 +279,48 @@ export function TransactionsContent() {
                     ) : filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction) => (
                       <div key={transaction.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
-                        <div className="w-[140px]">
-                          <div className="font-mono font-bold text-sm text-gray-900 dark:text-gray-100">
-                              {transaction.id.slice(0, 8)}...
-                            </div>
-                            {transaction.reference && (
-                            <div className="text-xs text-gray-500 font-geist">
-                                Ref: {transaction.reference}
-                              </div>
-                            )}
-                        </div>
-                        <div className="w-[100px]">
-                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
-                              {formatDate(transaction.created_at)}
-                          </span>
-                            </div>
-                        <div className="w-[160px]">
-                          <div className="text-sm font-bold text-gray-900 dark:text-gray-100 font-geist">
-                              {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
-                            </div>
-                          <div className="text-xs text-gray-500 font-geist">
-                              {transaction.customer_email}
-                            </div>
-                        </div>
-                        <div className="w-[100px]">
-                          <span className="text-sm font-bold text-gray-900 dark:text-gray-100 font-geist">
-                              {formatAmount(transaction.amount, transaction.currency)}
-                          </span>
-                            </div>
                         <div className="w-[120px]">
-                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
-                              {transaction.payment_method}
-                          </span>
-                            </div>
-                        <div className="w-[100px]">
-                          <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-bold font-geist")}>
-                              {transaction.status.replace('_', ' ')}
-                            </Badge>
+                          <span className="text-sm font-mono text-gray-900 dark:text-gray-100">{transaction.id.slice(0, 8)}...</span>
                         </div>
-                        <div className="w-[80px] text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                  <span className="sr-only">Open menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem asChild>
-                                <Link href={`/transactions/${transaction.id}`} className="flex items-center gap-2 font-bold font-geist">
-                                    <Eye className="h-4 w-4" />
-                                    View Details
-                                  </Link>
-                                </DropdownMenuItem>
-                              <DropdownMenuItem className="font-bold font-geist">
-                                  <Download className="h-4 w-4 mr-2" />
-                                  Download Receipt
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                        <div className="w-[100px]">
+                          <span className="text-sm font-geist text-gray-900 dark:text-gray-100">{formatDate(transaction.created_at)}</span>
+                        </div>
+                        <div className="w-[160px]">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}</div>
+                          <div className="text-xs text-muted-foreground font-medium font-geist">{transaction.customer_email}</div>
+                        </div>
+                        <div className="w-[100px]">
+                          <span className="text-sm font-bold text-gray-900 dark:text-gray-100 font-geist">{formatAmount(transaction.amount, transaction.currency)}</span>
+                        </div>
+                        <div className="w-[120px]">
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{transaction.payment_method}</span>
+                        </div>
+                        <div className="w-[80px]">
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{transaction.country || 'N/A'}</span>
+                        </div>
+                        <div className="w-[140px] text-right">
+                          <div className="flex justify-end gap-2">
+                            {/* Transaction Details Link */}
+                            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                              <Link href={`/transactions/${transaction.id}`}>
+                                <Eye className="h-4 w-4" />
+                                <span className="sr-only">View Transaction Details</span>
+                              </Link>
+                            </Button>
+
+                            <Badge variant="outline" className={cn(
+                              "font-bold font-geist",
+                              transaction.status === 'completed' && "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
+                              transaction.status === 'pending_verification' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
+                              transaction.status === 'pending' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
+                              transaction.status === 'failed' && "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800",
+                              transaction.status === 'refunded' && "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
+                            )}>
+                              {transaction.status === 'pending_verification' 
+                                ? 'pending verification' 
+                                : transaction.status}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                       ))

@@ -225,7 +225,7 @@ export function CheckoutLinksList() {
         </Select>
       </div>
 
-      <div className="border rounded-lg border-gray-200 dark:border-gray-700">
+      <div className="border rounded-lg">
         <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
           <div className="w-1/3">Title</div>
           <div className="w-1/4">Countries</div>
