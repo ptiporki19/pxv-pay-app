@@ -294,11 +294,11 @@ export default function SuperAdminTransactionsPage() {
             </div>
 
             {/* Transactions Table */}
-            <div className="overflow-hidden border border-gray-200 rounded-lg">
+            <div className="overflow-hidden rounded-lg">
               <div className="overflow-x-auto">
                 <div className="border rounded-lg">
                   {/* Table Header */}
-                  <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                  <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
                     <div className="w-[120px]">Transaction ID</div>
                     <div className="w-[100px]">Date</div>
                     <div className="w-[140px]">Customer</div>

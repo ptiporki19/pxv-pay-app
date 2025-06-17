@@ -13,7 +13,7 @@ export function Spinner({ className, size = 'md' }: SpinnerProps) {
   }
   
   return (
-    <div className={cn("animate-spin text-muted-foreground", sizeClasses[size], className)}>
+    <div className={cn("animate-spin text-violet-600 dark:text-violet-400", sizeClasses[size], className)}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

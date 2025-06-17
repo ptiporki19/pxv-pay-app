@@ -209,16 +209,16 @@ export function NotificationsPopover() {
     
     // Navigate based on notification type and data
     if (notification.data?.payment_id) {
-      // For payment-related notifications, redirect to verification page
+      // For payment-related notifications, redirect to transaction detail page
       if (notification.title.includes('Payment Received') || notification.title.includes('Payment Submitted')) {
-        // Navigate to verification page with the specific payment
-        router.push(`/verification?payment_id=${notification.data.payment_id}`)
+        // Navigate to transaction detail page with the specific payment
+        router.push(`/transactions/${notification.data.payment_id}`)
       }
     }
     
-    // Default fallback: navigate to verification page
+    // Default fallback: navigate to transactions page
     if (!notification.data?.payment_id) {
-      router.push('/verification')
+      router.push('/transactions')
     }
   }
 
