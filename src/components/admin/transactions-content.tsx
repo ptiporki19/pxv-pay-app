@@ -185,12 +185,12 @@ export function TransactionsContent() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <Link href="/dashboard">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 font-bold font-geist">
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-geist">
             {userRole === 'super_admin' ? 'Platform Transactions' : 'My Transactions'}
           </h1>
         </div>
@@ -206,25 +206,25 @@ export function TransactionsContent() {
                     placeholder="Search transactions..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-11"
+                    className="pl-10 h-11 font-geist"
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px] h-11">
+                  <SelectTrigger className="w-[180px] h-11 font-geist">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="pending_verification">Pending Verification</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                    <SelectItem value="refunded">Refunded</SelectItem>
+                    <SelectItem value="all" className="font-geist">All Status</SelectItem>
+                    <SelectItem value="completed" className="font-geist">Completed</SelectItem>
+                    <SelectItem value="pending_verification" className="font-geist">Pending Verification</SelectItem>
+                    <SelectItem value="pending" className="font-geist">Pending</SelectItem>
+                    <SelectItem value="failed" className="font-geist">Failed</SelectItem>
+                    <SelectItem value="refunded" className="font-geist">Refunded</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="outline" className="gap-2 h-11">
+              <Button variant="outline" className="gap-2 h-11 font-bold font-geist">
                 <Download className="h-4 w-4" />
                 Export
               </Button>
@@ -232,94 +232,92 @@ export function TransactionsContent() {
 
             {/* Transaction Summary */}
             <div className="mb-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="p-4 bg-background rounded-lg border border-gray-200">
-                <div className="text-sm text-gray-600">Total Transactions</div>
-                <div className="text-2xl font-bold text-gray-900">{transactions.length}</div>
+              <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-200 dark:border-violet-700">
+                <div className="text-sm text-violet-600 dark:text-violet-400 font-bold font-geist">Total Transactions</div>
+                <div className="text-2xl font-black text-violet-700 dark:text-violet-300 font-geist">{transactions.length}</div>
               </div>
               <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <div className="text-sm text-green-600">Completed</div>
-                <div className="text-2xl font-bold text-green-700">
+                <div className="text-sm text-green-600 font-bold font-geist">Completed</div>
+                <div className="text-2xl font-black text-green-700 font-geist">
                   {transactions.filter(t => t.status === 'completed').length}
                 </div>
               </div>
               <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div className="text-sm text-yellow-600">Pending Verification</div>
-                <div className="text-2xl font-bold text-yellow-700">
+                <div className="text-sm text-yellow-600 font-bold font-geist">Pending Verification</div>
+                <div className="text-2xl font-black text-yellow-700 font-geist">
                   {transactions.filter(t => t.status === 'pending_verification').length}
                 </div>
               </div>
               <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                <div className="text-sm text-red-600">Failed</div>
-                <div className="text-2xl font-bold text-red-700">
+                <div className="text-sm text-red-600 font-bold font-geist">Failed</div>
+                <div className="text-2xl font-black text-red-700 font-geist">
                   {transactions.filter(t => t.status === 'failed').length}
                 </div>
               </div>
             </div>
 
-            {/* Transactions Table */}
-            <div className="overflow-hidden border border-gray-200 rounded-lg">
+            {/* Transactions Table with Enhanced Styling */}
+            <div className="enhanced-table">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-background">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                <div className="border rounded-lg">
+                  {/* Table Header */}
+                  <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                    <div className="w-[140px]">Transaction ID</div>
+                    <div className="w-[100px]">Date</div>
+                    <div className="w-[160px]">Customer</div>
+                    <div className="w-[100px]">Amount</div>
+                    <div className="w-[120px]">Method</div>
+                    <div className="w-[100px]">Status</div>
+                    <div className="w-[80px] text-right">Actions</div>
+                  </div>
+                  
+                  {/* Table Body */}
                     {isLoading ? (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center">
-                          <div className="text-gray-500">Loading transactions...</div>
-                        </td>
-                      </tr>
+                    <div className="px-4 py-12 text-center">
+                      <div className="text-gray-500 font-geist">Loading transactions...</div>
+                    </div>
                     ) : filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction) => (
-                        <tr key={transaction.id} className="border-b hover:bg-background transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                      <div key={transaction.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                        <div className="w-[140px]">
+                          <div className="font-mono font-bold text-sm text-gray-900 dark:text-gray-100">
                               {transaction.id.slice(0, 8)}...
                             </div>
                             {transaction.reference && (
-                              <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 font-geist">
                                 Ref: {transaction.reference}
                               </div>
                             )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                        </div>
+                        <div className="w-[100px]">
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
                               {formatDate(transaction.created_at)}
+                          </span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                        <div className="w-[160px]">
+                          <div className="text-sm font-bold text-gray-900 dark:text-gray-100 font-geist">
                               {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
                             </div>
-                            <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 font-geist">
                               {transaction.customer_email}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                        </div>
+                        <div className="w-[100px]">
+                          <span className="text-sm font-bold text-gray-900 dark:text-gray-100 font-geist">
                               {formatAmount(transaction.amount, transaction.currency)}
+                          </span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                        <div className="w-[120px]">
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
                               {transaction.payment_method}
+                          </span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status))}>
+                        <div className="w-[100px]">
+                          <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-bold font-geist")}>
                               {transaction.status.replace('_', ' ')}
                             </Badge>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                        </div>
+                        <div className="w-[80px] text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -329,47 +327,44 @@ export function TransactionsContent() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem asChild>
-                                  <Link href={`/transactions/${transaction.id}`} className="flex items-center gap-2">
+                                <Link href={`/transactions/${transaction.id}`} className="flex items-center gap-2 font-bold font-geist">
                                     <Eye className="h-4 w-4" />
                                     View Details
                                   </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                              <DropdownMenuItem className="font-bold font-geist">
                                   <Download className="h-4 w-4 mr-2" />
                                   Download Receipt
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                          </td>
-                        </tr>
+                        </div>
+                      </div>
                       ))
                     ) : (
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="px-4 py-12 text-center">
                           <div className="text-gray-500">
-                            <div className="text-lg font-medium mb-2">No transactions found</div>
-                            <div className="text-sm">
+                        <div className="text-lg font-bold mb-2 font-geist">No transactions found</div>
+                        <div className="text-sm font-geist">
                               {searchTerm || statusFilter !== 'all' 
                                 ? 'Try adjusting your search or filter criteria.'
                                 : `${userRole === 'super_admin' ? 'Transactions' : 'Your transactions'} will appear here once payments are processed.`
                               }
                             </div>
                           </div>
-                        </td>
-                      </tr>
+                    </div>
                     )}
-                  </tbody>
-                </table>
+                </div>
               </div>
             </div>
 
             {/* Pagination Info */}
             {filteredTransactions.length > 0 && (
               <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
-                <div>
+                <div className="font-bold font-geist">
                   Showing {filteredTransactions.length} of {transactions.length} transactions
                 </div>
-                <div className="text-xs">
+                <div className="text-xs font-geist">
                   Last updated: {new Date().toLocaleTimeString()}
                 </div>
               </div>

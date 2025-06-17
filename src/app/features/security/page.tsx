@@ -112,7 +112,7 @@ export default function SecurityPage() {
                     View All Features
                   </Button>
                 </Link>
-              </div>
+                </div>
             </div>
           </div>
         </section>
@@ -192,15 +192,15 @@ export default function SecurityPage() {
                   <div className="space-y-4">
                     <h3 className="text-xl font-bold text-black dark:text-white">
                       {level.title}
-                    </h3>
+                  </h3>
                     
                     <p className="text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
                       {level.description}
-                    </p>
+                  </p>
                     
                     <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                       {level.details}
-                    </p>
+                  </p>
                   </div>
                 </div>
               ))}
@@ -226,7 +226,7 @@ export default function SecurityPage() {
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-8">
                   <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-xl flex items-center justify-center mb-4">
                     <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
-                  </div>
+                      </div>
                   <h3 className="text-xl font-bold text-black dark:text-white mb-4">What We Do</h3>
                   <ul className="space-y-2 text-gray-600 dark:text-gray-400">
                     <li>• Instant payment verification</li>
@@ -235,8 +235,8 @@ export default function SecurityPage() {
                     <li>• Real-time alerts</li>
                     <li>• Secure data handling</li>
                   </ul>
-                </div>
-
+                    </div>
+                    
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-8">
                   <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-xl flex items-center justify-center mb-4">
                     <AlertTriangle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
@@ -266,7 +266,7 @@ export default function SecurityPage() {
               <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
                 Start protecting your business with instant payment verification and fraud detection.
               </p>
-
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link href="/signup">
                   <Button size="lg" className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-violet-500/25 group border-0">

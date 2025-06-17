@@ -119,21 +119,21 @@ export default function GlobalCoveragePage() {
 
         {/* 2. Global Features Section - Has background */}
         <div className="bg-violet-50 dark:bg-violet-950/30">
-          <section className="py-20 bg-transparent dark:bg-transparent">
-            <div className="container mx-auto px-6">
-              <div className="text-center mb-16">
-                <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
+        <section className="py-20 bg-transparent dark:bg-transparent">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white mb-4">
                   Built for Global Business
-                </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
                   PXV Pay removes geographic barriers and makes global payments accessible to everyone
-                </p>
-              </div>
-              
+              </p>
+            </div>
+            
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {globalFeatures.map((feature, index) => (
-                  <div 
-                    key={index}
+                <div 
+                  key={index}
                     className="group bg-white dark:bg-gray-800 rounded-2xl p-8 hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-500 hover:-translate-y-2"
                   >
                     <div className="mb-6">
@@ -141,7 +141,7 @@ export default function GlobalCoveragePage() {
                         <feature.icon className="w-7 h-7 text-violet-600 dark:text-violet-400 group-hover:text-white transition-colors duration-300" />
                       </div>
                     </div>
-
+                    
                     <div className="space-y-4">
                       <h3 className="text-2xl font-bold text-black dark:text-white">
                         {feature.title}
@@ -158,13 +158,13 @@ export default function GlobalCoveragePage() {
                             {benefit}
                           </div>
                         ))}
-                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          </section>
+          </div>
+        </section>
         </div>
 
         {/* 3. Universal Access Section - No background (shows animations) */}
@@ -174,26 +174,26 @@ export default function GlobalCoveragePage() {
               <div className="space-y-6">
                 <h2 className="text-3xl md:text-4xl font-bold text-black dark:text-white">
                   Every Country, Every Business
-                </h2>
+              </h2>
                 <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
                   PXV Pay believes that geography shouldn't limit business opportunities. 
                   Whether you're in a major city or a remote location, our platform works for you.
-                </p>
-              </div>
-
+              </p>
+            </div>
+            
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center space-y-4 p-6 bg-white dark:bg-gray-900 rounded-2xl">
                   <div className="w-16 h-16 mx-auto bg-violet-100 dark:bg-violet-900 rounded-2xl flex items-center justify-center">
                     <Globe className="w-8 h-8 text-violet-600 dark:text-violet-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-black dark:text-white">
+                      </div>
+                      <h3 className="text-xl font-bold text-black dark:text-white">
                     180+ Countries
-                  </h3>
+                      </h3>
                   <p className="text-gray-600 dark:text-gray-400">
                     Available in countries worldwide
                   </p>
-                </div>
-
+                    </div>
+                    
                 <div className="text-center space-y-4 p-6 bg-white dark:bg-gray-900 rounded-2xl">
                   <div className="w-16 h-16 mx-auto bg-violet-100 dark:bg-violet-900 rounded-2xl flex items-center justify-center">
                     <Banknote className="w-8 h-8 text-violet-600 dark:text-violet-400" />
@@ -250,7 +250,7 @@ export default function GlobalCoveragePage() {
                   <div className="space-y-4">
                     <h3 className="text-xl font-bold text-black dark:text-white">
                       {business.title}
-                    </h3>
+                  </h3>
                     
                     <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                       {business.description}

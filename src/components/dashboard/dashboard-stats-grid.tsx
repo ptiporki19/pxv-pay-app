@@ -1,7 +1,16 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, CreditCard, Globe, Shield, TrendingUp, AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import { 
+  UsersIcon, 
+  CreditCardIcon, 
+  GlobeAltIcon, 
+  ShieldCheckIcon, 
+  ChartBarIcon, 
+  ExclamationCircleIcon, 
+  CheckCircleIcon, 
+  ClockIcon 
+} from '@heroicons/react/24/solid'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -136,7 +145,7 @@ export function DashboardStatsGrid() {
     {
       title: "Total Users",
       value: stats.totalUsers,
-      icon: Users,
+      icon: UsersIcon,
       description: "Registered users",
       color: "text-blue-600",
       bgColor: "bg-blue-100 dark:bg-blue-900/20",
@@ -146,7 +155,7 @@ export function DashboardStatsGrid() {
     {
       title: "Active Users",
       value: stats.activeUsers,
-      icon: CheckCircle,
+      icon: CheckCircleIcon,
       description: "Currently active",
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/20",
@@ -156,18 +165,18 @@ export function DashboardStatsGrid() {
     {
       title: "Total Payments",
       value: stats.totalPayments,
-      icon: CreditCard,
-      description: "All transactions",
+      icon: CreditCardIcon,
+      description: "All payment transactions",
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/20",
       link: isSuperAdmin ? "/super-admin-transactions" : "/payments",
       requiresSuperAdmin: false
     },
     {
-      title: "Pending Verifications",
+      title: "Pending Verification",
       value: stats.pendingPayments,
-      icon: Clock,
-      description: "Awaiting review",
+      icon: ClockIcon,
+      description: "Payments awaiting verification",
       color: "text-orange-600",
       bgColor: "bg-orange-100 dark:bg-orange-900/20",
       link: "/verification",
@@ -176,57 +185,64 @@ export function DashboardStatsGrid() {
     {
       title: "Payment Methods",
       value: stats.totalPaymentMethods,
-      icon: Shield,
-      description: "Your active methods",
+      icon: ShieldCheckIcon,
+      description: "Available payment methods",
       color: "text-cyan-600",
       bgColor: "bg-cyan-100 dark:bg-cyan-900/20",
       link: "/payment-methods",
       requiresSuperAdmin: false
     },
     {
-      title: "Recent Registrations",
-      value: stats.recentRegistrations,
-      icon: AlertCircle,
-      description: "Last 24 hours",
+      title: "Products",
+      value: 1,
+      icon: ExclamationCircleIcon,
+      description: "Total products created",
       color: "text-pink-600",
       bgColor: "bg-pink-100 dark:bg-pink-900/20",
-      link: "/users",
-      requiresSuperAdmin: true
+      link: "/content",
+      requiresSuperAdmin: false
     }
   ]
 
   const StatCard = ({ widget, index }: { widget: any, index: number }) => {
-        const Icon = widget.icon
+    const Icon = widget.icon
     const shouldLink = !widget.requiresSuperAdmin || isSuperAdmin
     
     const cardContent = (
-      <Card className={`${shouldLink ? 'hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105' : ''}`}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{widget.title}</CardTitle>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${widget.bgColor}`}>
-                  <Icon className={`h-4 w-4 ${widget.color}`} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {loading ? '...' : widget.value.toLocaleString()}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {widget.description}
-                </p>
-              </CardContent>
-            </Card>
+      <Card className={`violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50 ${shouldLink ? 'cursor-pointer' : ''}`}>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            {/* Content Section */}
+            <div className="flex-1 min-w-0">
+              <div className="text-3xl lg:text-4xl font-black tracking-tight text-gray-900 dark:text-white font-geist mb-2">
+                {loading ? '...' : widget.value.toLocaleString()}
+              </div>
+              <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white font-geist mb-1">{widget.title}</h3>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 font-geist">
+                {widget.description}
+              </p>
+            </div>
+            
+            {/* Icon Section */}
+            <div className="flex-shrink-0 ml-4">
+              <div className="w-14 h-14 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                <Icon className="h-7 w-7 text-violet-600 dark:text-violet-400" />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     )
 
     return shouldLink ? (
       <Link key={index} href={widget.link}>
         {cardContent}
-          </Link>
+      </Link>
     ) : (
       <div key={index}>
         {cardContent}
       </div>
-        )
+    )
   }
 
   return (
@@ -235,9 +251,6 @@ export function DashboardStatsGrid() {
         {widgets.map((widget, index) => (
           <StatCard key={index} widget={widget} index={index} />
         ))}
-      </div>
-      <div className="mt-4 text-xs text-muted-foreground text-center">
-        📊 Real-time updates active • Last updated: {lastUpdate.toLocaleTimeString()}
       </div>
     </div>
   )

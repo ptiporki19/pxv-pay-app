@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Moon, Sun } from "lucide-react"
+import { MoonIcon, SunIcon } from "@heroicons/react/24/solid"
 import { useTheme } from "@/providers/theme-provider"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,8 +19,8 @@ export function ThemeToggleButton() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" disabled className="rounded-full">
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
+      <Button variant="ghost" size="icon" disabled className="text-white hover:bg-violet-500 hover:text-white transition-all duration-200 hover:scale-105">
+        <SunIcon className="h-[1.2rem] w-[1.2rem]" />
         <span className="sr-only">Toggle theme</span>
       </Button>
     )
@@ -29,11 +29,11 @@ export function ThemeToggleButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button variant="ghost" size="icon" className="text-white hover:bg-violet-500 hover:text-white transition-all duration-200 hover:scale-105">
           {resolvedTheme === 'dark' ? (
-            <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />
+            <MoonIcon className="h-[1.2rem] w-[1.2rem] transition-all" />
           ) : (
-            <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />
+            <SunIcon className="h-[1.2rem] w-[1.2rem] transition-all" />
           )}
           <span className="sr-only">Toggle theme</span>
         </Button>

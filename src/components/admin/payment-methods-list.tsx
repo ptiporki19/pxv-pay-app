@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
 import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 export function PaymentMethodsList() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
@@ -83,18 +85,6 @@ export function PaymentMethodsList() {
       })
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  // Status badge style helper
-  const getStatusBadgeClass = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
-      default:
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
     }
   }
 
@@ -167,34 +157,46 @@ export function PaymentMethodsList() {
       </div>
 
       <div className="border rounded-lg">
-        <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
-          <div className="w-1/3">Payment Method Name</div>
-          <div className="w-1/3">Supported Countries</div>
-          <div className="w-1/6 text-center">Status</div>
-          <div className="w-1/6 text-right">Actions</div>
+        {/* Table Header */}
+        <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+          <div className="w-[200px]">Payment Method Name</div>
+          <div className="w-[200px]">Supported Countries</div>
+          <div className="w-[100px] text-center">Status</div>
+          <div className="w-[100px] text-right">Actions</div>
         </div>
         
+        {/* Table Body */}
         {isLoading ? (
-          <div className="px-4 py-3 text-center text-muted-foreground">
-            Loading payment methods...
+          <div className="px-4 py-12 text-center text-muted-foreground">
+            <div className="text-base font-medium font-geist">Loading payment methods...</div>
           </div>
         ) : paymentMethods.length > 0 ? (
           paymentMethods.map((method) => (
-            <div key={method.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-background dark:hover:bg-gray-800">
-              <div className="w-1/3 flex items-center space-x-3">
+            <div key={method.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+              <div className="w-[200px] flex items-center space-x-3">
                 {method.icon && (
                   <img src={method.icon} alt={method.name} className="w-6 h-6 object-contain" />
                 )}
-                <span>{method.name}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{method.name}</span>
               </div>
-              <div className="w-1/3">{formatCountries(method.countries)}</div>
-              <div className="w-1/6 text-center">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(method.status)}`}>
+              <div className="w-[200px]">
+                <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatCountries(method.countries)}</span>
+              </div>
+              <div className="w-[100px] text-center">
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "font-geist",
+                    method.status === 'active' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
+                    method.status === 'pending' && 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400',
+                    method.status === 'inactive' && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
+                  )}
+                >
                   {method.status === 'active' ? 'Active' : 
                    method.status === 'pending' ? 'Pending' : 'Inactive'}
-                </span>
+                </Badge>
               </div>
-              <div className="w-1/6 text-right">
+              <div className="w-[100px] text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -204,14 +206,14 @@ export function PaymentMethodsList() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/payment-methods/edit/${method.id}`}>
+                      <Link href={`/payment-methods/edit/${method.id}`} className="font-geist">
                         <Edit className="mr-2 h-4 w-4" />
                         <span>Edit</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => method.id && handleDelete(method.id)}
-                      className="text-red-600"
+                      className="text-red-600 font-geist"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       <span>Delete</span>
@@ -222,8 +224,8 @@ export function PaymentMethodsList() {
             </div>
           ))
         ) : (
-          <div className="px-4 py-3 text-center text-muted-foreground">
-            No payment methods found. Add one to get started.
+          <div className="px-4 py-12 text-center text-muted-foreground">
+            <div className="text-base font-medium font-geist">No payment methods found. Add one to get started.</div>
           </div>
         )}
       </div>

@@ -17,6 +17,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useRealtimeUsers } from '@/hooks/use-realtime-users'
 import Link from 'next/link'
+import { cn } from "@/lib/utils"
 
 interface User {
   id: string
@@ -186,27 +187,6 @@ export function UsersList() {
     }
   }
 
-  // Role badge color helper
-  const getRoleBadgeClass = (role: string) => {
-    switch (role) {
-      case 'super_admin':
-        return 'bg-black text-white'
-      case 'subscriber':
-        return 'bg-blue-100 text-blue-800'
-      case 'registered_user':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  // Status badge color helper
-  const getStatusBadgeClass = (active: boolean) => {
-    return active
-      ? 'bg-green-100 text-green-800'
-      : 'bg-red-100 text-red-800'
-  }
-
   // Format date helper
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -242,55 +222,67 @@ export function UsersList() {
       </div>
 
       <div className="border rounded-lg">
-        <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
-          <div className="w-1/3">User</div>
-          <div className="w-1/6 text-center">Role</div>
-          <div className="w-1/6 text-center">Status</div>
-          <div className="w-1/4">Joined</div>
-          <div className="w-1/12 text-right">Actions</div>
+        {/* Table Header */}
+        <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+          <div className="w-[200px]">User</div>
+          <div className="w-[120px] text-center">Role</div>
+          <div className="w-[100px] text-center">Status</div>
+          <div className="w-[120px]">Joined</div>
+          <div className="w-[100px] text-right">Actions</div>
         </div>
         
+        {/* Table Body */}
         {isLoading ? (
-          <div className="px-4 py-8 text-center text-muted-foreground">
-            Loading users...
+          <div className="px-4 py-12 text-center text-muted-foreground">
+            <div className="text-base font-medium font-geist">Loading users...</div>
           </div>
         ) : users.length > 0 ? (
           users.map((user) => (
-            <div key={user.id} className="flex items-center justify-between px-4 py-4 border-b hover:bg-background dark:hover:bg-gray-800">
-              <div className="w-1/3">
+            <div key={user.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+              <div className="w-[200px]">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
                     {user.role === 'super_admin' ? (
-                      <Crown className="h-5 w-5 text-blue-600" />
+                      <Crown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     ) : (
-                      <User className="h-5 w-5 text-blue-600" />
+                      <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     )}
                   </div>
                   <div>
-                    <p className="font-medium">{user.email}</p>
-                    <p className="text-sm text-muted-foreground">ID: {user.id.slice(0, 8)}...</p>
+                    <p className="font-medium text-sm text-gray-900 dark:text-gray-100 font-geist">{user.email}</p>
+                    <p className="text-xs text-gray-500 font-geist">ID: {user.id.slice(0, 8)}...</p>
                   </div>
                 </div>
               </div>
-              <div className="w-1/6 text-center">
-                <Badge className={getRoleBadgeClass(user.role)}>
+              <div className="w-[120px] text-center">
+                <Badge className={cn(
+                  "font-geist",
+                  user.role === 'super_admin' && 'bg-black text-white dark:bg-gray-100 dark:text-black',
+                  user.role === 'subscriber' && 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400',
+                  user.role === 'registered_user' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400'
+                )}>
                   {user.role === 'super_admin' && <Crown className="h-3 w-3 mr-1" />}
                   {user.role === 'super_admin' ? 'Super Admin' : 
                    user.role === 'subscriber' ? 'Subscriber' : 'User'}
                 </Badge>
               </div>
-              <div className="w-1/6 text-center">
-                <Badge className={getStatusBadgeClass(user.active)}>
+              <div className="w-[100px] text-center">
+                <Badge className={cn(
+                  "font-geist",
+                  user.active 
+                    ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400'
+                    : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
+                )}>
                   {user.active ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
-              <div className="w-1/4">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <div className="w-[120px]">
+                <div className="flex items-center gap-1 text-sm text-gray-900 dark:text-gray-100 font-geist">
                   <Calendar className="h-3 w-3" />
                   {formatDate(user.created_at)}
                 </div>
               </div>
-              <div className="w-1/12 text-right">
+              <div className="w-[100px] text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -300,27 +292,30 @@ export function UsersList() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/users/${user.id}/profile`}>
+                      <Link href={`/users/${user.id}/profile`} className="font-geist">
                         <Eye className="mr-2 h-4 w-4" />
                         View Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'registered_user')}>
+                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'registered_user')} className="font-geist">
                       <User className="mr-2 h-4 w-4" />
                       Make User
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'subscriber')}>
+                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'subscriber')} className="font-geist">
                       <Shield className="mr-2 h-4 w-4" />
                       Make Subscriber
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'super_admin')}>
+                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'super_admin')} className="font-geist">
                       <Crown className="mr-2 h-4 w-4" />
                       Make Super Admin
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => handleStatusToggle(user.id, user.active)}
-                      className={user.active ? 'text-red-600' : 'text-green-600'}
+                      className={cn(
+                        "font-geist",
+                        user.active ? 'text-red-600' : 'text-green-600'
+                      )}
                     >
                       {user.active ? '🚫 Deactivate' : '✅ Activate'}
                     </DropdownMenuItem>
@@ -330,14 +325,14 @@ export function UsersList() {
             </div>
           ))
         ) : (
-          <div className="px-4 py-8 text-center text-muted-foreground">
+          <div className="px-4 py-12 text-center text-muted-foreground">
             <div className="flex flex-col items-center gap-4">
               <User className="h-12 w-12 text-gray-400" />
               <div>
-                <p className="font-medium">No users found</p>
-                <p className="text-sm">Users will appear here once they register or are synced.</p>
+                <p className="font-medium font-geist">No users found</p>
+                <p className="text-sm font-geist">Users will appear here once they register or are synced.</p>
               </div>
-              <Button onClick={syncUsersFromAuth} variant="outline" disabled={isSyncing}>
+              <Button onClick={syncUsersFromAuth} variant="outline" disabled={isSyncing} className="font-geist">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 {isSyncing ? 'Syncing...' : 'Sync Users from Auth'}
               </Button>

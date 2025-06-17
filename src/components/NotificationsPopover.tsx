@@ -1,7 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, CheckCircle2, Clock, CreditCard, Info, UserPlus } from 'lucide-react'
+import { 
+  BellIcon, 
+  CheckCircleIcon, 
+  ClockIcon, 
+  CreditCardIcon, 
+  InformationCircleIcon, 
+  UserPlusIcon 
+} from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -238,36 +245,36 @@ export function NotificationsPopover() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'payment':
-        return <CreditCard className="h-4 w-4 text-gray-500" />
+        return <CreditCardIcon className="h-4 w-4 text-gray-500" />
       case 'user':
-        return <UserPlus className="h-4 w-4 text-gray-500" />
+        return <UserPlusIcon className="h-4 w-4 text-gray-500" />
       case 'system':
-        return <Info className="h-4 w-4 text-gray-500" />
+        return <InformationCircleIcon className="h-4 w-4 text-gray-500" />
       default:
-        return <Info className="h-4 w-4 text-gray-500" />
+        return <InformationCircleIcon className="h-4 w-4 text-gray-500" />
     }
   }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="relative text-white hover:bg-violet-500 hover:text-white">
+          <BellIcon className="h-5 w-5" />
           <span className="sr-only">Notifications</span>
           {unreadCount > 0 && (
             <span className="absolute top-0 right-0 flex h-[10px] w-[10px] items-center justify-center">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
-              <span className="relative inline-flex h-[6px] w-[6px] rounded-full bg-black"></span>
+              <span className="absolute inline-flex h-full w-full rounded-full bg-violet-500 opacity-75 animate-ping"></span>
+              <span className="relative inline-flex h-[6px] w-[6px] rounded-full bg-violet-500"></span>
             </span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between p-3 border-b">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-medium">Notifications</h4>
             {unreadCount > 0 && (
-              <span className="inline-flex items-center rounded-full bg-black/10 px-2 py-0.5 text-xs font-medium">
+              <span className="inline-flex items-center rounded-full bg-violet-100 dark:bg-violet-800/50 px-2 py-0.5 text-xs font-medium text-violet-700 dark:text-violet-300">
                 {unreadCount} new
               </span>
             )}
@@ -276,10 +283,10 @@ export function NotificationsPopover() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-auto p-0 text-xs hover:bg-transparent hover:text-gray-900"
+              className="h-auto p-0 text-xs hover:bg-transparent hover:text-violet-600 dark:hover:text-violet-400"
               onClick={markAllAsRead}
             >
-              <CheckCircle2 className="mr-1 h-3 w-3" />
+              <CheckCircleIcon className="mr-1 h-3 w-3" />
               Mark all as read
             </Button>
           )}
@@ -295,27 +302,27 @@ export function NotificationsPopover() {
                 <div 
                   key={notification.id}
                   className={cn(
-                    "flex gap-3 p-3 cursor-pointer border-b border-gray-100 transition-colors",
+                    "flex gap-3 p-3 cursor-pointer transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50",
                     notification.is_read 
-                      ? "hover:bg-background" 
-                      : "bg-black/[0.02]"
+                      ? "hover:bg-violet-50/50 dark:hover:bg-violet-900/10" 
+                      : "bg-violet-50/30 dark:bg-violet-900/10 hover:bg-violet-50/50 dark:hover:bg-violet-900/20"
                   )}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-background">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/30">
                     {getNotificationIcon(notification.type)}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <p className={cn(
-                        "text-sm",
+                        "text-sm font-geist",
                         !notification.is_read && "font-medium"
                       )}>
                         {notification.title}
                       </p>
                       <div className="flex items-center gap-1">
                         {!notification.is_read && (
-                          <span className="h-2 w-2 rounded-full bg-black"></span>
+                          <span className="h-2 w-2 rounded-full bg-violet-500"></span>
                         )}
                         <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {notification.time}
@@ -333,14 +340,14 @@ export function NotificationsPopover() {
         ) : (
           <div className="flex items-center justify-center h-[100px]">
             <div className="flex flex-col items-center gap-2">
-              <Bell className="h-5 w-5 text-gray-400" />
+              <BellIcon className="h-5 w-5 text-violet-400" />
               <p className="text-sm text-muted-foreground">No notifications yet</p>
             </div>
           </div>
         )}
-        <div className="p-3 border-t">
-          <Button variant="outline" size="sm" className="w-full text-xs gap-1">
-            <Clock className="h-3.5 w-3.5" />
+        <div className="p-3 border-t border-gray-100 dark:border-gray-700/50 bg-violet-50/30 dark:bg-violet-900/10">
+          <Button variant="outline" size="sm" className="w-full text-xs gap-1 font-geist hover:bg-violet-100 dark:hover:bg-violet-900/30">
+            <ClockIcon className="h-3.5 w-3.5" />
             View all notifications
           </Button>
         </div>

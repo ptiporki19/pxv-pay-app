@@ -54,41 +54,11 @@ export async function GET(
       )
     }
 
-    console.log('✅ API: Successfully fetched user profile')
-
-    return NextResponse.json({
-      success: true,
-      user: userData
-    })
-
-  } catch (error) {
-    console.error('💥 API: Exception in user profile fetch:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-} 
-    // Fetch user details
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', params.id)
-      .single()
-
-    if (userError) {
-      console.error('❌ API: Failed to fetch user:', userError)
-      return NextResponse.json(
-        { error: 'User not found', details: userError.message },
-        { status: 404 }
-      )
-    }
-
     // Fetch payments for this user
     const { data: paymentsData, error: paymentsError } = await supabase
       .from('payments')
       .select('*')
-      .eq('user_id', params.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
     if (paymentsError) {
@@ -99,7 +69,7 @@ export async function GET(
     const { data: paymentMethodsData, error: paymentMethodsError } = await supabase
       .from('payment_methods')
       .select('*')
-      .eq('user_id', params.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
     if (paymentMethodsError) {
@@ -110,7 +80,7 @@ export async function GET(
     const { data: countriesData, error: countriesError } = await supabase
       .from('countries')
       .select('*')
-      .eq('user_id', params.id)
+      .eq('user_id', userId)
       .order('name', { ascending: true })
 
     if (countriesError) {
@@ -121,7 +91,7 @@ export async function GET(
     const { data: currenciesData, error: currenciesError } = await supabase
       .from('currencies')
       .select('*')
-      .eq('user_id', params.id)
+      .eq('user_id', userId)
       .order('name', { ascending: true })
 
     if (currenciesError) {
@@ -146,7 +116,7 @@ export async function GET(
       accountAge: Math.floor((new Date().getTime() - new Date(userData.created_at).getTime()) / (1000 * 60 * 60 * 24))
     }
 
-    console.log(`✅ API: Successfully fetched profile for user ${params.id}`)
+    console.log(`✅ API: Successfully fetched profile for user ${userId}`)
 
     return NextResponse.json({
       success: true,

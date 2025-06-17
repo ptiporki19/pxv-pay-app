@@ -4,20 +4,20 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
 import { 
-  FileText, 
-  Shield, 
-  Settings, 
-  ArrowRight,
-  Crown,
-  Activity,
-  ExternalLink,
-  Info,
-  Eye,
-  Copy,
-  PenTool,
-  CreditCard,
-  BarChart3
-} from 'lucide-react'
+  DocumentTextIcon,
+  ShieldCheckIcon,
+  CogIcon,
+  ArrowRightIcon,
+  ArrowTopRightOnSquareIcon,
+  InformationCircleIcon,
+  EyeIcon,
+  ClipboardIcon,
+  PencilIcon,
+  CreditCardIcon,
+  ChartBarIcon,
+  StarIcon,
+  BoltIcon
+} from '@heroicons/react/24/solid'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { cn } from '@/lib/utils'
@@ -89,171 +89,178 @@ export default async function SuperAdminDashboard() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Header Section with Super Admin identification */}
+      {/* Professional Header Section */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-black dark:bg-white">
-            <Crown className="h-6 w-6 text-white dark:text-black" />
+        <div className="flex items-center gap-4">
+          <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-violet-700 shadow-lg">
+            <StarIcon className="h-8 w-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Super Admin Control Center</h1>
-            <p className="text-lg text-muted-foreground">
-              Welcome back, <span className="font-semibold text-foreground">{userName}</span>
+            <h1 className="hero-title">Super Admin Control Center</h1>
+            <p className="hero-subtitle mt-2">
+              Welcome back, <span className="font-bold text-violet-600 dark:text-violet-400">{userName}</span>
             </p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-black text-white dark:bg-white dark:text-black border-black dark:border-white">
-            <Crown className="h-3 w-3 mr-1" />
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="bg-violet-600 text-white border-violet-600 hover:bg-violet-700 font-semibold px-3 py-1">
+            <StarIcon className="h-4 w-4 mr-2" />
             Super Administrator
           </Badge>
-          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-            <Activity className="h-3 w-3 mr-1" />
+          <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800 font-semibold px-3 py-1">
+            <BoltIcon className="h-4 w-4 mr-2" />
             Full Platform Access
           </Badge>
         </div>
       </div>
 
-      {/* Real-time Dashboard Statistics */}
+      {/* Platform Overview */}
       <div>
-        <h2 className="text-2xl font-semibold mb-6">Platform Overview</h2>
+        <h2 className="section-title mb-6">Platform Overview</h2>
         <DashboardStatsGrid />
-        <p className="text-xs text-muted-foreground mt-4">
-          📊 Real-time data • Updates every 30 seconds • Click widgets to navigate
-        </p>
       </div>
 
       {/* Payment History Section */}
       <div>
-        <div className="mb-4 flex justify-between items-center">
+        <div className="mb-6 flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-semibold">Platform Payment History</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="section-title">Platform Payment History</h2>
+            <p className="text-base font-medium text-gray-600 dark:text-gray-300 mt-1">
               Recent payment transactions across all merchants
             </p>
           </div>
-          <Button variant="outline" size="sm" className="gap-2" asChild>
+          <Button variant="outline" size="default" className="gap-2 font-semibold" asChild>
             <Link href="/super-admin-transactions">
-              <ExternalLink className="h-4 w-4" />
+              <ArrowTopRightOnSquareIcon className="h-4 w-4" />
               View All Transactions
             </Link>
           </Button>
         </div>
 
-        <div className="rounded-md border shadow-sm">
+        <div className="rounded-xl border shadow-sm bg-card">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-gray-50 dark:bg-gray-800/50">
-                  <th className="px-4 py-3 text-left font-medium">Transaction ID</th>
-                  <th className="px-4 py-3 text-left font-medium">Date</th>
-                  <th className="px-4 py-3 text-left font-medium">Customer</th>
-                  <th className="px-4 py-3 text-left font-medium">Amount</th>
-                  <th className="px-4 py-3 text-left font-medium">Method</th>
-                  <th className="px-4 py-3 text-left font-medium">Country</th>
-                  <th className="px-4 py-3 text-left font-medium">View / Status</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div className="border rounded-lg">
+              {/* Table Header */}
+              <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                <div className="w-[120px]">Transaction ID</div>
+                <div className="w-[100px]">Date</div>
+                <div className="w-[160px]">Customer</div>
+                <div className="w-[100px]">Amount</div>
+                <div className="w-[120px]">Method</div>
+                <div className="w-[80px]">Country</div>
+                <div className="w-[140px] text-right">View / Status</div>
+              </div>
+              
+              {/* Table Body */}
                 {formattedPayments.length > 0 ? (
                   formattedPayments.map((payment) => (
-                    <tr key={payment.fullId} className="border-b transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                      <td className="px-4 py-3 font-medium">{payment.id.slice(0, 8)}...</td>
-                      <td className="px-4 py-3">{payment.date}</td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{payment.customer}</div>
-                        <div className="text-xs text-muted-foreground">{payment.customerEmail}</div>
-                      </td>
-                      <td className="px-4 py-3 font-medium">{payment.amount} {payment.currency}</td>
-                      <td className="px-4 py-3">{payment.method}</td>
-                      <td className="px-4 py-3">{payment.country}</td>
-                      <td className="px-4 py-3">
+                  <div key={payment.fullId} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                    <div className="w-[120px]">
+                      <span className="text-sm font-mono text-gray-900 dark:text-gray-100">{payment.id.slice(0, 8)}...</span>
+                    </div>
+                    <div className="w-[100px]">
+                      <span className="text-sm font-geist text-gray-900 dark:text-gray-100">{payment.date}</span>
+                    </div>
+                    <div className="w-[160px]">
+                      <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{payment.customer}</div>
+                      <div className="text-xs text-muted-foreground font-medium font-geist">{payment.customerEmail}</div>
+                    </div>
+                    <div className="w-[100px]">
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 font-geist">{payment.amount} {payment.currency}</span>
+                    </div>
+                    <div className="w-[120px]">
+                      <span className="text-sm font-geist text-gray-900 dark:text-gray-100">{payment.method}</span>
+                    </div>
+                    <div className="w-[80px]">
+                      <span className="text-sm font-geist text-gray-900 dark:text-gray-100">{payment.country}</span>
+                    </div>
+                    <div className="w-[140px] text-right">
                         <div className="flex justify-end gap-2">
                           {/* Transaction Details Link */}
                           <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                             <Link href={`/super-admin-transactions/${payment.fullId}`}>
-                              <Info className="h-4 w-4" />
+                              <InformationCircleIcon className="h-4 w-4" />
                               <span className="sr-only">View Transaction Details</span>
                             </Link>
                           </Button>
 
                           <Badge variant="outline" className={cn(
+                          "font-semibold font-geist",
                             payment.status === 'completed' && "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
                             payment.status === 'pending_verification' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
                             payment.status === 'pending' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
                             payment.status === 'failed' && "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
                           )}>
-                            {payment.status.replace('_', ' ')}
+                            {payment.status === 'pending_verification' 
+                              ? 'pending verification' 
+                              : payment.status}
                           </Badge>
                         </div>
-                      </td>
-                    </tr>
+                    </div>
+                  </div>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                      No recent transactions found
-                    </td>
-                  </tr>
+                <div className="px-4 py-12 text-center">
+                  <p className="text-base font-medium text-muted-foreground font-geist">No recent transactions found</p>
+                </div>
                 )}
-              </tbody>
-            </table>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions Section */}
+      {/* Platform Management Section */}
       <div>
-        <h2 className="text-2xl font-semibold mb-6">Platform Management</h2>
+        <h2 className="section-title mb-6">Platform Management</h2>
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           
           {/* User Management Card */}
-          <Card className="relative">
+          <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/20">
-                  <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+                  <BoltIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">User Management</CardTitle>
-                  <CardDescription>Manage all platform users and their permissions</CardDescription>
+                  <CardTitle className="card-title">User Management</CardTitle>
+                  <CardDescription className="card-description">Manage all platform users and their permissions</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">
                 View, activate, deactivate, and manage user roles across the platform. Monitor user activity and maintain security.
               </p>
-              <Button asChild className="w-full btn-primary">
+              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
                 <Link href="/users" className="flex items-center justify-center gap-2">
                   Access User Management
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRightIcon className="h-4 w-4" />
                 </Link>
               </Button>
             </CardContent>
           </Card>
 
-          {/* Website Content (Blog) Management Card */}
-          <Card className="relative">
+          {/* Website Content Management Card */}
+          <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-                  <FileText className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+                  <DocumentTextIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Website Content</CardTitle>
-                  <CardDescription>Manage blog posts and website content</CardDescription>
+                  <CardTitle className="card-title">Website Content</CardTitle>
+                  <CardDescription className="card-description">Manage blog posts and website content</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">
                 Create, edit, and publish blog posts. Manage all website content that's visible to the public and merchants.
               </p>
-              <Button asChild className="w-full btn-primary">
+              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
                 <Link href="/blog-management" className="flex items-center gap-2">
-                  <PenTool className="h-4 w-4" />
+                  <PencilIcon className="h-4 w-4" />
                   Blog Management
                 </Link>
               </Button>
@@ -261,26 +268,26 @@ export default async function SuperAdminDashboard() {
           </Card>
 
           {/* Audit Logs Card */}
-          <Card className="relative">
+          <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/20">
-                  <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+                  <ShieldCheckIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Audit Logs</CardTitle>
-                  <CardDescription>Monitor all platform activities and changes</CardDescription>
+                  <CardTitle className="card-title">Audit Logs</CardTitle>
+                  <CardDescription className="card-description">Monitor all platform activities and changes</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">
                 Track all administrative actions, user activities, and system changes for security and compliance monitoring.
               </p>
-              <Button asChild className="w-full btn-primary">
+              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
                 <Link href="/audit-logs" className="flex items-center justify-center gap-2">
                   View Audit Logs
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRightIcon className="h-4 w-4" />
                 </Link>
               </Button>
             </CardContent>
@@ -289,24 +296,26 @@ export default async function SuperAdminDashboard() {
         </div>
       </div>
 
-      {/* Secondary Actions */}
+      {/* Advanced Settings */}
       <div>
-        <h2 className="text-xl font-semibold mb-4">Advanced Settings</h2>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <h2 className="section-title mb-6">Advanced Settings</h2>
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
           
           {/* Platform Settings */}
-          <Card className="relative">
+          <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <Settings className="h-5 w-5 text-gray-600" />
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+                  <CogIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+                </div>
                 <div>
-                  <CardTitle className="text-base">Platform Settings</CardTitle>
-                  <CardDescription>Configure global platform settings</CardDescription>
+                  <CardTitle className="card-title">Platform Settings</CardTitle>
+                  <CardDescription className="card-description">Configure global platform settings</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <Button variant="outline" asChild className="w-full">
+              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
                 <Link href="/settings">
                   Configure Settings
                 </Link>
@@ -315,18 +324,20 @@ export default async function SuperAdminDashboard() {
           </Card>
 
           {/* Payment Verification */}
-          <Card className="relative">
+          <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
             <CardHeader>
-              <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-gray-600" />
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+                  <CreditCardIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+                </div>
                 <div>
-                  <CardTitle className="text-base">Payment Verification</CardTitle>
-                  <CardDescription>Review pending payment verifications</CardDescription>
+                  <CardTitle className="card-title">Payment Verification</CardTitle>
+                  <CardDescription className="card-description">Review pending payment verifications</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <Button variant="outline" asChild className="w-full">
+              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
                 <Link href="/verification">
                   Review Payments
                 </Link>

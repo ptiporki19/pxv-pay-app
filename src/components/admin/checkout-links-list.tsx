@@ -190,7 +190,7 @@ export function CheckoutLinksList() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Checkout Links</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-geist">Checkout Links</h1>
           <p className="text-muted-foreground">Create and manage payment checkout links for your customers.</p>
         </div>
         <Link href="/checkout-links/create">
@@ -225,8 +225,8 @@ export function CheckoutLinksList() {
         </Select>
       </div>
 
-      <div className="border rounded-lg">
-        <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
+      <div className="border rounded-lg border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
           <div className="w-1/3">Title</div>
           <div className="w-1/4">Countries</div>
           <div className="w-1/6">Status</div>
@@ -240,9 +240,9 @@ export function CheckoutLinksList() {
           </div>
         ) : checkoutLinks.length > 0 ? (
           checkoutLinks.map((link) => (
-            <div key={link.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div key={link.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200">
               <div className="w-1/3">
-                <div className="font-medium">{link.title}</div>
+                <div className="font-medium font-geist">{link.title}</div>
                 <div className="text-sm text-muted-foreground">/{link.slug}</div>
               </div>
               <div className="w-1/4">
@@ -253,7 +253,15 @@ export function CheckoutLinksList() {
                 </span>
               </div>
               <div className="w-1/6">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(link.status)}`}>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  link.status === 'active' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                    : link.status === 'inactive'
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
+                    : link.status === 'expired'
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'
+                }`}>
                   {link.status === 'active' ? 'Active' : 
                    link.status === 'inactive' ? 'Inactive' : 
                    link.status === 'expired' ? 'Expired' : 'Draft'}

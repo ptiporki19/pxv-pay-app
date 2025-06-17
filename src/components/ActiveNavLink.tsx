@@ -3,7 +3,21 @@
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useMerchantUIStore } from '@/lib/store'
-import { Home, Globe, DollarSign, CreditCard, Link2, Palette, FileText, Shield, Users, Activity, Clock, Zap, Crown, Package } from 'lucide-react'
+import { 
+  HomeIcon,
+  GlobeAltIcon,
+  CurrencyDollarIcon,
+  CreditCardIcon,
+  LinkIcon,
+  PaintBrushIcon,
+  DocumentTextIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+  ChartBarIcon,
+  ClockIcon,
+  BoltIcon,
+  CubeIcon
+} from '@heroicons/react/24/solid'
 import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -11,9 +25,12 @@ interface ActiveNavLinkProps {
   href: string
   iconName: string
   children: React.ReactNode
+  collapsed?: boolean
+  onClick?: () => void
+  className?: string
 }
 
-export function ActiveNavLink({ href, iconName, children }: ActiveNavLinkProps) {
+export function ActiveNavLink({ href, iconName, children, collapsed = false, onClick, className }: ActiveNavLinkProps) {
   const pathname = usePathname()
   const { setActiveNav } = useMerchantUIStore()
   
@@ -27,60 +44,69 @@ export function ActiveNavLink({ href, iconName, children }: ActiveNavLinkProps) 
     }
   }, [isActive, href, setActiveNav])
   
-  // Render the appropriate icon based on iconName
+  // Render the appropriate icon based on iconName - using Heroicons solid
   const renderIcon = () => {
-    const className = cn("mr-3 h-5 w-5",
+    const iconClassName = cn("h-5 w-5 transition-all duration-200",
+      collapsed ? "mx-auto" : "mr-3",
       isActive 
-        ? "text-black" 
-        : "text-gray-500 group-hover:text-black"
+        ? "text-white drop-shadow-sm" 
+        : "text-violet-200 group-hover:text-white group-hover:drop-shadow-sm"
     )
     
     switch (iconName) {
       case 'Home':
-        return <Home className={className} />
+        return <HomeIcon className={iconClassName} />
       case 'Globe':
-        return <Globe className={className} />
+        return <GlobeAltIcon className={iconClassName} />
       case 'DollarSign':
-        return <DollarSign className={className} />
+        return <CurrencyDollarIcon className={iconClassName} />
       case 'CreditCard':
-        return <CreditCard className={className} />
+        return <CreditCardIcon className={iconClassName} />
       case 'Link2':
-        return <Link2 className={className} />
+        return <LinkIcon className={iconClassName} />
       case 'Palette':
-        return <Palette className={className} />
+        return <PaintBrushIcon className={iconClassName} />
       case 'FileText':
-        return <FileText className={className} />
+        return <DocumentTextIcon className={iconClassName} />
       case 'Shield':
-        return <Shield className={className} />
+        return <ShieldCheckIcon className={iconClassName} />
       case 'Users':
-        return <Users className={className} />
+        return <UsersIcon className={iconClassName} />
       case 'Activity':
-        return <Activity className={className} />
+        return <ChartBarIcon className={iconClassName} />
       case 'Clock':
-        return <Clock className={className} />
+        return <ClockIcon className={iconClassName} />
       case 'Zap':
-        return <Zap className={className} />
+        return <BoltIcon className={iconClassName} />
       case 'Crown':
-        return <Crown className={className} />
+        return <ShieldCheckIcon className={iconClassName} /> // Using ShieldCheck as Crown alternative
       case 'Package':
-        return <Package className={className} />
+        return <CubeIcon className={iconClassName} />
       default:
-        return <Home className={className} />
+        return <HomeIcon className={iconClassName} />
     }
   }
 
   return (
     <Link
       href={href}
+      onClick={onClick}
       className={cn(
-        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all hover:bg-gray-100",
+        "group flex items-center rounded-xl px-3 py-3 text-sm font-bold font-geist transition-all duration-200 hover:scale-[1.02] transform-gpu tracking-wide",
+        collapsed ? "justify-center" : "gap-3",
         isActive
-          ? "text-black"
-          : "text-gray-500 group-hover:text-black"
+          ? "bg-violet-500/80 dark:bg-violet-800/80 text-white shadow-lg backdrop-blur-sm border border-violet-400/30"
+          : "text-violet-200 hover:bg-violet-500/60 dark:hover:bg-violet-800/60 hover:text-white hover:shadow-md backdrop-blur-sm",
+        className
       )}
+      title={collapsed ? children?.toString() : undefined}
     >
       {renderIcon()}
-      {children}
+      {!collapsed && (
+        <span className="transition-colors duration-200 font-bold font-geist tracking-wide">
+          {children}
+        </span>
+      )}
     </Link>
   )
 } 

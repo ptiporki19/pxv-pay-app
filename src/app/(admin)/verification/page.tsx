@@ -17,6 +17,7 @@ import {
   ImageIcon,
   AlertCircle 
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function VerificationPage() {
   const [pendingPayments, setPendingPayments] = useState<Payment[]>([])
@@ -343,23 +344,33 @@ export default function VerificationPage() {
   }
 
   const renderPaymentRow = (payment: Payment, showActions: boolean = true) => (
-    <div key={payment.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-background dark:hover:bg-gray-800">
-      <div className="w-1/8 text-sm font-medium">{payment.id?.slice(0, 8)}...</div>
-      <div className="w-1/8 text-sm">{formatDate(payment.created_at || '')}</div>
-      <div className="w-1/6 text-sm">
-        <div className="font-medium">{payment.customer_name || 'N/A'}</div>
-        <div className="text-xs text-muted-foreground">{payment.customer_email || ''}</div>
+    <div key={payment.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+      <div className="w-[120px]">
+        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">{payment.id?.slice(0, 8)}...</span>
       </div>
-      <div className="w-1/8 text-sm font-medium">{formatAmount(payment.amount, payment.currency)}</div>
-      <div className="w-1/8 text-sm">{payment.payment_method}</div>
-      <div className="w-1/8 text-sm">{payment.country || 'N/A'}</div>
-      <div className="w-1/6 text-right">
+      <div className="w-[100px]">
+        <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatDate(payment.created_at || '')}</span>
+      </div>
+      <div className="w-[160px]">
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{payment.customer_name || 'N/A'}</div>
+        <div className="text-xs text-gray-500 font-geist">{payment.customer_email || ''}</div>
+      </div>
+      <div className="w-[100px]">
+        <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{formatAmount(payment.amount, payment.currency)}</span>
+      </div>
+      <div className="w-[100px]">
+        <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{payment.payment_method}</span>
+      </div>
+      <div className="w-[100px]">
+        <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{payment.country || 'N/A'}</span>
+      </div>
+      <div className="w-[140px] text-right">
           <div className="flex justify-end gap-2">
           {/* Always show View Proof button if proof exists */}
           {payment.payment_proof_url && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button size="sm" variant="outline" className="flex items-center gap-1">
+                <Button size="sm" variant="outline" className="flex items-center gap-1 font-geist">
                   {isImageFile(payment.payment_proof_url) && <ImageIcon className="h-3 w-3" />}
                   {isPdfFile(payment.payment_proof_url) && <FileText className="h-3 w-3" />}
                   {!isImageFile(payment.payment_proof_url) && !isPdfFile(payment.payment_proof_url) && <FileText className="h-3 w-3" />}
@@ -368,55 +379,56 @@ export default function VerificationPage() {
               </DialogTrigger>
               <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Payment Proof Verification</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="font-geist">Payment Proof Verification</DialogTitle>
+                  <DialogDescription className="font-geist">
                     Review payment proof submitted by {payment.customer_name}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="mt-4 space-y-6">
                   {/* Payment Details Card */}
                   <div className="p-4 bg-background rounded-lg">
-                    <h3 className="font-semibold mb-3">Payment Details</h3>
+                    <h3 className="font-semibold mb-3 font-geist">Payment Details</h3>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <span className="font-medium">Customer:</span>
-                        <div>{payment.customer_name}</div>
-                        <div className="text-gray-600">{payment.customer_email}</div>
+                        <span className="font-medium font-geist">Customer:</span>
+                        <div className="font-geist">{payment.customer_name}</div>
+                        <div className="text-gray-600 font-geist">{payment.customer_email}</div>
                       </div>
                       <div>
-                        <span className="font-medium">Transaction ID:</span>
+                        <span className="font-medium font-geist">Transaction ID:</span>
                         <div className="font-mono text-xs">{payment.id}</div>
                       </div>
                       <div>
-                        <span className="font-medium">Amount:</span>
-                        <div className="text-lg font-semibold">{formatAmount(payment.amount, payment.currency)}</div>
+                        <span className="font-medium font-geist">Amount:</span>
+                        <div className="text-lg font-semibold font-geist">{formatAmount(payment.amount, payment.currency)}</div>
                       </div>
                       <div>
-                        <span className="font-medium">Payment Method:</span>
-                        <div>{payment.payment_method}</div>
+                        <span className="font-medium font-geist">Payment Method:</span>
+                        <div className="font-geist">{payment.payment_method}</div>
                       </div>
                       <div>
-                        <span className="font-medium">Country:</span>
-                        <div>{payment.country || 'N/A'}</div>
+                        <span className="font-medium font-geist">Country:</span>
+                        <div className="font-geist">{payment.country || 'N/A'}</div>
                       </div>
                       <div>
-                        <span className="font-medium">Submitted:</span>
-                        <div>{formatDate(payment.created_at || '')}</div>
+                        <span className="font-medium font-geist">Submitted:</span>
+                        <div className="font-geist">{formatDate(payment.created_at || '')}</div>
                       </div>
                       <div>
-                        <span className="font-medium">Status:</span>
+                        <span className="font-medium font-geist">Status:</span>
                         <div>
-                          <Badge variant="outline" className={
-                            payment.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
-                            payment.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
-                            'bg-yellow-50 text-yellow-700 border-yellow-200'
-                          }>
+                          <Badge variant="outline" className={cn(
+                            "font-geist",
+                            payment.status === 'completed' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
+                            payment.status === 'failed' && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400',
+                            payment.status === 'pending_verification' && 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400'
+                          )}>
                             {payment.status?.replace('_', ' ') || 'Pending'}
                           </Badge>
                         </div>
                       </div>
                       <div>
-                        <span className="font-medium">Checkout Link:</span>
+                        <span className="font-medium font-geist">Checkout Link:</span>
                         <div className="font-mono text-xs">{payment.checkout_link_id}</div>
                       </div>
                     </div>
@@ -430,6 +442,7 @@ export default function VerificationPage() {
                     <div className="flex justify-end gap-3 pt-4 border-t">
                       <Button 
                         variant="outline"
+                        className="font-geist"
                         onClick={() => {
                           // Close modal first, then handle action
                           const modal = document.querySelector('[role="dialog"]') as HTMLElement;
@@ -440,6 +453,7 @@ export default function VerificationPage() {
                       </Button>
                       <Button 
                         variant="destructive"
+                        className="font-geist"
                         onClick={() => {
                           handleVerifyPayment(payment.id!, 'failed');
                           // Close modal
@@ -451,6 +465,7 @@ export default function VerificationPage() {
                       </Button>
                       <Button 
                         variant="default"
+                        className="font-geist"
                         onClick={() => {
                           handleVerifyPayment(payment.id!, 'completed');
                           // Close modal
@@ -473,6 +488,7 @@ export default function VerificationPage() {
                 <Button 
                   size="sm" 
                   variant="default"
+                  className="font-geist"
                   onClick={() => handleVerifyPayment(payment.id!, 'completed')}
                 >
                   Approve
@@ -480,6 +496,7 @@ export default function VerificationPage() {
                 <Button 
                   size="sm" 
                   variant="destructive"
+                  className="font-geist"
                   onClick={() => handleVerifyPayment(payment.id!, 'failed')}
                 >
                   Reject
@@ -489,11 +506,12 @@ export default function VerificationPage() {
 
           {/* Show status badge for non-pending payments when not showing actions */}
           {!showActions && (
-          <Badge variant="outline" className={
-            payment.status === 'completed' ? 'bg-green-50 text-green-700 border-green-200' :
-            payment.status === 'failed' ? 'bg-red-50 text-red-700 border-red-200' :
-            'bg-yellow-50 text-yellow-700 border-yellow-200'
-          }>
+          <Badge variant="outline" className={cn(
+            "font-geist",
+            payment.status === 'completed' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
+            payment.status === 'failed' && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400',
+            payment.status === 'pending_verification' && 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400'
+          )}>
               {payment.status?.replace('_', ' ') || 'Pending'}
           </Badge>
         )}
@@ -504,26 +522,29 @@ export default function VerificationPage() {
 
   const renderPaymentTable = (payments: Payment[], showActions: boolean = true) => (
     <div className="border rounded-lg">
-      <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
-        <div className="w-1/8">Transaction ID</div>
-        <div className="w-1/8">Date</div>
-        <div className="w-1/6">Customer</div>
-        <div className="w-1/8">Amount</div>
-        <div className="w-1/8">Method</div>
-        <div className="w-1/8">Country</div>
-        <div className="w-1/6 text-right">
+      {/* Table Header */}
+      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+        <div className="w-[120px]">Transaction ID</div>
+        <div className="w-[100px]">Date</div>
+        <div className="w-[160px]">Customer</div>
+        <div className="w-[100px]">Amount</div>
+        <div className="w-[100px]">Method</div>
+        <div className="w-[100px]">Country</div>
+        <div className="w-[140px] text-right">
           {showActions ? 'Actions' : 'View / Status'}
         </div>
       </div>
       {loading ? (
-        <div className="px-4 py-8 text-center text-muted-foreground">
-          Loading payments...
+        <div className="px-4 py-12 text-center text-muted-foreground">
+          <div className="text-base font-medium font-geist">Loading payments...</div>
         </div>
       ) : filteredPayments(payments).length > 0 ? (
         filteredPayments(payments).map(payment => renderPaymentRow(payment, showActions))
       ) : (
-        <div className="px-4 py-8 text-center text-muted-foreground">
+        <div className="px-4 py-12 text-center text-muted-foreground">
+          <div className="text-base font-medium font-geist">
           {searchQuery ? 'No payments found matching your search.' : 'No payments found.'}
+          </div>
         </div>
       )}
     </div>

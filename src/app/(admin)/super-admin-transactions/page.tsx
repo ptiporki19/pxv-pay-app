@@ -296,76 +296,74 @@ export default function SuperAdminTransactionsPage() {
             {/* Transactions Table */}
             <div className="overflow-hidden border border-gray-200 rounded-lg">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-background">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Merchant</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                <div className="border rounded-lg">
+                  {/* Table Header */}
+                  <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                    <div className="w-[120px]">Transaction ID</div>
+                    <div className="w-[100px]">Date</div>
+                    <div className="w-[140px]">Customer</div>
+                    <div className="w-[140px]">Merchant</div>
+                    <div className="w-[100px]">Amount</div>
+                    <div className="w-[120px]">Method</div>
+                    <div className="w-[100px]">Status</div>
+                    <div className="w-[80px] text-right">Actions</div>
+                  </div>
+                  
+                  {/* Table Body */}
                     {isLoading ? (
-                      <tr>
-                        <td colSpan={8} className="px-6 py-12 text-center">
-                          <div className="text-gray-500">Loading transactions...</div>
-                        </td>
-                      </tr>
+                    <div className="px-4 py-12 text-center">
+                      <div className="text-gray-500 font-geist">Loading transactions...</div>
+                    </div>
                     ) : filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction) => (
-                        <tr key={transaction.id} className="border-b hover:bg-background transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                      <div key={transaction.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                        <div className="w-[120px]">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">
                               {transaction.id.slice(0, 8)}...
                             </div>
                             {transaction.reference && (
-                              <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 font-geist">
                                 Ref: {transaction.reference}
                               </div>
                             )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                        </div>
+                        <div className="w-[100px]">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                               {formatDate(transaction.created_at)}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                        </div>
+                        <div className="w-[140px]">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                               {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
                             </div>
-                            <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 font-geist">
                               {transaction.customer_email}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                        </div>
+                        <div className="w-[140px]">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                               {transaction.merchant_email?.split('@')[0] || 'N/A'}
                             </div>
-                            <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 font-geist">
                               {transaction.merchant_email}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                        </div>
+                        <div className="w-[100px]">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
                               {formatAmount(transaction.amount, transaction.currency)}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                        </div>
+                        <div className="w-[120px]">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                               {transaction.payment_method}
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status))}>
+                        </div>
+                        <div className="w-[100px]">
+                          <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-geist")}>
                               {transaction.status.replace('_', ' ')}
                             </Badge>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                        </div>
+                        <div className="w-[80px] text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -375,37 +373,34 @@ export default function SuperAdminTransactionsPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem asChild>
-                                  <Link href={`/super-admin-transactions/${transaction.id}`}>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    View Details
+                                <Link href={`/super-admin-transactions/${transaction.id}`} className="font-geist">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Details
                                   </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem>
+                              <DropdownMenuItem className="font-geist">
                                   <Download className="h-4 w-4 mr-2" />
                                   Download Receipt
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                          </td>
-                        </tr>
+                        </div>
+                      </div>
                       ))
                     ) : (
-                      <tr>
-                        <td colSpan={8} className="px-6 py-12 text-center">
+                    <div className="px-4 py-12 text-center">
                           <div className="text-gray-500">
-                            <div className="text-lg font-medium mb-2">No transactions found</div>
-                            <div className="text-sm">
+                        <div className="text-lg font-medium mb-2 font-geist">No transactions found</div>
+                        <div className="text-sm font-geist">
                               {searchTerm || statusFilter !== 'all' 
                                 ? 'Try adjusting your search or filter criteria.'
                                 : 'Transactions will appear here once payments are processed.'
                               }
                             </div>
                           </div>
-                        </td>
-                      </tr>
+                    </div>
                     )}
-                  </tbody>
-                </table>
+                </div>
               </div>
             </div>
 

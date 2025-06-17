@@ -905,51 +905,57 @@ export function UserProfile({ userId }: UserProfileProps) {
 
               <div className="rounded-md border">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b bg-background dark:bg-gray-800/50">
-                        <th className="px-4 py-3 text-left font-medium">ID</th>
-                        <th className="px-4 py-3 text-left font-medium">Date</th>
-                        <th className="px-4 py-3 text-left font-medium">Customer</th>
-                        <th className="px-4 py-3 text-left font-medium">Amount</th>
-                        <th className="px-4 py-3 text-left font-medium">Method</th>
-                        <th className="px-4 py-3 text-left font-medium">Status</th>
-                        <th className="px-4 py-3 text-left font-medium">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
+                  <div className="border rounded-lg">
+                    {/* Table Header */}
+                    <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                      <div className="w-[120px]">ID</div>
+                      <div className="w-[100px]">Date</div>
+                      <div className="w-[140px]">Customer</div>
+                      <div className="w-[100px]">Amount</div>
+                      <div className="w-[100px]">Method</div>
+                      <div className="w-[100px]">Status</div>
+                      <div className="w-[80px] text-right">Actions</div>
+                    </div>
+                    
+                    {/* Table Body */}
                       {payments.length > 0 ? (
                         payments.slice(0, 10).map((payment) => (
-                          <tr key={payment.id} className="border-b transition-colors hover:bg-background dark:hover:bg-gray-800/50">
-                            <td className="px-4 py-3 font-medium">
-                              <div className="text-sm font-medium text-gray-900">
+                        <div key={payment.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                          <div className="w-[120px]">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">
                                 {payment.id.slice(0, 8)}...
                               </div>
                               {payment.reference && (
-                                <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-500 font-geist">
                                   Ref: {payment.reference}
                                 </div>
                               )}
-                            </td>
-                            <td className="px-4 py-3">{formatDate(payment.created_at)}</td>
-                            <td className="px-4 py-3">
-                              <div className="text-sm text-gray-900">
+                          </div>
+                          <div className="w-[100px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatDate(payment.created_at)}</span>
+                          </div>
+                          <div className="w-[140px]">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                                 {payment.customer_name || payment.customer_email?.split('@')[0] || 'N/A'}
                               </div>
                               {payment.customer_email && (
-                                <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-500 font-geist">
                                   {payment.customer_email}
                                 </div>
                               )}
-                            </td>
-                            <td className="px-4 py-3 font-medium">{formatCurrency(payment.amount, payment.currency)}</td>
-                            <td className="px-4 py-3">{payment.payment_method}</td>
-                            <td className="px-4 py-3">
-                              <Badge variant="outline" className={cn(getPaymentStatusBadgeClass(payment.status))}>
+                          </div>
+                          <div className="w-[100px]">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{formatCurrency(payment.amount, payment.currency)}</span>
+                          </div>
+                          <div className="w-[100px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{payment.payment_method}</span>
+                          </div>
+                          <div className="w-[100px]">
+                            <Badge variant="outline" className={cn(getPaymentStatusBadgeClass(payment.status), "font-geist")}>
                                 {payment.status}
                               </Badge>
-                            </td>
-                            <td className="px-4 py-3">
+                          </div>
+                          <div className="w-[80px] text-right">
                               <Button 
                                 variant="ghost" 
                                 size="icon" 
@@ -959,27 +965,24 @@ export function UserProfile({ userId }: UserProfileProps) {
                                 <Eye className="h-4 w-4" />
                                 <span className="sr-only">Details</span>
                               </Button>
-                            </td>
-                          </tr>
+                          </div>
+                        </div>
                         ))
                       ) : (
-                        <tr>
-                          <td colSpan={7} className="px-4 py-12 text-center">
+                      <div className="px-4 py-12 text-center">
                             <div className="text-gray-500">
-                              <div className="text-lg font-medium mb-2">No transactions found</div>
-                              <div className="text-sm">Transactions will appear here once payments are processed.</div>
+                          <div className="text-lg font-medium mb-2 font-geist">No transactions found</div>
+                          <div className="text-sm font-geist">Transactions will appear here once payments are processed.</div>
                             </div>
-                          </td>
-                        </tr>
+                      </div>
                       )}
-                    </tbody>
-                  </table>
+                  </div>
                 </div>
               </div>
 
               {payments.length > 10 && (
                 <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
-                  <div>Showing 10 of {payments.length} transactions</div>
+                  <div className="font-geist">Showing 10 of {payments.length} transactions</div>
                 </div>
               )}
             </div>
@@ -992,8 +995,8 @@ export function UserProfile({ userId }: UserProfileProps) {
             <div className="p-6">
               <div className="mb-4 flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-semibold">Products</h2>
-                  <p className="text-sm text-muted-foreground">
+                  <h2 className="text-xl font-semibold font-geist">Products</h2>
+                  <p className="text-sm text-muted-foreground font-geist">
                     Manage product offerings and configurations
                   </p>
                 </div>
@@ -1002,36 +1005,39 @@ export function UserProfile({ userId }: UserProfileProps) {
               {checkoutLinks.length > 0 ? (
                 <div className="rounded-md border">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-background dark:bg-gray-800/50">
-                          <th className="px-4 py-3 text-left font-medium">Product Name</th>
-                          <th className="px-4 py-3 text-left font-medium">Pricing</th>
-                          <th className="px-4 py-3 text-left font-medium">URL Slug</th>
-                          <th className="px-4 py-3 text-left font-medium">Status</th>
-                          <th className="px-4 py-3 text-left font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <div className="border rounded-lg">
+                      {/* Table Header */}
+                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                        <div className="w-[160px]">Product Name</div>
+                        <div className="w-[120px]">Pricing</div>
+                        <div className="w-[120px]">URL Slug</div>
+                        <div className="w-[100px]">Status</div>
+                        <div className="w-[80px] text-right">Actions</div>
+                      </div>
+                      
+                      {/* Table Body */}
                         {checkoutLinks.map((link) => (
-                          <tr key={link.id} className="border-b transition-colors hover:bg-background dark:hover:bg-gray-800/50">
-                            <td className="px-4 py-3 font-medium">{link.title}</td>
-                            <td className="px-4 py-3">
+                        <div key={link.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                          <div className="w-[160px]">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{link.title}</span>
+                          </div>
+                          <div className="w-[120px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                               {link.amount_type === 'fixed' 
                                 ? formatCurrency(link.amount, link.currency)
                                 : `${formatCurrency(link.min_amount || 0, link.currency)} - ${formatCurrency(link.max_amount || 0, link.currency)}`
                               }
-                            </td>
-                            <td className="px-4 py-3">
-                              <code className="text-xs bg-gray-100 px-2 py-1 rounded">/{link.slug}</code>
-                            </td>
-                            <td className="px-4 py-3">
-                              <Badge variant={link.status === 'active' ? 'default' : 'secondary'}>
+                            </span>
+                          </div>
+                          <div className="w-[120px]">
+                            <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-geist">/{link.slug}</code>
+                          </div>
+                          <div className="w-[100px]">
+                            <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className="font-geist">
                                 {link.status}
                               </Badge>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
+                          </div>
+                          <div className="w-[80px] text-right">
                                 <Button 
                                   variant="ghost" 
                                   size="icon" 
@@ -1042,18 +1048,16 @@ export function UserProfile({ userId }: UserProfileProps) {
                                   <span className="sr-only">Open Link</span>
                                 </Button>
                               </div>
-                            </td>
-                          </tr>
+                        </div>
                         ))}
-                      </tbody>
-                    </table>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <div className="text-gray-500">
-                    <div className="text-lg font-medium mb-2">No products found</div>
-                    <div className="text-sm">Products will appear here once they are created.</div>
+                    <div className="text-lg font-medium mb-2 font-geist">No products found</div>
+                    <div className="text-sm font-geist">Products will appear here once they are created.</div>
                   </div>
                 </div>
               )}
@@ -1067,8 +1071,8 @@ export function UserProfile({ userId }: UserProfileProps) {
             <div className="p-6">
               <div className="mb-4 flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-semibold">Checkout Links</h2>
-                  <p className="text-sm text-muted-foreground">
+                  <h2 className="text-xl font-semibold font-geist">Checkout Links</h2>
+                  <p className="text-sm text-muted-foreground font-geist">
                     Direct payment links and checkout configurations
                   </p>
                 </div>
@@ -1077,40 +1081,43 @@ export function UserProfile({ userId }: UserProfileProps) {
               {checkoutLinks.length > 0 ? (
                 <div className="rounded-md border">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-background dark:bg-gray-800/50">
-                          <th className="px-4 py-3 text-left font-medium">Link Title</th>
-                          <th className="px-4 py-3 text-left font-medium">Amount</th>
-                          <th className="px-4 py-3 text-left font-medium">Countries</th>
-                          <th className="px-4 py-3 text-left font-medium">Created</th>
-                          <th className="px-4 py-3 text-left font-medium">Status</th>
-                          <th className="px-4 py-3 text-left font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <div className="border rounded-lg">
+                      {/* Table Header */}
+                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                        <div className="w-[140px]">Link Title</div>
+                        <div className="w-[100px]">Amount</div>
+                        <div className="w-[120px]">Countries</div>
+                        <div className="w-[100px]">Created</div>
+                        <div className="w-[100px]">Status</div>
+                        <div className="w-[80px] text-right">Actions</div>
+                      </div>
+                      
+                      {/* Table Body */}
                         {checkoutLinks.map((link) => (
-                          <tr key={link.id} className="border-b transition-colors hover:bg-background dark:hover:bg-gray-800/50">
-                            <td className="px-4 py-3 font-medium">{link.title}</td>
-                            <td className="px-4 py-3">
+                        <div key={link.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                          <div className="w-[140px]">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{link.title}</span>
+                          </div>
+                          <div className="w-[100px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                               {link.amount_type === 'fixed' 
                                 ? formatCurrency(link.amount, link.currency)
                                 : 'Flexible'
-                              }
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                              }</span></div>
+                          <div className="w-[120px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                                 {link.active_country_codes.length} countries
                               </span>
-                            </td>
-                            <td className="px-4 py-3">{formatDate(link.created_at)}</td>
-                            <td className="px-4 py-3">
-                              <Badge variant={link.status === 'active' ? 'default' : 'secondary'}>
+                          </div>
+                          <div className="w-[100px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatDate(link.created_at)}</span>
+                          </div>
+                          <div className="w-[100px]">
+                            <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className="font-geist">
                                 {link.status}
                               </Badge>
-                            </td>
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
+                          </div>
+                          <div className="w-[80px] text-right">
                                 <Button 
                                   variant="ghost" 
                                   size="icon" 
@@ -1121,18 +1128,16 @@ export function UserProfile({ userId }: UserProfileProps) {
                                   <span className="sr-only">Open Link</span>
                                 </Button>
                               </div>
-                            </td>
-                          </tr>
+                        </div>
                         ))}
-                      </tbody>
-                    </table>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <div className="text-gray-500">
-                    <div className="text-lg font-medium mb-2">No checkout links found</div>
-                    <div className="text-sm">Checkout links will appear here once they are created.</div>
+                    <div className="text-lg font-medium mb-2 font-geist">No checkout links found</div>
+                    <div className="text-sm font-geist">Checkout links will appear here once they are created.</div>
                   </div>
                 </div>
               )}
@@ -1156,57 +1161,62 @@ export function UserProfile({ userId }: UserProfileProps) {
               {paymentMethods.length > 0 ? (
                 <div className="rounded-md border">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-background dark:bg-gray-800/50">
-                          <th className="px-4 py-3 text-left font-medium">Method Name</th>
-                          <th className="px-4 py-3 text-left font-medium">Type</th>
-                          <th className="px-4 py-3 text-left font-medium">Countries</th>
-                          <th className="px-4 py-3 text-left font-medium">Created</th>
-                          <th className="px-4 py-3 text-left font-medium">Status</th>
-                          <th className="px-4 py-3 text-left font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
+                    <div className="border rounded-lg">
+                      {/* Table Header */}
+                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                        <div className="w-[160px]">Method Name</div>
+                        <div className="w-[120px]">Type</div>
+                        <div className="w-[120px]">Countries</div>
+                        <div className="w-[100px]">Created</div>
+                        <div className="w-[100px]">Status</div>
+                        <div className="w-[80px] text-right">Actions</div>
+                      </div>
+                      
+                      {/* Table Body */}
                         {paymentMethods.map((method) => (
-                          <tr key={method.id} className="border-b transition-colors hover:bg-background dark:hover:bg-gray-800/50">
-                            <td className="px-4 py-3 font-medium">{method.name}</td>
-                            <td className="px-4 py-3 capitalize">{method.type} payment</td>
-                            <td className="px-4 py-3">
+                        <div key={method.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                          <div className="w-[160px]">
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{method.name}</span>
+                          </div>
+                          <div className="w-[120px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{method.type} payment</span>
+                          </div>
+                          <div className="w-[120px]">
                               <div className="max-h-20 overflow-y-auto">
                                 {method.countries.length > 0 ? (
-                                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                                <span className="text-xs bg-gray-100 px-2 py-1 rounded font-geist">
                                     {method.countries.slice(0, 2).join(', ')}
                                     {method.countries.length > 2 && ` +${method.countries.length - 2} more`}
                                   </span>
                                 ) : (
-                                  <span className="text-gray-500">All countries</span>
+                                <span className="text-gray-500 font-geist">All countries</span>
                                 )}
                               </div>
-                            </td>
-                            <td className="px-4 py-3">{formatDate(method.created_at)}</td>
-                            <td className="px-4 py-3">
-                              <Badge variant={method.status === 'active' ? 'default' : 'secondary'}>
+                          </div>
+                          <div className="w-[100px]">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatDate(method.created_at)}</span>
+                          </div>
+                          <div className="w-[100px]">
+                            <Badge variant={method.status === 'active' ? 'default' : 'secondary'} className="font-geist">
                                 {method.status}
                               </Badge>
-                            </td>
-                            <td className="px-4 py-3">
+                          </div>
+                          <div className="w-[80px] text-right">
                               <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <Eye className="h-4 w-4" />
                                 <span className="sr-only">Details</span>
                               </Button>
-                            </td>
-                          </tr>
+                          </div>
+                        </div>
                         ))}
-                      </tbody>
-                    </table>
+                    </div>
                   </div>
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <div className="text-gray-500">
-                    <div className="text-lg font-medium mb-2">No payment methods found</div>
-                    <div className="text-sm">Payment methods will appear here once they are configured.</div>
+                    <div className="text-lg font-medium mb-2 font-geist">No payment methods found</div>
+                    <div className="text-sm font-geist">Payment methods will appear here once they are configured.</div>
                   </div>
                 </div>
               )}

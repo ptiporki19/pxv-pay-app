@@ -180,70 +180,58 @@ export default function BlogManagementClient({
         </div>
       ) : (
         <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Author</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <div className="border rounded-lg">
+            {/* Table Header */}
+            <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+              <div className="w-[200px]">Title</div>
+              <div className="w-[100px]">Status</div>
+              <div className="w-[120px]">Author</div>
+              <div className="w-[100px]">Created</div>
+              <div className="w-[100px]">Updated</div>
+              <div className="w-[100px] text-right">Actions</div>
+            </div>
+            
+            {/* Table Body */}
               {posts.map((post) => (
-                <TableRow key={post.id}>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div className="font-medium">{post.title}</div>
-                      <div className="text-sm text-muted-foreground">
-                        /blog/{post.slug}
+              <div key={post.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                <div className="w-[200px]">
+                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100 font-geist">
+                    {post.title}
+                  </div>
+                  <div className="text-xs text-muted-foreground font-geist">
+                    {post.slug}
                       </div>
-                      {post.tags && post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {post.tags.slice(0, 3).map((tag, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {post.tags.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{post.tags.length - 3} more
-                            </Badge>
-                          )}
+                  <div className="text-xs text-muted-foreground mt-1 font-geist">
+                    {post.content && post.content.length > 100 
+                      ? post.content.substring(0, 100) + '...' 
+                      : post.content || 'No content'
+                    }
                         </div>
-                      )}
                     </div>
-                  </TableCell>
-                  <TableCell>
+                <div className="w-[100px]">
                     <Badge 
-                      variant={post.published ? "default" : "secondary"}
-                      className={post.published ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" : ""}
+                    variant={post.published ? 'default' : 'secondary'}
+                    className="font-geist"
                     >
                       {post.published ? 'Published' : 'Draft'}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
+                </div>
+                <div className="w-[120px]">
+                  <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
                         {authors[post.author_id]?.email?.split('@')[0] || 'Unknown'}
+                  </div>
+                </div>
+                <div className="w-[100px]">
+                  <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                    {new Date(post.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4" />
-                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                <div className="w-[100px]">
+                  <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                    {new Date(post.updated_at).toLocaleDateString()}
+                  </span>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm text-muted-foreground">
-                      {formatDistanceToNow(new Date(post.updated_at), { addSuffix: true })}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
+                <div className="w-[100px] text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -252,41 +240,39 @@ export default function BlogManagementClient({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem asChild>
-                          <Link href={`/blog-management/${post.id}/edit`}>
-                            <Edit className="mr-2 h-4 w-4" />
+                        <Link href={`/blog-management/${post.id}/edit`} className="font-geist">
                             Edit
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href={`/blog/${post.slug}`} target="_blank">
-                            <ExternalLink className="mr-2 h-4 w-4" />
+                        <Link 
+                          href={`/blog/${post.slug}`} 
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-geist"
+                        >
                             View
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => togglePublished(post)}
+                        className="text-red-600 font-geist"
                         >
-                          <Eye className="mr-2 h-4 w-4" />
                           {post.published ? 'Unpublish' : 'Publish'}
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
                         <DropdownMenuItem 
                           onClick={() => handleDelete(post)}
-                          disabled={deletingId === post.id}
-                          className="text-red-600 dark:text-red-400"
+                        className="text-red-600 font-geist"
                         >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          {deletingId === post.id ? 'Deleting...' : 'Delete'}
+                        Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                </div>
+              </div>
               ))}
-            </TableBody>
-          </Table>
+          </div>
         </div>
       )}
     </div>

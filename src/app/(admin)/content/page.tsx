@@ -133,7 +133,7 @@ export default function ProductManagementPage() {
       {/* Header - Same structure as payment methods */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Product Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-geist">Product Management</h1>
           <p className="text-muted-foreground">Manage products for your checkout.</p>
         </div>
         <Link href="/content/create">
@@ -169,8 +169,8 @@ export default function ProductManagementPage() {
       </div>
 
       {/* Table - Same structure as payment methods */}
-      <div className="border rounded-lg">
-        <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
+      <div className="border rounded-lg border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
           <div className="w-1/3">Product Name</div>
           <div className="w-1/3">Description</div>
           <div className="w-1/6">Category</div>
@@ -184,7 +184,7 @@ export default function ProductManagementPage() {
           </div>
         ) : products.length > 0 ? (
           products.map((product) => (
-            <div key={product.id} className="flex items-center justify-between px-4 py-3 border-b hover:bg-background dark:hover:bg-gray-800">
+            <div key={product.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200">
               <div className="w-1/3 flex items-center space-x-3">
                 {product.featured_image && (
                   <img 
@@ -195,7 +195,7 @@ export default function ProductManagementPage() {
                 )}
                 <div>
                   <div className="flex items-center gap-2">
-                    <span>{product.name}</span>
+                    <span className="font-geist">{product.name}</span>
                     {product.is_featured && (
                       <Star className="h-3 w-3 text-yellow-500 fill-current" />
                     )}
@@ -206,7 +206,11 @@ export default function ProductManagementPage() {
               <div className="w-1/3">{stripHtmlAndTruncate(product.description)}</div>
               <div className="w-1/6 capitalize">{product.category}</div>
               <div className="w-1/6 text-center">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(product.is_active)}`}>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  product.is_active 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                }`}>
                   {product.is_active ? 'Active' : 'Inactive'}
                 </span>
               </div>
