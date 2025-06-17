@@ -22,6 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 export default function ProductManagementPage() {
   const [products, setProducts] = useState<ProductTemplate[]>([])
@@ -136,36 +138,37 @@ export default function ProductManagementPage() {
           <h1 className="text-3xl font-bold tracking-tight font-geist">Product Management</h1>
           <p className="text-muted-foreground">Manage products for your checkout.</p>
         </div>
+      </div>
+
+      {/* Search Bar - Same as payment methods */}
+      <div className="flex items-center py-4 gap-4 justify-between">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search products..."
+              className="w-full bg-background pl-8 h-11 font-geist"
+            />
+          </div>
+          <Select defaultValue="all">
+            <SelectTrigger className="w-[180px] h-11 font-geist">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="font-geist">All Status</SelectItem>
+              <SelectItem value="active" className="font-geist">Active</SelectItem>
+              <SelectItem value="inactive" className="font-geist">Inactive</SelectItem>
+              <SelectItem value="draft" className="font-geist">Draft</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Link href="/content/create">
-          <Button>
+          <Button className="h-11 font-geist">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Product
           </Button>
         </Link>
-      </div>
-
-      {/* Search Bar - Same as payment methods */}
-      <div className="flex items-center py-4 gap-4">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search products..."
-            className="w-full bg-white pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <Filter className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Table - Same structure as payment methods */}
@@ -206,13 +209,16 @@ export default function ProductManagementPage() {
               <div className="w-1/3">{stripHtmlAndTruncate(product.description)}</div>
               <div className="w-1/6 capitalize">{product.category}</div>
               <div className="w-1/6 text-center">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  product.is_active 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-                }`}>
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "font-geist",
+                    product.is_active && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
+                    !product.is_active && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
+                  )}
+                >
                   {product.is_active ? 'Active' : 'Inactive'}
-                </span>
+                </Badge>
               </div>
               <div className="w-1/12 text-right">
                 <DropdownMenu>

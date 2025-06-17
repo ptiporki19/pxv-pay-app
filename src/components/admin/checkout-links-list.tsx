@@ -21,6 +21,8 @@ import {
 import { toast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 export function CheckoutLinksList() {
   const [checkoutLinks, setCheckoutLinks] = useState<CheckoutLink[]>([])
@@ -193,36 +195,36 @@ export function CheckoutLinksList() {
           <h1 className="text-3xl font-bold tracking-tight font-geist">Checkout Links</h1>
           <p className="text-muted-foreground">Create and manage payment checkout links for your customers.</p>
         </div>
+      </div>
+
+      <div className="flex items-center py-4 gap-4 justify-between">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search checkout links..."
+              className="w-full bg-background pl-8 h-11 font-geist"
+            />
+          </div>
+          <Select defaultValue="all">
+            <SelectTrigger className="w-[180px] h-11 font-geist">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="font-geist">All Status</SelectItem>
+              <SelectItem value="active" className="font-geist">Active</SelectItem>
+              <SelectItem value="inactive" className="font-geist">Inactive</SelectItem>
+              <SelectItem value="draft" className="font-geist">Draft</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <Link href="/checkout-links/create">
-          <Button>
+          <Button className="h-11 font-geist">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Link
           </Button>
         </Link>
-      </div>
-
-      <div className="flex items-center py-4 gap-4">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search checkout links..."
-            className="w-full bg-white pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <Filter className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="expired">Expired</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       <div className="border rounded-lg">
@@ -253,19 +255,20 @@ export function CheckoutLinksList() {
                 </span>
               </div>
               <div className="w-1/6">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  link.status === 'active' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
-                    : link.status === 'inactive'
-                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
-                    : link.status === 'expired'
-                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'
-                }`}>
-                  {link.status === 'active' ? 'Active' : 
-                   link.status === 'inactive' ? 'Inactive' : 
-                   link.status === 'expired' ? 'Expired' : 'Draft'}
-                </span>
+                <div className="w-[100px] text-center">
+                  <Badge 
+                    variant="outline" 
+                    className={cn(
+                      "font-geist",
+                      link.status === 'active' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
+                      link.status === 'draft' && 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400',
+                      link.status === 'inactive' && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
+                    )}
+                  >
+                    {link.status === 'active' ? 'Active' : 
+                     link.status === 'draft' ? 'Draft' : 'Inactive'}
+                  </Badge>
+                </div>
               </div>
               <div className="w-1/6">
                 <span className="text-sm text-muted-foreground">

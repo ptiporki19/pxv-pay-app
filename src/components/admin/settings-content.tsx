@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/use-toast"
 import { createClient } from '@/lib/supabase/client'
+import { Spinner } from "@/components/ui/spinner"
 import Link from 'next/link'
 
 interface UserSettings {
@@ -131,7 +132,7 @@ export function SettingsContent() {
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <Spinner size="lg" className="mx-auto mb-4" />
               <p className="text-muted-foreground">Loading settings...</p>
             </div>
           </div>
@@ -268,37 +269,6 @@ export function SettingsContent() {
                   <Button variant="outline" className="h-11" disabled>
                     Export Data
                   </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* System Information */}
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">System Information</h2>
-                <p className="text-sm text-gray-600">Application and system details</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">App Version</Label>
-                  <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
-                    v1.0.0
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Database</Label>
-                  <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
-                    Supabase
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Environment</Label>
-                  <div className="h-11 px-3 py-2 bg-background border border-gray-200 rounded-md flex items-center text-sm">
-                    Development
-                  </div>
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Crown, Shield, User, Mail, Calendar, Eye } from "lucide-react"
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Crown, Shield, User, Mail, Calendar, Eye, UserPlus, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +18,13 @@ import { useRouter } from 'next/navigation'
 import { useRealtimeUsers } from '@/hooks/use-realtime-users'
 import Link from 'next/link'
 import { cn } from "@/lib/utils"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface User {
   id: string
@@ -34,6 +41,7 @@ export function UsersList() {
   const [isSyncing, setIsSyncing] = useState(false)
   const supabase = createClient()
   const router = useRouter()
+  const [roleFilter, setRoleFilter] = useState("all")
 
   // Check super admin access on mount
   useEffect(() => {
@@ -200,25 +208,42 @@ export function UsersList() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
-          <p className="text-muted-foreground">Manage all platform users and their permissions.</p>
+          <h1 className="text-3xl font-bold tracking-tight font-geist">User Management</h1>
+          <p className="text-muted-foreground">Manage users and their permissions.</p>
         </div>
-        <Button onClick={syncUsersFromAuth} variant="outline" disabled={isSyncing}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          {isSyncing ? 'Syncing...' : 'Sync Users'}
-        </Button>
       </div>
 
-      <div className="flex items-center py-4">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search users..."
-            className="w-full bg-white pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="flex items-center py-4 gap-4 justify-between">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search users..."
+              className="w-full bg-background pl-8 h-11 font-geist"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="w-[180px] h-11 font-geist">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="font-geist">All Roles</SelectItem>
+              <SelectItem value="super_admin" className="font-geist">Super Admin</SelectItem>
+              <SelectItem value="registered_user" className="font-geist">Registered User</SelectItem>
+              <SelectItem value="subscriber" className="font-geist">Subscriber</SelectItem>
+              <SelectItem value="free_user" className="font-geist">Free User</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+        <Link href="/users/create">
+          <Button className="h-11 font-geist">
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add User
+          </Button>
+        </Link>
       </div>
 
       <div className="border rounded-lg">

@@ -29,6 +29,7 @@ import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Spinner } from "@/components/ui/spinner"
 
 interface User {
   id: string
@@ -520,7 +521,7 @@ export function UserProfile({ userId }: UserProfileProps) {
     return (
       <div className="flex items-center justify-center min-h-[600px]">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <Spinner size="lg" className="mx-auto" />
           <div className="space-y-2">
             <p className="text-lg font-medium">Loading Profile</p>
             <p className="text-sm text-muted-foreground">Fetching user information and analytics...</p>
@@ -589,7 +590,7 @@ export function UserProfile({ userId }: UserProfileProps) {
         </Card>
         
         <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <Spinner size="md" className="mx-auto" />
           <p className="mt-2 text-gray-600">Loading user profile...</p>
         </div>
       </div>

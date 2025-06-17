@@ -550,26 +550,31 @@ export default function VerificationPage() {
     </div>
   )
 
+  const handleRefresh = () => {
+    loadPaymentData()
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Payment Verification</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-geist text-gray-900 dark:text-white">Payment Verification</h1>
           <p className="text-muted-foreground">Manage and verify payment submissions.</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline">Export</Button>
-          <Button onClick={loadPaymentData}>Refresh</Button>
         </div>
       </div>
 
       <Tabs defaultValue="pending" className="mt-6">
-        <TabsList>
-          <TabsTrigger value="pending">Pending ({pendingPayments.length})</TabsTrigger>
-          <TabsTrigger value="approved">Approved ({approvedPayments.length})</TabsTrigger>
-          <TabsTrigger value="rejected">Rejected ({rejectedPayments.length})</TabsTrigger>
-          <TabsTrigger value="all">All Transactions ({allPayments.length})</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="pending">Pending ({pendingPayments.length})</TabsTrigger>
+            <TabsTrigger value="approved">Approved ({approvedPayments.length})</TabsTrigger>
+            <TabsTrigger value="rejected">Rejected ({rejectedPayments.length})</TabsTrigger>
+            <TabsTrigger value="all">All Transactions ({allPayments.length})</TabsTrigger>
+          </TabsList>
+          <Button variant="outline" onClick={handleRefresh} className="font-geist">
+            Refresh
+          </Button>
+        </div>
         
         <TabsContent value="pending" className="space-y-4 mt-4">
           <Card>

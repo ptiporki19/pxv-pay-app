@@ -213,11 +213,12 @@ export function NotificationsPopover() {
       if (notification.title.includes('Payment Received') || notification.title.includes('Payment Submitted')) {
         // Navigate to transaction detail page with the specific payment
         router.push(`/transactions/${notification.data.payment_id}`)
+      } else {
+        // Default to transaction detail page for any payment-related notification
+        router.push(`/transactions/${notification.data.payment_id}`)
       }
-    }
-    
-    // Default fallback: navigate to transactions page
-    if (!notification.data?.payment_id) {
+    } else {
+      // Default fallback: navigate to transactions page
       router.push('/transactions')
     }
   }

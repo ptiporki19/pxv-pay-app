@@ -9,6 +9,7 @@ import { toast } from "@/components/ui/use-toast"
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import { Spinner } from "@/components/ui/spinner"
 
 interface TransactionDetail {
   id: string
@@ -42,46 +43,12 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
   const [transaction, setTransaction] = useState<TransactionDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [isProcessingAction, setIsProcessingAction] = useState(false)
   
   const supabase = createClient()
 
   useEffect(() => {
     loadTransactionDetail()
   }, [transactionId])
-
-  const handleVerifyPayment = async (paymentId: string, newStatus: 'completed' | 'failed') => {
-    try {
-      setIsProcessingAction(true)
-      
-      const { error } = await supabase
-        .from('payments')
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', paymentId)
-
-      if (error) throw error
-
-      toast({
-        title: "Success",
-        description: `Payment ${newStatus === 'completed' ? 'approved' : 'rejected'} successfully`,
-      })
-      
-      // Refresh transaction details
-      await loadTransactionDetail()
-    } catch (error) {
-      console.error('Error updating payment status:', error)
-      toast({
-        title: "Error",
-        description: 'Failed to update payment status',
-        variant: "destructive"
-      })
-    } finally {
-      setIsProcessingAction(false)
-    }
-  }
 
   const loadTransactionDetail = async () => {
     try {
@@ -187,6 +154,32 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
     }
   }
 
+  const handleVerifyPayment = async (paymentId: string, newStatus: 'completed' | 'failed') => {
+    try {
+      const { error } = await supabase
+        .from('payments')
+        .update({ status: newStatus })
+        .eq('id', paymentId)
+
+      if (error) throw error
+
+      toast({
+        title: "Payment Updated",
+        description: `Payment ${newStatus === 'completed' ? 'approved' : 'rejected'} successfully`,
+      })
+      
+      // Reload transaction details to reflect changes
+      loadTransactionDetail()
+    } catch (error) {
+      console.error('Error updating payment status:', error)
+      toast({
+        title: "Error",
+        description: 'Failed to update payment status',
+        variant: "destructive",
+      })
+    }
+  }
+
   const handleRefresh = async () => {
     setIsRefreshing(true)
     await loadTransactionDetail()
@@ -267,7 +260,7 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
         <div className="max-w-7xl mx-auto p-6">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <Spinner size="lg" className="mx-auto mb-4" />
               <p className="text-muted-foreground">Loading transaction details...</p>
             </div>
           </div>
@@ -567,40 +560,34 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
               {/* Actions */}
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Actions</h3>
-                <div className="flex flex-wrap gap-4">
-                  {/* Approve/Reject buttons for pending verification transactions */}
-                  {transaction.status === 'pending_verification' && (
-                    <>
-                      <Button 
-                        variant="default"
-                        className="gap-2 font-geist"
-                        onClick={() => handleVerifyPayment(transaction.id, 'completed')}
-                        disabled={isProcessingAction}
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        {isProcessingAction ? 'Processing...' : 'Approve Payment'}
-                      </Button>
-                      <Button 
-                        variant="destructive"
-                        className="gap-2 font-geist"
-                        onClick={() => handleVerifyPayment(transaction.id, 'failed')}
-                        disabled={isProcessingAction}
-                      >
-                        <XCircle className="h-4 w-4" />
-                        {isProcessingAction ? 'Processing...' : 'Reject Payment'}
-                      </Button>
-                    </>
-                  )}
-                  
-                  {/* Standard action buttons */}
+                <div className="flex items-center justify-between">
+                  {/* Left side - Download button */}
                   <Button variant="outline" className="gap-2">
                     <Download className="h-4 w-4" />
                     Download Receipt
                   </Button>
-                  <Button variant="outline" className="gap-2">
-                    <Copy className="h-4 w-4" />
-                    Copy Transaction Link
-                  </Button>
+                  
+                  {/* Right side - Payment Verification Actions */}
+                  {transaction.status === 'pending_verification' && (
+                    <div className="flex items-center gap-3">
+                      <Button 
+                        variant="destructive"
+                        className="gap-2 font-geist"
+                        onClick={() => handleVerifyPayment(transaction.id, 'failed')}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Reject Payment
+                      </Button>
+                      <Button 
+                        variant="default"
+                        className="gap-2 font-geist"
+                        onClick={() => handleVerifyPayment(transaction.id, 'completed')}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        Approve Payment
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

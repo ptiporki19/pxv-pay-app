@@ -10,6 +10,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useToast } from '@/components/ui/use-toast'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface Transaction {
   id: string
@@ -31,8 +34,7 @@ export function TransactionsContent() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
-  const [userRole, setUserRole] = useState<string>('')
-  const [currentUser, setCurrentUser] = useState<{email: string, name?: string} | null>(null)
+  const [userRole, setUserRole] = useState<string>('merchant')
   
   const supabase = createClient()
 
@@ -59,7 +61,7 @@ export function TransactionsContent() {
       // Get database profile to determine role and get the correct ID
       const { data: dbUser, error: profileError } = await supabase
         .from('users')
-        .select('id, role, name')
+        .select('id, role')
         .eq('email', user.email) // Use email for reliable lookup
         .single()
 
@@ -75,12 +77,6 @@ export function TransactionsContent() {
         user.email === 'superadmin@pxvpay.com'
 
       setUserRole(isSuperAdmin ? 'super_admin' : 'merchant')
-
-      // Store current user info for merchant column
-      setCurrentUser({
-        email: user.email || '',
-        name: dbUser.name
-      })
 
       // Build query based on user role
       let query = supabase.from('payments').select('*')
@@ -145,44 +141,34 @@ export function TransactionsContent() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'long',
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+      year: '2-digit'
     })
   }
 
   const formatAmount = (amount: string, currency: string) => {
-    const numAmount = parseFloat(amount)
-    
-    if (isNaN(numAmount)) {
-      return `0 ${currency || 'USD'}`
-    }
-    
-    const formattedAmount = new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(numAmount)
-    
-    return `${formattedAmount} ${currency || 'USD'}`
+    const numericAmount = parseFloat(amount)
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      minimumFractionDigits: 2
+    }).format(numericAmount)
   }
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'completed':
-        return "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800"
-      case 'pending':
+        return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
       case 'pending_verification':
-        return "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800"
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800'
+      case 'pending':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800'
       case 'failed':
-        return "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
-      case 'refunded':
-        return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800"
+        return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800'
       default:
-        return "bg-background text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
+        return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800'
     }
   }
 
@@ -239,119 +225,143 @@ export function TransactionsContent() {
 
             {/* Transaction Summary */}
             <div className="mb-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-200 dark:border-violet-700">
-                <div className="text-sm text-violet-600 dark:text-violet-400 font-bold font-geist">Total Transactions</div>
-                <div className="text-2xl font-black text-violet-700 dark:text-violet-300 font-geist">{transactions.length}</div>
+              <div className="p-6 bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-900/30 dark:to-violet-800/20 rounded-xl border border-violet-200 dark:border-violet-700/50 shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="text-sm text-violet-600 dark:text-violet-400 font-bold font-geist mb-1">Total Transactions</div>
+                <div className="text-3xl font-black text-violet-700 dark:text-violet-300 font-geist">{transactions.length}</div>
+                <div className="text-xs text-violet-500 dark:text-violet-400 font-geist mt-1">All time</div>
               </div>
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <div className="text-sm text-green-600 font-bold font-geist">Completed</div>
-                <div className="text-2xl font-black text-green-700 font-geist">
+              <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/20 rounded-xl border border-green-200 dark:border-green-700/50 shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="text-sm text-green-600 dark:text-green-400 font-bold font-geist mb-1">Completed</div>
+                <div className="text-3xl font-black text-green-700 dark:text-green-300 font-geist">
                   {transactions.filter(t => t.status === 'completed').length}
                 </div>
+                <div className="text-xs text-green-500 dark:text-green-400 font-geist mt-1">Successfully processed</div>
               </div>
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div className="text-sm text-yellow-600 font-bold font-geist">Pending Verification</div>
-                <div className="text-2xl font-black text-yellow-700 font-geist">
+              <div className="p-6 bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-800/20 rounded-xl border border-amber-200 dark:border-amber-700/50 shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="text-sm text-amber-600 dark:text-amber-400 font-bold font-geist mb-1">Pending Verification</div>
+                <div className="text-3xl font-black text-amber-700 dark:text-amber-300 font-geist">
                   {transactions.filter(t => t.status === 'pending_verification').length}
                 </div>
+                <div className="text-xs text-amber-500 dark:text-amber-400 font-geist mt-1">Awaiting review</div>
               </div>
-              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                <div className="text-sm text-red-600 font-bold font-geist">Failed</div>
-                <div className="text-2xl font-black text-red-700 font-geist">
+              <div className="p-6 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/30 dark:to-rose-800/20 rounded-xl border border-red-200 dark:border-red-700/50 shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="text-sm text-red-600 dark:text-red-400 font-bold font-geist mb-1">Failed</div>
+                <div className="text-3xl font-black text-red-700 dark:text-red-300 font-geist">
                   {transactions.filter(t => t.status === 'failed').length}
                 </div>
+                <div className="text-xs text-red-500 dark:text-red-400 font-geist mt-1">Rejected payments</div>
               </div>
             </div>
 
-            {/* Transactions Table with Enhanced Styling */}
+            {/* Transactions Table with Enhanced Styling - Copy from Platform Transactions */}
             <div className="enhanced-table">
-              <div className="overflow-x-auto">
-                <div className="border rounded-lg">
-                  {/* Table Header - Match Platform Transactions exactly */}
-                  <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
-                    <div className="w-[120px]">Transaction ID</div>
-                    <div className="w-[100px]">Date</div>
-                    <div className="w-[140px]">Customer</div>
-                    <div className="w-[140px]">Merchant</div>
-                    <div className="w-[100px]">Amount</div>
-                    <div className="w-[120px]">Method</div>
-                    <div className="w-[100px]">Status</div>
-                    <div className="w-[80px] text-right">Actions</div>
-                  </div>
-                  
-                  {/* Table Body */}
-                    {isLoading ? (
-                    <div className="px-4 py-12 text-center">
-                      <div className="text-gray-500 font-geist">Loading transactions...</div>
+              <div className="overflow-hidden border rounded-lg">
+                <div className="overflow-x-auto">
+                  <div className="border rounded-lg">
+                    {/* Table Header - Exact copy from Platform Transactions */}
+                    <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                      <div className="w-[120px]">Transaction ID</div>
+                      <div className="w-[100px]">Date</div>
+                      <div className="w-[140px]">Customer</div>
+                      <div className="w-[140px]">Merchant</div>
+                      <div className="w-[100px]">Amount</div>
+                      <div className="w-[120px]">Method</div>
+                      <div className="w-[100px]">Status</div>
+                      <div className="w-[80px] text-right">Actions</div>
                     </div>
-                    ) : filteredTransactions.length > 0 ? (
-                      filteredTransactions.map((transaction) => (
-                      <div key={transaction.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
-                        <div className="w-[120px]">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">{transaction.id.slice(0, 8)}...</div>
-                          {transaction.reference && (
-                            <div className="text-xs text-gray-500 font-geist">Ref: {transaction.reference}</div>
-                          )}
-                        </div>
-                        <div className="w-[100px]">
-                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatDate(transaction.created_at)}</div>
-                        </div>
-                        <div className="w-[140px]">
-                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">{transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}</div>
-                          <div className="text-xs text-gray-500 font-geist">{transaction.customer_email}</div>
-                        </div>
-                        <div className="w-[140px]">
-                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">{currentUser?.name || currentUser?.email?.split('@')[0] || 'N/A'}</div>
-                          <div className="text-xs text-gray-500 font-geist">{currentUser?.email}</div>
-                        </div>
-                        <div className="w-[100px]">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{formatAmount(transaction.amount, transaction.currency)}</div>
-                        </div>
-                        <div className="w-[120px]">
-                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">{transaction.payment_method}</div>
-                        </div>
-                        <div className="w-[100px]">
-                          <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-geist")}>
-                            {transaction.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        <div className="w-[80px] text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem asChild>
-                                <Link href={`/transactions/${transaction.id}`} className="font-geist">
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="font-geist">
-                                <Download className="h-4 w-4 mr-2" />
-                                Download Receipt
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
+                    
+                    {/* Table Body - Exact copy from Platform Transactions */}
+                      {isLoading ? (
+                      <div className="px-4 py-12 text-center">
+                        <div className="text-gray-500 font-geist">Loading transactions...</div>
                       </div>
-                      ))
-                    ) : (
-                    <div className="px-4 py-12 text-center">
-                          <div className="text-gray-500">
-                        <div className="text-lg font-medium mb-2 font-geist">No transactions found</div>
-                        <div className="text-sm font-geist">
-                              {searchTerm || statusFilter !== 'all' 
-                                ? 'Try adjusting your search or filter criteria.'
-                                : `${userRole === 'super_admin' ? 'Transactions' : 'Your transactions'} will appear here once payments are processed.`
-                              }
-                            </div>
+                      ) : filteredTransactions.length > 0 ? (
+                        filteredTransactions.map((transaction) => (
+                        <div key={transaction.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+                          <div className="w-[120px]">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">
+                                {transaction.id.slice(0, 8)}...
+                              </div>
+                              {transaction.reference && (
+                              <div className="text-xs text-gray-500 font-geist">
+                                  Ref: {transaction.reference}
+                                </div>
+                              )}
                           </div>
-                    </div>
-                    )}
+                          <div className="w-[100px]">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                                {formatDate(transaction.created_at)}
+                              </div>
+                          </div>
+                          <div className="w-[140px]">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                                {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
+                              </div>
+                            <div className="text-xs text-gray-500 font-geist">
+                                {transaction.customer_email}
+                              </div>
+                          </div>
+                          <div className="w-[140px]">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                                {userRole === 'super_admin' ? 'Merchant' : 'You'}
+                              </div>
+                            <div className="text-xs text-gray-500 font-geist">
+                                Current User
+                              </div>
+                          </div>
+                          <div className="w-[100px]">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
+                                {formatAmount(transaction.amount, transaction.currency)}
+                              </div>
+                          </div>
+                          <div className="w-[120px]">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                                {transaction.payment_method}
+                              </div>
+                          </div>
+                          <div className="w-[100px]">
+                            <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-geist")}>
+                                {transaction.status.replace('_', ' ')}
+                              </Badge>
+                          </div>
+                          <div className="w-[80px] text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Open menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem asChild>
+                                  <Link href={`/transactions/${transaction.id}`} className="font-geist">
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Details
+                                    </Link>
+                                  </DropdownMenuItem>
+                                <DropdownMenuItem className="font-geist">
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Download Receipt
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                          </div>
+                        </div>
+                        ))
+                      ) : (
+                      <div className="px-4 py-12 text-center">
+                            <div className="text-gray-500">
+                          <div className="text-lg font-medium mb-2 font-geist">No transactions found</div>
+                          <div className="text-sm font-geist">
+                                {searchTerm || statusFilter !== 'all' 
+                                  ? 'Try adjusting your search or filter criteria.'
+                                  : `${userRole === 'super_admin' ? 'Transactions' : 'Your transactions'} will appear here once payments are processed.`
+                                }
+                              </div>
+                            </div>
+                      </div>
+                      )}
+                  </div>
                 </div>
               </div>
             </div>
