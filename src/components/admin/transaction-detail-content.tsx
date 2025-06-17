@@ -16,7 +16,7 @@ interface TransactionDetail {
   updated_at: string
   amount: string
   currency: string
-  status: 'pending' | 'completed' | 'failed' | 'refunded'
+  status: 'pending' | 'completed' | 'failed' | 'refunded' | 'pending_verification'
   payment_method: string
   customer_email?: string
   customer_name?: string
@@ -42,12 +42,46 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
   const [transaction, setTransaction] = useState<TransactionDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isProcessingAction, setIsProcessingAction] = useState(false)
   
   const supabase = createClient()
 
   useEffect(() => {
     loadTransactionDetail()
   }, [transactionId])
+
+  const handleVerifyPayment = async (paymentId: string, newStatus: 'completed' | 'failed') => {
+    try {
+      setIsProcessingAction(true)
+      
+      const { error } = await supabase
+        .from('payments')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', paymentId)
+
+      if (error) throw error
+
+      toast({
+        title: "Success",
+        description: `Payment ${newStatus === 'completed' ? 'approved' : 'rejected'} successfully`,
+      })
+      
+      // Refresh transaction details
+      await loadTransactionDetail()
+    } catch (error) {
+      console.error('Error updating payment status:', error)
+      toast({
+        title: "Error",
+        description: 'Failed to update payment status',
+        variant: "destructive"
+      })
+    } finally {
+      setIsProcessingAction(false)
+    }
+  }
 
   const loadTransactionDetail = async () => {
     try {
@@ -534,6 +568,31 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Actions</h3>
                 <div className="flex flex-wrap gap-4">
+                  {/* Approve/Reject buttons for pending verification transactions */}
+                  {transaction.status === 'pending_verification' && (
+                    <>
+                      <Button 
+                        variant="default"
+                        className="gap-2 font-geist"
+                        onClick={() => handleVerifyPayment(transaction.id, 'completed')}
+                        disabled={isProcessingAction}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        {isProcessingAction ? 'Processing...' : 'Approve Payment'}
+                      </Button>
+                      <Button 
+                        variant="destructive"
+                        className="gap-2 font-geist"
+                        onClick={() => handleVerifyPayment(transaction.id, 'failed')}
+                        disabled={isProcessingAction}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        {isProcessingAction ? 'Processing...' : 'Reject Payment'}
+                      </Button>
+                    </>
+                  )}
+                  
+                  {/* Standard action buttons */}
                   <Button variant="outline" className="gap-2">
                     <Download className="h-4 w-4" />
                     Download Receipt
