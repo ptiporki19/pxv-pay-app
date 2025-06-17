@@ -87,7 +87,7 @@ export function CountriesList() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Countries</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-geist">Countries</h1>
           <p className="text-muted-foreground">Manage supported countries for payments.</p>
         </div>
         <Link href="/countries/create">
@@ -110,8 +110,8 @@ export function CountriesList() {
         </div>
       </div>
 
-      <div className="border rounded-lg">
-        <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
+      <div className="border rounded-lg border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
           <div className="w-1/4">Country Name</div>
           <div className="w-1/4">Country Code</div>
           <div className="w-1/4">Currency</div>
@@ -125,8 +125,8 @@ export function CountriesList() {
           </div>
         ) : countries.length > 0 ? (
           countries.map((country) => (
-            <div key={country.id} className="flex items-center justify-between px-4 py-3 hover:bg-background">
-              <div className="w-1/4">{country.name}</div>
+            <div key={country.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200">
+              <div className="w-1/4 font-geist">{country.name}</div>
               <div className="w-1/4">{country.code}</div>
               <div className="w-1/4">
                 {country.currency ? (
@@ -138,7 +138,13 @@ export function CountriesList() {
                 )}
               </div>
               <div className="w-1/6 text-center">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(country.status)}`}>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  country.status === 'active' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                    : country.status === 'pending'
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                }`}>
                   {country.status === 'active' ? 'Active' : 
                    country.status === 'pending' ? 'Pending' : 'Inactive'}
                 </span>

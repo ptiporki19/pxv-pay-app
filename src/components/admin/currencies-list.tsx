@@ -87,7 +87,7 @@ export function CurrenciesList() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Currencies</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-geist">Currencies</h1>
           <p className="text-muted-foreground">Manage supported currencies for payments.</p>
         </div>
         <Link href="/currencies/create">
@@ -110,8 +110,8 @@ export function CurrenciesList() {
         </div>
       </div>
 
-      <div className="border rounded-lg">
-        <div className="flex items-center justify-between border-b px-4 py-3 font-medium">
+      <div className="border rounded-lg border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
           <div className="w-1/4">Currency Name</div>
           <div className="w-1/4">Currency Code</div>
           <div className="w-1/4">Symbol</div>
@@ -125,12 +125,18 @@ export function CurrenciesList() {
           </div>
         ) : currencies.length > 0 ? (
           currencies.map((currency) => (
-            <div key={currency.id} className="flex items-center justify-between px-4 py-3 hover:bg-background">
-              <div className="w-1/4">{currency.name}</div>
+            <div key={currency.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200">
+              <div className="w-1/4 font-geist">{currency.name}</div>
               <div className="w-1/4">{currency.code}</div>
               <div className="w-1/4">{currency.symbol}</div>
               <div className="w-1/6 text-center">
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(currency.status)}`}>
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  currency.status === 'active' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100'
+                    : currency.status === 'pending'
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
+                }`}>
                   {currency.status === 'active' ? 'Active' : 
                    currency.status === 'pending' ? 'Pending' : 'Inactive'}
                 </span>
