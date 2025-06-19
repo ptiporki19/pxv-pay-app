@@ -265,7 +265,7 @@ export function CheckoutLinksList() {
                       link.status === 'inactive' && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
                     )}
                   >
-                    {link.status === 'active' ? 'Active' : 
+                  {link.status === 'active' ? 'Active' : 
                      link.status === 'draft' ? 'Draft' : 'Inactive'}
                   </Badge>
                 </div>

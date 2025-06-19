@@ -66,26 +66,26 @@ function StatWidget({ title, icon, description, fetchFunction, href }: StatWidge
             {/* Content Section - Left Side */}
             <div className="flex-1 min-w-0">
               <div className="text-3xl lg:text-4xl font-black tracking-tight text-gray-900 dark:text-white font-geist mb-2">
-                {loading ? '...' : count.toLocaleString()}
-              </div>
+              {loading ? '...' : count.toLocaleString()}
+            </div>
               <h3 className="text-base font-bold tracking-tight text-gray-900 dark:text-white font-geist mb-1">{title}</h3>
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400 font-geist">
-                {description}
+              {description}
+            </p>
+            {error && (
+              <p className="text-xs text-red-500 dark:text-red-400 mt-1 font-medium">
+                {error}
               </p>
-              {error && (
-                <p className="text-xs text-red-500 dark:text-red-400 mt-1 font-medium">
-                  {error}
-                </p>
-              )}
-            </div>
+            )}
+          </div>
             
             {/* Icon Section - Right Side */}
             <div className="flex-shrink-0 ml-4">
               {icon}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </CardContent>
+    </Card>
     </Link>
   )
 }

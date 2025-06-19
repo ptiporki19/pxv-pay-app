@@ -565,12 +565,12 @@ export default function VerificationPage() {
 
       <Tabs defaultValue="pending" className="mt-6">
         <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="pending">Pending ({pendingPayments.length})</TabsTrigger>
-            <TabsTrigger value="approved">Approved ({approvedPayments.length})</TabsTrigger>
-            <TabsTrigger value="rejected">Rejected ({rejectedPayments.length})</TabsTrigger>
-            <TabsTrigger value="all">All Transactions ({allPayments.length})</TabsTrigger>
-          </TabsList>
+        <TabsList>
+          <TabsTrigger value="pending">Pending ({pendingPayments.length})</TabsTrigger>
+          <TabsTrigger value="approved">Approved ({approvedPayments.length})</TabsTrigger>
+          <TabsTrigger value="rejected">Rejected ({rejectedPayments.length})</TabsTrigger>
+          <TabsTrigger value="all">All Transactions ({allPayments.length})</TabsTrigger>
+        </TabsList>
           <Button variant="outline" onClick={handleRefresh} className="font-geist">
             Refresh
           </Button>

@@ -256,7 +256,7 @@ export function TransactionsContent() {
             {/* Transactions Table with Enhanced Styling - Copy from Platform Transactions */}
             <div className="enhanced-table">
               <div className="overflow-hidden border rounded-lg">
-                <div className="overflow-x-auto">
+              <div className="overflow-x-auto">
                   <div className="border rounded-lg">
                     {/* Table Header - Exact copy from Platform Transactions */}
                     <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
@@ -271,35 +271,35 @@ export function TransactionsContent() {
                     </div>
                     
                     {/* Table Body - Exact copy from Platform Transactions */}
-                      {isLoading ? (
+                    {isLoading ? (
                       <div className="px-4 py-12 text-center">
                         <div className="text-gray-500 font-geist">Loading transactions...</div>
                       </div>
-                      ) : filteredTransactions.length > 0 ? (
-                        filteredTransactions.map((transaction) => (
+                    ) : filteredTransactions.length > 0 ? (
+                      filteredTransactions.map((transaction) => (
                         <div key={transaction.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
                           <div className="w-[120px]">
                             <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-mono">
-                                {transaction.id.slice(0, 8)}...
-                              </div>
-                              {transaction.reference && (
+                              {transaction.id.slice(0, 8)}...
+                            </div>
+                            {transaction.reference && (
                               <div className="text-xs text-gray-500 font-geist">
-                                  Ref: {transaction.reference}
-                                </div>
-                              )}
+                                Ref: {transaction.reference}
+                              </div>
+                            )}
                           </div>
                           <div className="w-[100px]">
                             <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
-                                {formatDate(transaction.created_at)}
-                              </div>
+                              {formatDate(transaction.created_at)}
+                            </div>
                           </div>
                           <div className="w-[140px]">
                             <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
-                                {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
-                              </div>
+                              {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
+                            </div>
                             <div className="text-xs text-gray-500 font-geist">
-                                {transaction.customer_email}
-                              </div>
+                              {transaction.customer_email}
+                            </div>
                           </div>
                           <div className="w-[140px]">
                             <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
@@ -311,56 +311,56 @@ export function TransactionsContent() {
                           </div>
                           <div className="w-[100px]">
                             <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
-                                {formatAmount(transaction.amount, transaction.currency)}
-                              </div>
+                              {formatAmount(transaction.amount, transaction.currency)}
+                            </div>
                           </div>
                           <div className="w-[120px]">
                             <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
-                                {transaction.payment_method}
-                              </div>
+                              {transaction.payment_method}
+                            </div>
                           </div>
                           <div className="w-[100px]">
                             <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-geist")}>
-                                {transaction.status.replace('_', ' ')}
-                              </Badge>
+                              {transaction.status.replace('_', ' ')}
+                            </Badge>
                           </div>
                           <div className="w-[80px] text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                    <span className="sr-only">Open menu</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem asChild>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Open menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem asChild>
                                   <Link href={`/transactions/${transaction.id}`} className="font-geist">
                                     <Eye className="h-4 w-4 mr-2" />
                                     View Details
-                                    </Link>
-                                  </DropdownMenuItem>
+                                  </Link>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem className="font-geist">
-                                    <Download className="h-4 w-4 mr-2" />
-                                    Download Receipt
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Download Receipt
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         </div>
-                        ))
-                      ) : (
+                      ))
+                    ) : (
                       <div className="px-4 py-12 text-center">
-                            <div className="text-gray-500">
+                          <div className="text-gray-500">
                           <div className="text-lg font-medium mb-2 font-geist">No transactions found</div>
                           <div className="text-sm font-geist">
-                                {searchTerm || statusFilter !== 'all' 
-                                  ? 'Try adjusting your search or filter criteria.'
-                                  : `${userRole === 'super_admin' ? 'Transactions' : 'Your transactions'} will appear here once payments are processed.`
-                                }
-                              </div>
+                              {searchTerm || statusFilter !== 'all' 
+                                ? 'Try adjusting your search or filter criteria.'
+                                : `${userRole === 'super_admin' ? 'Transactions' : 'Your transactions'} will appear here once payments are processed.`
+                              }
                             </div>
+                          </div>
                       </div>
-                      )}
+                    )}
                   </div>
                 </div>
               </div>

@@ -215,15 +215,15 @@ export function UsersList() {
 
       <div className="flex items-center py-4 gap-4 justify-between">
         <div className="flex items-center gap-4 flex-1">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search users..."
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search users..."
               className="w-full bg-background pl-8 h-11 font-geist"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
           <Select value={roleFilter} onValueChange={setRoleFilter}>
             <SelectTrigger className="w-[180px] h-11 font-geist">
               <Filter className="h-4 w-4 mr-2" />

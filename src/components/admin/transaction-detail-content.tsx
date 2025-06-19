@@ -585,7 +585,7 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
                       >
                         <CheckCircle className="h-4 w-4" />
                         Approve Payment
-                      </Button>
+                  </Button>
                     </div>
                   )}
                 </div>
