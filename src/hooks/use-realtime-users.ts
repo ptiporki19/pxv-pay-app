@@ -23,6 +23,7 @@ export function useRealtimeUsers() {
     const fetchUsers = async () => {
       try {
         setIsLoading(true)
+        console.log('🔍 Fetching users from API...')
         
         // Use the API endpoint that uses service role
         const response = await fetch('/api/users/list', {
@@ -34,13 +35,39 @@ export function useRealtimeUsers() {
 
         if (response.ok) {
           const data = await response.json()
-          setUsers(data.users || [])
+          console.log('📋 API Response:', {
+            success: data.success,
+            count: data.count,
+            keyType: data.keyType,
+            hasUsers: Array.isArray(data.users),
+            userCount: data.users?.length || 0
+          })
+          
+          if (data.users && Array.isArray(data.users)) {
+            setUsers(data.users)
+            console.log(`✅ Fetched ${data.users.length} users successfully`)
+          } else {
+            console.warn('⚠️ API returned invalid user data structure')
+            setUsers([])
+          }
         } else {
-          console.error('Failed to fetch users from API')
+          console.error('❌ Failed to fetch users from API:', {
+            status: response.status,
+            statusText: response.statusText
+          })
+          
+          // Try to parse error response
+          try {
+            const errorData = await response.json()
+            console.error('❌ API Error details:', errorData)
+          } catch (e) {
+            console.error('❌ Could not parse error response')
+          }
+          
           setUsers([])
         }
       } catch (error) {
-        console.error('Error fetching users:', error)
+        console.error('💥 Exception fetching users:', error)
         setUsers([])
       } finally {
         setIsLoading(false)

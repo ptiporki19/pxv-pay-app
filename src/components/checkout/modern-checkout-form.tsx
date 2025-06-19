@@ -240,18 +240,51 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
       return
     }
 
+    // Additional null checks for TypeScript
+    if (!selectedPaymentMethod || !checkoutData?.checkout_link) {
+      setError('Missing payment method or checkout link information')
+      return
+    }
+
+    // Validate amount - Simple fix to get the correct amount value
+    let finalAmount = '0'
+    
+    if (checkoutData.checkout_link.amount_type === 'fixed') {
+      // For fixed amounts, use the checkout link amount or custom price for products
+      const checkoutAmount = checkoutData.checkout_link.checkout_type === 'product' 
+        ? (checkoutData.checkout_link.custom_price || checkoutData.checkout_link.amount)
+        : checkoutData.checkout_link.amount
+      finalAmount = checkoutAmount?.toString() || '0'
+    } else {
+      // For custom amounts, use the amount state variable
+      finalAmount = amount || '0'
+    }
+    
+    console.log('💰 Amount validation:', {
+      amountType: checkoutData.checkout_link.amount_type,
+      checkoutType: checkoutData.checkout_link.checkout_type,
+      linkAmount: checkoutData.checkout_link.amount,
+      customPrice: checkoutData.checkout_link.custom_price,
+      stateAmount: amount,
+      finalAmount
+    })
+
+    if (!finalAmount || parseFloat(finalAmount) <= 0) {
+      setError('Please enter a valid amount')
+      return
+    }
+
     setSubmitting(true)
-    setError(null)
 
     try {
       const formData = new FormData()
       formData.append('proof', proofFile)
-      formData.append('customer_name', customerName)
-      formData.append('customer_email', customerEmail)
-      formData.append('amount', checkoutData?.checkout_link?.amount_type === 'fixed' ? checkoutData.checkout_link.amount.toString() : amount)
-      formData.append('country', selectedCountry)
-      formData.append('payment_method_id', selectedPaymentMethod?.id || '')
-      formData.append('checkout_link_id', checkoutData?.checkout_link?.id || '')
+      formData.append('customer_name', customerName.trim())
+      formData.append('customer_email', customerEmail.trim())
+      formData.append('amount', finalAmount)
+      formData.append('country', selectedCountry.trim())
+      formData.append('payment_method_id', selectedPaymentMethod.id.trim())
+      formData.append('checkout_link_id', checkoutData.checkout_link.id.trim())
 
       const response = await fetch(`/api/checkout/${slug}/submit`, {
         method: 'POST',
@@ -715,7 +748,19 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
             {currentStep === 'proof-upload' && (
               <form onSubmit={handleProofUpload} className="space-y-6">
                 <div className="text-center">
-                  <p className="text-xl font-semibold text-gray-800 mb-1">{checkoutLink.amount_type === 'fixed' ? checkoutLink.amount : amount} {currency?.code}</p>
+                  <p className="text-xl font-semibold text-gray-800 mb-1">
+                    {(() => {
+                      // Use the same amount calculation logic as validation
+                      if (checkoutLink.amount_type === 'fixed') {
+                        const checkoutAmount = checkoutLink.checkout_type === 'product' 
+                          ? (checkoutLink.custom_price || checkoutLink.amount)
+                          : checkoutLink.amount;
+                        return checkoutAmount;
+                      } else {
+                        return amount;
+                      }
+                    })()} {currency?.code}
+                  </p>
                   <p className="text-sm text-gray-500">Upload proof of payment</p>
                 </div>
                 <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-gray-400 transition-colors">

@@ -70,22 +70,13 @@ export function DashboardStatsGrid() {
     try {
       setLoading(true)
       const response = await fetch('/api/dashboard/stats')
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-      
-      const data = await response.json()
-      
-      if (data.success) {
+      if (response.ok) {
+        const data = await response.json()
         setStats(data.stats)
         setLastUpdate(new Date())
-      } else {
-        throw new Error(data.error || 'Failed to fetch stats')
       }
     } catch (error) {
       console.error('Failed to fetch dashboard stats:', error)
-      // Set error state but keep trying
     } finally {
       setLoading(false)
     }

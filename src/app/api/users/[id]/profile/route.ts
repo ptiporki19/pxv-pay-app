@@ -9,123 +9,78 @@ const supabase = createClient(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: userId } = await params
+    const resolvedParams = await params
+    const userId = resolvedParams.id
+    console.log('📋 API: Fetching user profile for ID:', userId)
     
-    console.log('🔍 API: Fetching user profile for ID:', userId)
-
-    // Validate UUID format (relaxed for testing)
+    // Validate user ID
     if (!userId || userId.trim() === '') {
+      console.error('❌ Invalid user ID provided')
       return NextResponse.json(
         { error: 'User ID is required' },
         { status: 400 }
       )
     }
-
-    // Fetch user details using service role (bypasses RLS)
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single()
-
-    if (userError) {
-      console.error('❌ API: User fetch error:', userError)
-      
-      if (userError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: `No user found with ID: ${userId}` },
-          { status: 404 }
-        )
-      }
-      
+    
+    // Check environment variables
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error('❌ Missing environment variables:', {
+        hasUrl: !!supabaseUrl,
+        hasServiceKey: !!serviceRoleKey
+      })
       return NextResponse.json(
-        { error: 'Failed to fetch user', details: userError.message },
+        { error: 'Server configuration error' },
         { status: 500 }
       )
     }
 
-    if (!userData) {
+    const supabase = createClient(supabaseUrl, serviceRoleKey)
+
+    // Fetch user profile
+    console.log('🔍 Querying users table...')
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('id, email, role, active, created_at, updated_at')
+      .eq('id', userId)
+      .single()
+
+    if (error) {
+      console.error('❌ API: Failed to fetch user profile:', {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        userId
+      })
       return NextResponse.json(
-        { error: 'No user data returned' },
+        { error: 'Failed to fetch user', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    if (!user) {
+      console.log('❌ User not found:', userId)
+      return NextResponse.json(
+        { error: 'User not found' },
         { status: 404 }
       )
     }
 
-    // Fetch payments for this user
-    const { data: paymentsData, error: paymentsError } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-
-    if (paymentsError) {
-      console.error('❌ API: Failed to fetch payments:', paymentsError)
-    }
-
-    // Fetch payment methods for this user
-    const { data: paymentMethodsData, error: paymentMethodsError } = await supabase
-      .from('payment_methods')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-
-    if (paymentMethodsError) {
-      console.error('❌ API: Failed to fetch payment methods:', paymentMethodsError)
-    }
-
-    // Fetch countries for this user
-    const { data: countriesData, error: countriesError } = await supabase
-      .from('countries')
-      .select('*')
-      .eq('user_id', userId)
-      .order('name', { ascending: true })
-
-    if (countriesError) {
-      console.error('❌ API: Failed to fetch countries:', countriesError)
-    }
-
-    // Fetch currencies for this user
-    const { data: currenciesData, error: currenciesError } = await supabase
-      .from('currencies')
-      .select('*')
-      .eq('user_id', userId)
-      .order('name', { ascending: true })
-
-    if (currenciesError) {
-      console.error('❌ API: Failed to fetch currencies:', currenciesError)
-    }
-
-    // Calculate stats
-    const payments = paymentsData || []
-    const paymentMethods = paymentMethodsData || []
-    const countries = countriesData || []
-    const currencies = currenciesData || []
-
-    const stats = {
-      totalPayments: payments.length,
-      totalAmount: payments.reduce((sum, payment) => sum + payment.amount, 0),
-      successfulPayments: payments.filter(p => p.status === 'completed').length,
-      pendingPayments: payments.filter(p => p.status === 'pending').length,
-      failedPayments: payments.filter(p => p.status === 'failed').length,
-      uniqueCurrencies: new Set(payments.map(p => p.currency)).size,
-      activePaymentMethods: paymentMethods.filter(pm => pm.status === 'active').length,
-      activeCountries: countries.filter(c => c.status === 'active').length,
-      accountAge: Math.floor((new Date().getTime() - new Date(userData.created_at).getTime()) / (1000 * 60 * 60 * 24))
-    }
-
-    console.log(`✅ API: Successfully fetched profile for user ${userId}`)
+    console.log('✅ API: Successfully fetched user profile:', {
+      id: user.id,
+      email: user.email,
+      role: user.role
+    })
 
     return NextResponse.json({
       success: true,
-      user: userData,
-      payments,
-      paymentMethods,
-      countries,
-      currencies,
-      stats
+      user
     })
 
   } catch (error) {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Crown, Shield, User, Mail, Calendar, Eye, UserPlus, Filter } from "lucide-react"
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Crown, Shield, User, Mail, Calendar, Eye, UserPlus, Filter, ArrowDownUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -70,13 +70,18 @@ export function UsersList() {
     checkAccess()
   }, [supabase, router])
 
-  // Filter users based on search query
-  const users = searchQuery.trim() 
-    ? allUsers.filter(user => 
-        user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.role?.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : allUsers
+  // Filter users based on search query and role filter
+  const users = allUsers.filter(user => {
+    // Apply search filter
+    const searchMatch = !searchQuery.trim() || 
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    // Apply role filter
+    const roleMatch = roleFilter === 'all' || user.role === roleFilter
+    
+    return searchMatch && roleMatch
+  })
 
   // Sync users from auth table to public users table
   const syncUsersFromAuth = async () => {
@@ -92,13 +97,35 @@ export function UsersList() {
         }
       })
 
-      const result = await response.json()
+      console.log('📋 Raw response:', {
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      })
 
-      if (response.ok) {
+      let result
+      try {
+        const responseText = await response.text()
+        console.log('📋 Raw response text:', responseText)
+        
+        if (responseText.trim() === '') {
+          throw new Error('Empty response from server')
+        }
+        
+        result = JSON.parse(responseText)
+      } catch (parseError) {
+        console.error('❌ Failed to parse JSON response:', parseError)
+        throw new Error(`Invalid JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`)
+      }
+
+      console.log('📋 Parsed sync API response:', result)
+
+      if (response.ok && result && result.success !== false) {
         console.log('✅ Users synced successfully:', result)
         toast({
           title: "Success",
-          description: `Synced ${result.insertedUsers} users successfully`
+          description: result.message || `Synced ${result.insertedUsers || 0} users successfully`
         })
         
         // Refresh the list by re-fetching
@@ -109,20 +136,42 @@ export function UsersList() {
 
         if (!error && data) {
           setUsers(data)
+          console.log(`🔄 Refreshed users list: ${data.length} users`)
+        } else {
+          console.warn('⚠️ Failed to refresh users list:', error)
         }
       } else {
-        console.error('❌ Failed to sync users:', result)
+        const errorMessage = result?.error || result?.details || `HTTP ${response.status}: ${response.statusText}` || 'Failed to sync users'
+        console.error('❌ Failed to sync users:', {
+          response: {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText
+          },
+          result
+        })
+        
+        // Show more detailed error message
+        let userFriendlyMessage = errorMessage
+        if (response.status === 401) {
+          userFriendlyMessage = 'Authentication failed. Please try signing in again.'
+        } else if (response.status === 403) {
+          userFriendlyMessage = 'You don\'t have permission to sync users.'
+        } else if (response.status === 500) {
+          userFriendlyMessage = 'Server error occurred. Please try again later.'
+        }
+        
         toast({
           title: "Error",
-          description: result.error || "Failed to sync users",
+          description: userFriendlyMessage,
           variant: "destructive"
         })
       }
     } catch (error) {
-      console.error('Error syncing users:', error)
+      console.error('💥 Error syncing users:', error)
       toast({
         title: "Error",
-        description: "Failed to sync users",
+        description: `Failed to sync users: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive"
       })
     } finally {
@@ -238,12 +287,32 @@ export function UsersList() {
             </SelectContent>
           </Select>
         </div>
-        <Link href="/users/create">
-          <Button className="h-11 font-geist">
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add User
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={syncUsersFromAuth} 
+            disabled={isSyncing} 
+            variant="outline" 
+            className="h-11 font-geist"
+          >
+            {isSyncing ? (
+              <>
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                Syncing...
+              </>
+            ) : (
+              <>
+                <ArrowDownUp className="mr-2 h-4 w-4" />
+                Sync Users
+              </>
+            )}
           </Button>
-        </Link>
+          <Link href="/users/create">
+            <Button className="h-11 font-geist">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add User
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="border rounded-lg">

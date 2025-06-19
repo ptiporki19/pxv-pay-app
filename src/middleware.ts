@@ -57,9 +57,22 @@ export async function middleware(request: NextRequest) {
 
       // Check if user is authenticated
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session && !path.startsWith('/api/public/') && !path.startsWith('/api/checkout/')) {
+      
+      // Public endpoints that don't require authentication
+      const publicPaths = [
+        '/api/public/',
+        '/api/checkout/',
+        '/api/users/',
+        '/api/blog/',
+        '/api/auth/signout'
+      ]
+      
+      const isPublicPath = publicPaths.some(publicPath => path.startsWith(publicPath)) || path === '/api/auth/signout'
+      
+      // If no session and not a public path, deny access
+      if (!session && !isPublicPath) {
         return NextResponse.json(
-          { error: 'Unauthorized' },
+          { error: 'Authentication required' },
           { status: 401 }
         )
       }

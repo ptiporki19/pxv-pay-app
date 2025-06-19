@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user has permission to upload blog images
-    if (!['super_admin', 'content_author'].includes(userData.role)) {
+    if (!['super_admin'].includes(userData.role)) {
       return NextResponse.json(
-        { error: 'Insufficient permissions' },
+        { error: 'Insufficient permissions - only super admins can upload blog images' },
         { status: 403 }
       )
     }
@@ -130,12 +130,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('🗄️ Creating service client for file upload...')
-    // Create service role client for file upload (same as payment proofs)
-    const serviceSupabase = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
-    )
+    console.log('🗄️ Using authenticated client for file upload...')
+    // Use the authenticated client instead of service role
+    // Since we already checked permissions above, this should work
 
     console.log('📤 Uploading resized blog image...')
     // Upload resized image file to Supabase Storage
@@ -151,7 +148,7 @@ export async function POST(request: NextRequest) {
       format: 'JPEG'
     })
 
-    const { error: uploadError } = await serviceSupabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('blog-images')
       .upload(filePath, resizedBuffer, {
         cacheControl: '3600',
@@ -160,16 +157,21 @@ export async function POST(request: NextRequest) {
       })
 
     if (uploadError) {
-      console.error('❌ File upload error:', uploadError)
+      console.error('❌ File upload error:', {
+        error: uploadError,
+        message: uploadError.message,
+        filePath,
+        bucketName: 'blog-images'
+      })
       return NextResponse.json(
-        { error: 'Failed to upload image file' },
+        { error: `Failed to upload image file: ${uploadError.message}` },
         { status: 500 }
       )
     }
     console.log('✅ Resized image uploaded to:', filePath)
 
     // Get public URL for the uploaded file
-    const { data: urlData } = serviceSupabase.storage
+    const { data: urlData } = supabase.storage
       .from('blog-images')
       .getPublicUrl(filePath)
 

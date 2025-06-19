@@ -137,11 +137,11 @@ export async function POST(
     }
     console.log('✅ Payment method validated:', paymentMethod.name);
 
-    console.log('🗄️ Creating service client for file upload...');
-    // Create service role client for file upload
+    console.log('🗄️ Creating service client for file upload...')
+    // Create service client with proper fallback URL
     const serviceSupabase = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://frdksqjaiuakkalebnzd.supabase.co',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'fallback'
     )
 
     console.log('📤 Uploading proof file...');
@@ -267,7 +267,7 @@ export async function POST(
         .eq('role', 'super_admin');
 
       if (superAdmins && superAdmins.length > 0) {
-        const superAdminNotifications = superAdmins.map(admin => ({
+        const superAdminNotifications = superAdmins.map((admin: any) => ({
           user_id: admin.id,
           title: 'New Payment Submitted',
           message: `Payment verification needed: ${amount} ${finalCurrency} from ${customerName}`,

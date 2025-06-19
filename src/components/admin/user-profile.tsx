@@ -179,23 +179,32 @@ export function UserProfile({ userId }: UserProfileProps) {
         // throw new Error(`Invalid user ID format: ${userId}`)
       }
       
-      console.log('Fetching user profile for ID:', userId)
+      console.log('🔍 Fetching user profile for ID:', userId)
       
       // Fetch user details via API (uses service role, bypasses RLS)
       const response = await fetch(`/api/users/${userId}/profile`)
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown API error' }))
+        console.error('❌ API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
         throw new Error(`Failed to fetch user: ${errorData.error || 'API request failed'}`)
       }
       
       const apiResult = await response.json()
+      console.log('📋 API Response:', apiResult)
+      
       const userData = apiResult.user
       
       if (!userData) {
+        console.error('❌ No user data in API response:', apiResult)
         throw new Error(`No user data returned for ID: ${userId}`)
       }
       
+      console.log('✅ User profile loaded successfully:', userData)
       setUser(userData)
 
       // Fetch ALL payments for this user - both as customer (user_id) and merchant (merchant_id)
