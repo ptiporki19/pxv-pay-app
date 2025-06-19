@@ -1,0 +1,75 @@
+[
+  {
+    "id": "payment-proofs",
+    "name": "payment-proofs",
+    "owner": "",
+    "public": false,
+    "file_size_limit": 5242880,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "application/pdf"
+    ],
+    "created_at": "2025-05-25T01:23:16.971Z",
+    "updated_at": "2025-05-25T01:23:16.971Z"
+  },
+  {
+    "id": "merchant-logos",
+    "name": "merchant-logos",
+    "owner": "",
+    "public": true,
+    "file_size_limit": 2097152,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/svg+xml"
+    ],
+    "created_at": "2025-05-25T01:23:17.830Z",
+    "updated_at": "2025-05-25T01:23:17.830Z"
+  },
+  {
+    "id": "payment-method-icons",
+    "name": "payment-method-icons",
+    "owner": "",
+    "public": true,
+    "file_size_limit": 1048576,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+      "image/svg+xml"
+    ],
+    "created_at": "2025-05-25T01:23:18.105Z",
+    "updated_at": "2025-05-25T01:23:18.105Z"
+  },
+  {
+    "id": "user-avatars",
+    "name": "user-avatars",
+    "owner": "",
+    "public": false,
+    "file_size_limit": 2097152,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ],
+    "created_at": "2025-05-25T01:23:18.212Z",
+    "updated_at": "2025-05-25T01:23:18.212Z"
+  },
+  {
+    "id": "blog-images",
+    "name": "blog-images",
+    "owner": "",
+    "public": true,
+    "file_size_limit": 5242880,
+    "allowed_mime_types": [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ],
+    "created_at": "2025-05-25T01:23:18.703Z",
+    "updated_at": "2025-05-25T01:23:18.703Z"
+  }
+]

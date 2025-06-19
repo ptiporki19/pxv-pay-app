@@ -1,0 +1,16 @@
+PXV Pay Complete Backup Summary
+==============================
+Backup Date: Sun May 25 06:49:32 PDT 2025
+Backup Directory: pxv_pay_backup_20250525_064928
+
+Files Included:
+- database_complete.sql ( 40K)
+- database_schema.sql ( 40K)
+- database_data.sql ( 12K)
+- Migration files:       15 files
+- Configuration files:        2 files
+- Restore scripts: 3 files
+
+Total Backup Size: 208K
+
+To restore: cd pxv_pay_backup_20250525_064928 && ./quick_restore.sh

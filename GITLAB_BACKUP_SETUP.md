@@ -31,9 +31,10 @@ cd /Users/MAC/Documents/combo-1
 git remote -v
 
 # Push to GitLab (first time)
-git push gitlab main
+git push -uf gitlab main
 
-# If prompted for credentials, use your GitLab username and password/token
+# Username: petitporky1
+# Password: [paste your Personal Access Token]
 ```
 
 ### Step 3: Verify Backup Success

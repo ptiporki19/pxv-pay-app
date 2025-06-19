@@ -1,0 +1,552 @@
+{
+  "users": [
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "users_select_policy",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "((uid() = id) OR (email() = ANY (ARRAY['admin@pxvpay.com'::text, 'dev-admin@pxvpay.com'::text, 'superadmin@pxvpay.com'::text])))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "users_update_policy",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "UPDATE",
+      "qual": "((uid() = id) OR (email() = ANY (ARRAY['admin@pxvpay.com'::text, 'dev-admin@pxvpay.com'::text, 'superadmin@pxvpay.com'::text])))",
+      "with_check": "((uid() = id) OR (email() = ANY (ARRAY['admin@pxvpay.com'::text, 'dev-admin@pxvpay.com'::text, 'superadmin@pxvpay.com'::text])))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "users_insert_policy",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "users_service_role_all",
+      "permissive": "PERMISSIVE",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "users_view_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(uid() = id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "users_update_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "UPDATE",
+      "qual": "(uid() = id)",
+      "with_check": "(uid() = id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "allow_user_insert",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "users_view_own_profile",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(uid() = id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "super_admin_view_all_users",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = uid()) AND (u.role = 'super_admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "super_admin_update_all_users",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = uid()) AND (u.role = 'super_admin'::user_role))))",
+      "with_check": null
+    }
+  ],
+  "payments": [
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "Users can view their own payments",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "Users can create their own payments",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "Users can insert payments",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "Users can view payments",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "payments_select_all",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "payments_insert_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "payments_update_all",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "super_admin_manage_all_payments",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.id = uid()) AND (users.role = 'super_admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "users_view_own_payments",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payments",
+      "policyname": "super_admin_view_all_payments",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = uid()) AND (u.role = 'super_admin'::user_role))))",
+      "with_check": null
+    }
+  ],
+  "countries": [
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "Users can view their own countries",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "Users can create their own countries",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "Users can update their own countries",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "Users can delete their own countries",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "countries_select_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "countries_insert_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "countries_update_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "countries_delete_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "super_admin_manage_all_countries",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.id = uid()) AND (users.role = 'super_admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "users_view_own_countries",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "countries",
+      "policyname": "super_admin_view_all_countries",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = uid()) AND (u.role = 'super_admin'::user_role))))",
+      "with_check": null
+    }
+  ],
+  "currencies": [
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "Users can view their own currencies",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "Users can create their own currencies",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "Users can update their own currencies",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "Users can delete their own currencies",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "currencies_select_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "currencies_insert_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "currencies_update_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "currencies_delete_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "super_admin_manage_all_currencies",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.id = uid()) AND (users.role = 'super_admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "users_view_own_currencies",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "currencies",
+      "policyname": "super_admin_view_all_currencies",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = uid()) AND (u.role = 'super_admin'::user_role))))",
+      "with_check": null
+    }
+  ],
+  "payment_methods": [
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "admin_payment_methods_policy",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "Users can view their own payment methods",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "Users can create their own payment methods",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "Users can update their own payment methods",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "Users can delete their own payment methods",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "payment_methods_select_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "payment_methods_insert_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "payment_methods_update_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "payment_methods_delete_own",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "super_admin_manage_all_payment_methods",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.id = uid()) AND (users.role = 'super_admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "users_view_own_payment_methods",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "payment_methods",
+      "policyname": "super_admin_view_all_payment_methods",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = uid()) AND (u.role = 'super_admin'::user_role))))",
+      "with_check": null
+    }
+  ]
+}
