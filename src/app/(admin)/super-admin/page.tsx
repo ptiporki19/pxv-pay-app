@@ -30,44 +30,83 @@ export const metadata: Metadata = {
 }
 
 export default async function SuperAdminDashboard() {
-  // Initialize Supabase client
-  const supabase = await createClient()
-  
-  // Get user session and redirect if not authenticated
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) {
-    // Let the RouteGuard component handle the redirect
-    return null
-  }
+  try {
+    // Initialize Supabase client
+    const supabase = await createClient()
+    
+    // Get user session and redirect if not authenticated
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError) {
+      console.error('Session error:', sessionError)
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <h2 className="text-xl font-bold text-red-600">Authentication Error</h2>
+          <p className="text-gray-600">{sessionError.message}</p>
+        </div>
+      )
+    }
+    
+    if (!session) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <h2 className="text-xl font-bold text-gray-600">Not Authenticated</h2>
+          <p className="text-gray-600">Please sign in to access the dashboard</p>
+        </div>
+      )
+    }
 
-  // Get user profile including role and email for super admin check
-  const { data: profile } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', session.user.id)
-    .single()
+    // Get user profile including role and email for super admin check
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', session.user.email)
+      .single()
 
-  // Check if user is super admin (using ONLY database role)
-  const isSuperAdminRole = profile?.role === 'super_admin'
-  
-  if (!isSuperAdminRole) {
-    // Let the RouteGuard component handle the redirect
-    return null
-  }
+    if (profileError) {
+      console.error('Profile error:', profileError)
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <h2 className="text-xl font-bold text-red-600">Profile Error</h2>
+          <p className="text-gray-600">Error loading user profile: {profileError.message}</p>
+          <p className="text-sm text-gray-500">User ID: {session.user.id}</p>
+          <p className="text-sm text-gray-500">Email: {session.user.email}</p>
+        </div>
+      )
+    }
+
+    // Check if user is super admin (using database role OR email)
+    const isSuperAdminRole = profile?.role === 'super_admin'
+    const isSuperAdminEmail = session.user.email === 'admin@pxvpay.com' || 
+                              session.user.email === 'dev-admin@pxvpay.com' || 
+                              session.user.email === 'superadmin@pxvpay.com'
+    
+    const isSuperAdmin = isSuperAdminRole || isSuperAdminEmail
+    
+    if (!isSuperAdmin) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <h2 className="text-xl font-bold text-red-600">Access Denied</h2>
+          <p className="text-gray-600">You don't have super admin privileges</p>
+          <p className="text-sm text-gray-500">Role: {profile?.role || 'No role'}</p>
+          <p className="text-sm text-gray-500">Email: {session.user.email}</p>
+        </div>
+      )
+    }
 
   const userName = profile?.email?.split('@')[0] || 'Super Admin'
 
   // Fetch recent payments for super admin view - using same logic as verification page
   let paymentsQuery = supabase.from('payments').select('*')
   
-  // Super admins see all platform transactions, regular merchants see only their own
-  if (!isSuperAdminRole) {
-    paymentsQuery = paymentsQuery.eq('merchant_id', session.user.id)
-  }
-
+  // Super admins see all platform transactions
   const { data: recentPayments, error: paymentsError } = await paymentsQuery
     .order('created_at', { ascending: false })
     .limit(10)
+
+  if (paymentsError) {
+    console.error('Payments error:', paymentsError)
+  }
 
   // Format payments for display - matching verification page format exactly
   const formattedPayments = recentPayments?.map(payment => ({
@@ -201,152 +240,135 @@ export default async function SuperAdminDashboard() {
                   </div>
                   ))
                 ) : (
-                <div className="px-4 py-12 text-center">
-                  <p className="text-base font-medium text-muted-foreground font-geist">No recent transactions found</p>
-                </div>
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <CreditCardIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 font-geist">No Payment History</h3>
+                      <p className="text-gray-600 dark:text-gray-400 font-geist mt-1">
+                        {paymentsError ? `Error loading payments: ${paymentsError.message}` : 'No payment transactions found'}
+                      </p>
+                    </div>
+                  </div>
                 )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Platform Management Section */}
+      {/* Quick Actions Section */}
       <div>
-        <h2 className="section-title mb-6">Platform Management</h2>
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          
-          {/* User Management Card */}
+        <h2 className="section-title mb-6">Quick Actions</h2>
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Platform Management */}
           <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
-                  <BoltIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                  <ShieldCheckIcon className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <CardTitle className="card-title">User Management</CardTitle>
-                  <CardDescription className="card-description">Manage all platform users and their permissions</CardDescription>
+                  <CardTitle className="text-lg font-bold font-geist">Platform Management</CardTitle>
+                  <CardDescription className="font-medium font-geist">Manage platform settings and configurations</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">
-                View, activate, deactivate, and manage user roles across the platform. Monitor user activity and maintain security.
-              </p>
-              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
-                <Link href="/users" className="flex items-center justify-center gap-2">
-                  Access User Management
-                  <ArrowRightIcon className="h-4 w-4" />
-                </Link>
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button variant="outline" size="sm" className="justify-start gap-2 font-medium font-geist" asChild>
+                  <Link href="/users">
+                    <DocumentTextIcon className="h-4 w-4" />
+                    User Management
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="justify-start gap-2 font-medium font-geist" asChild>
+                  <Link href="/verification">
+                    <EyeIcon className="h-4 w-4" />
+                    Payment Verification
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="justify-start gap-2 font-medium font-geist" asChild>
+                  <Link href="/settings">
+                    <CogIcon className="h-4 w-4" />
+                    Platform Settings
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Website Content Management Card */}
+          {/* Transaction Management */}
           <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
-                  <DocumentTextIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                  <CreditCardIcon className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <CardTitle className="card-title">Website Content</CardTitle>
-                  <CardDescription className="card-description">Manage blog posts and website content</CardDescription>
+                  <CardTitle className="text-lg font-bold font-geist">Transaction Management</CardTitle>
+                  <CardDescription className="font-medium font-geist">Monitor and manage all platform transactions</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">
-                Create, edit, and publish blog posts. Manage all website content that's visible to the public and merchants.
-              </p>
-              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
-                <Link href="/blog-management" className="flex items-center gap-2">
-                  <PencilIcon className="h-4 w-4" />
-                  Blog Management
-                </Link>
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button variant="outline" size="sm" className="justify-start gap-2 font-medium font-geist" asChild>
+                  <Link href="/super-admin-transactions">
+                    <ChartBarIcon className="h-4 w-4" />
+                    All Transactions
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="justify-start gap-2 font-medium font-geist" asChild>
+                  <Link href="/verification">
+                    <ClipboardIcon className="h-4 w-4" />
+                    Pending Verifications
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Audit Logs Card */}
+          {/* System Monitoring */}
           <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
-                  <ShieldCheckIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/30">
+                  <ChartBarIcon className="h-5 w-5 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <CardTitle className="card-title">Audit Logs</CardTitle>
-                  <CardDescription className="card-description">Monitor all platform activities and changes</CardDescription>
+                  <CardTitle className="text-lg font-bold font-geist">System Monitoring</CardTitle>
+                  <CardDescription className="font-medium font-geist">Monitor platform performance and health</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-4">
-                Track all administrative actions, user activities, and system changes for security and compliance monitoring.
-              </p>
-              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
-                <Link href="/audit-logs" className="flex items-center justify-center gap-2">
-                  View Audit Logs
-                  <ArrowRightIcon className="h-4 w-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-        </div>
-      </div>
-
-      {/* Advanced Settings */}
-      <div>
-        <h2 className="section-title mb-6">Advanced Settings</h2>
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-          
-          {/* Platform Settings */}
-          <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
-                  <CogIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-                </div>
-                <div>
-                  <CardTitle className="card-title">Platform Settings</CardTitle>
-                  <CardDescription className="card-description">Configure global platform settings</CardDescription>
-                </div>
+              <div className="flex flex-col gap-2">
+                <Button variant="outline" size="sm" className="justify-start gap-2 font-medium font-geist" asChild>
+                  <Link href="/api/test-connection" target="_blank">
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                    Test Connection
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="justify-start gap-2 font-medium font-geist" asChild>
+                  <Link href="/settings">
+                    <CogIcon className="h-4 w-4" />
+                    System Settings
+                  </Link>
+                </Button>
               </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
-                <Link href="/settings">
-                  Configure Settings
-                </Link>
-              </Button>
             </CardContent>
           </Card>
-
-          {/* Payment Verification */}
-          <Card className="violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50">
-            <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
-                  <CreditCardIcon className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-                </div>
-                <div>
-                  <CardTitle className="card-title">Payment Verification</CardTitle>
-                  <CardDescription className="card-description">Review pending payment verifications</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <Button asChild className="w-full violet-gradient hover:violet-gradient-hover font-semibold">
-                <Link href="/verification">
-                  Review Payments
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
         </div>
       </div>
     </div>
   )
+  } catch (error) {
+    console.error('Super Admin Dashboard Error:', error)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <h2 className="text-xl font-bold text-red-600">Dashboard Error</h2>
+        <p className="text-gray-600">An error occurred while loading the dashboard</p>
+        <p className="text-sm text-gray-500">{error instanceof Error ? error.message : 'Unknown error'}</p>
+      </div>
+    )
+  }
 } 

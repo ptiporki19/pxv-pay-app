@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { 
   ArrowTopRightOnSquareIcon as ExternalLink,
   InformationCircleIcon as InfoIcon,
-  PlusIcon as Plus
+  PlusIcon as Plus,
+  CreditCardIcon
 } from '@heroicons/react/24/solid'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -28,27 +29,61 @@ interface PaymentStatus {
 }
 
 export default async function DashboardPage() {
-  // Initialize Supabase client
-  const supabase = await createClient()
-  
-  // Default values in case fetch fails
-  let session = null
-  let userData = null
-  let formattedPayments: any[] = []
-  
   try {
+    // Initialize Supabase client
+    const supabase = await createClient()
+    
+    // Default values in case fetch fails
+    let session = null
+    let userData = null
+    let formattedPayments: any[] = []
+    let paymentsError = null
+    
     // Get user session and profile
-    const { data } = await supabase.auth.getSession()
+    const { data, error: sessionError } = await supabase.auth.getSession()
+    
+    if (sessionError) {
+      console.error('Session error:', sessionError)
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <h2 className="text-xl font-bold text-red-600">Authentication Error</h2>
+          <p className="text-gray-600">{sessionError.message}</p>
+        </div>
+      )
+    }
+    
     session = data.session
+    
+    if (!session) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <h2 className="text-xl font-bold text-gray-600">Not Authenticated</h2>
+          <p className="text-gray-600">Please sign in to access the dashboard</p>
+        </div>
+      )
+    }
+    
     const userId = session?.user?.id
     
     if (userId) {
       // Fetch user data using email for reliable lookup
-      const { data: userResult } = await supabase
+      const { data: userResult, error: userError } = await supabase
         .from('users')
         .select('*')
         .eq('email', session?.user?.email)
         .single()
+      
+      if (userError) {
+        console.error('User profile error:', userError)
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+            <h2 className="text-xl font-bold text-red-600">Profile Error</h2>
+            <p className="text-gray-600">Error loading user profile: {userError.message}</p>
+            <p className="text-sm text-gray-500">User ID: {session.user.id}</p>
+            <p className="text-sm text-gray-500">Email: {session.user.email}</p>
+          </div>
+        )
+      }
       
       userData = userResult
 
@@ -70,7 +105,12 @@ export default async function DashboardPage() {
         paymentsQuery = paymentsQuery.eq('merchant_id', userData.id)
       }
 
-      const { data: recentPayments } = await paymentsQuery
+      const { data: recentPayments, error: paymentsFetchError } = await paymentsQuery
+      
+      if (paymentsFetchError) {
+        console.error('Payments fetch error:', paymentsFetchError)
+        paymentsError = paymentsFetchError
+      }
       
       // Format payment data using the same logic as super admin dashboard
       formattedPayments = recentPayments?.map(payment => ({
@@ -90,10 +130,6 @@ export default async function DashboardPage() {
         status: payment.status || 'pending'
       })) || []
     }
-  } catch (error) {
-    console.error("Error loading dashboard data:", error)
-    // The default values set at the beginning will be used
-  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -207,15 +243,20 @@ export default async function DashboardPage() {
                   </div>
                   ))
                 ) : (
-                <div className="px-4 py-12 text-center">
-                      <div className="flex flex-col items-center gap-2">
-                    <p className="text-base font-bold text-muted-foreground font-geist">No transactions found</p>
-                    <p className="text-sm text-muted-foreground font-geist">Start by creating your first checkout link</p>
-                    <Button size="sm" className="mt-2 font-bold font-geist" asChild>
-                          <Link href="/checkout-links/create">Create Checkout Link</Link>
-                        </Button>
-                      </div>
-                </div>
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <CreditCardIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 font-geist">No Payment History</h3>
+                      <p className="text-gray-600 dark:text-gray-400 font-geist mt-1">
+                        {paymentsError ? `Error loading payments: ${paymentsError.message}` : 'No payment transactions found for your account'}
+                      </p>
+                      {userData && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          User ID: {userData.id} | Role: {userData.role || 'merchant'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 )}
             </div>
           </div>
@@ -223,4 +264,14 @@ export default async function DashboardPage() {
       </div>
     </div>
   )
-} 
+  } catch (error) {
+    console.error("Error loading dashboard data:", error)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <h2 className="text-xl font-bold text-red-600">Dashboard Error</h2>
+        <p className="text-gray-600">An error occurred while loading the dashboard</p>
+        <p className="text-sm text-gray-500">{error instanceof Error ? error.message : 'Unknown error'}</p>
+      </div>
+    )
+  }
+}
