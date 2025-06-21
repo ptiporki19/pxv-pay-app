@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Checkbox } from '@/components/ui/checkbox'
-import { User, Mail, LockKeyhole, CheckCircle, ArrowRight } from 'lucide-react'
+import { User, Mail, LockKeyhole, CheckCircle, ArrowRight, Eye, EyeOff } from 'lucide-react'
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -39,6 +39,8 @@ export default function SignUpPage() {
   const router = useRouter()
   const supabase = createClient()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -151,12 +153,23 @@ export default function SignUpPage() {
                   <div className="relative">
                     <Input 
                       {...field} 
-                      type="password" 
+                      type={showPassword ? "text" : "password"} 
                       disabled={isLoading}
                       placeholder="Create a strong password"
-                      className="pl-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500" 
+                      className="pl-10 pr-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500" 
                     />
                     <LockKeyhole className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                 </FormControl>
                 <FormMessage className="text-red-500" />
@@ -174,12 +187,23 @@ export default function SignUpPage() {
                   <div className="relative">
                     <Input 
                       {...field} 
-                      type="password" 
+                      type={showConfirmPassword ? "text" : "password"} 
                       disabled={isLoading}
                       placeholder="Confirm your password"
-                      className="pl-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500" 
+                      className="pl-10 pr-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500" 
                     />
                     <CheckCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                 </FormControl>
                 <FormMessage className="text-red-500" />
@@ -237,6 +261,29 @@ export default function SignUpPage() {
           </div>
         </form>
       </Form>
+      
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-gray-200 dark:border-gray-800" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white/70 dark:bg-gray-900/70 px-2 text-gray-500 dark:text-gray-400">
+            Or continue with
+          </span>
+        </div>
+      </div>
+      
+      <Button 
+        variant="outline" 
+        className="w-full border-gray-200 dark:border-gray-800 hover:bg-violet-50 dark:hover:bg-violet-950/30 hover:text-violet-600 dark:hover:text-violet-400 transition-all duration-300" 
+        onClick={() => {/* Handle OAuth signup */}} 
+        disabled={isLoading}
+      >
+        <svg className="mr-2 h-4 w-4" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20.283 10.356h-8.327v3.451h4.792c-.446 2.193-2.313 3.453-4.792 3.453a5.27 5.27 0 0 1-5.279-5.28 5.27 5.27 0 0 1 5.279-5.279c1.259 0 2.397.447 3.29 1.178l2.6-2.599c-1.584-1.381-3.615-2.233-5.89-2.233a8.908 8.908 0 0 0-8.934 8.934 8.907 8.907 0 0 0 8.934 8.934c4.467 0 8.529-3.249 8.529-8.934 0-.528-.081-1.097-.202-1.625z"></path>
+        </svg>
+        Google
+      </Button>
       
       <div className="text-center text-sm">
         Already have an account?{' '}

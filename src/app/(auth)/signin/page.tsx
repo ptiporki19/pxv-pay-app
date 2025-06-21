@@ -20,7 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Globe, LockKeyhole, ArrowRight } from 'lucide-react'
+import { Globe, LockKeyhole, ArrowRight, Eye, EyeOff } from 'lucide-react'
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -31,6 +31,7 @@ export default function SignInPage() {
   const router = useRouter()
   const supabase = createClient()
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -164,7 +165,7 @@ export default function SignInPage() {
                 <div className="flex items-center justify-between">
                   <FormLabel className="text-gray-700 dark:text-gray-300">Password</FormLabel>
                   <Link
-                    href="/forgot-password"
+                    href="/reset-password"
                     className="text-sm text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors duration-200"
                   >
                     Forgot password?
@@ -174,11 +175,22 @@ export default function SignInPage() {
                   <div className="relative">
                     <Input 
                       {...field} 
-                      type="password" 
+                      type={showPassword ? "text" : "password"} 
                       disabled={isLoading}
-                      className="pl-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500"
+                      className="pl-10 pr-10 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 focus:border-violet-500 focus:ring-violet-500"
                     />
                     <LockKeyhole className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
                   </div>
                 </FormControl>
                 <FormMessage className="text-red-500" />
