@@ -520,3 +520,80 @@
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
 }
+
+/* Checkout specific styles */
+.checkout-container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.checkout-card {
+  @apply bg-card border border-border rounded-lg shadow-sm;
+}
+
+.checkout-input {
+  @apply h-12 font-geist bg-background border-border;
+}
+
+.checkout-button {
+  @apply h-12 bg-violet-600 hover:bg-violet-700 text-white font-semibold font-geist transition-colors;
+}
+
+.checkout-amount-display {
+  @apply p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-200 dark:border-violet-800;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .checkout-container {
+    @apply px-3;
+  }
+  
+  .checkout-card {
+    @apply p-4;
+  }
+  
+  .checkout-grid {
+    @apply grid-cols-1 gap-4;
+  }
+}
+
+/* Checkout specific utilities */
+.checkout-container {
+  font-family: 'Geist', system-ui, -apple-system, sans-serif;
+}
+
+/* Mobile optimizations for checkout */
+@media (max-width: 768px) {
+  .checkout-mobile-padding {
+    padding: 1rem;
+  }
+  
+  .checkout-mobile-text {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+}
+
+/* Floating animations for checkout left section */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.2;
+  }
+  25% {
+    transform: translateY(-10px) translateX(5px);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-20px) translateX(-3px);
+    opacity: 0.1;
+  }
+  75% {
+    transform: translateY(-5px) translateX(8px);
+    opacity: 0.3;
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow infinite ease-in-out;
+}

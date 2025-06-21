@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,7 +20,9 @@ import {
   Copy,
   AlertTriangle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Minus,
+  Plus
 } from 'lucide-react'
 
 interface ModernCheckoutFormProps {
@@ -105,6 +109,55 @@ const formatValueForDisplay = (value: string): string => {
 const isTruncated = (value: string): boolean => {
   return value.length > 16;
 };
+
+// Falling animation component
+const FallingItems = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Subtle falling dots */}
+      <div className="absolute animate-float-slow opacity-20">
+        <div className="w-2 h-2 bg-foreground/10 rounded-full" style={{ 
+          left: '10%', 
+          top: '20%',
+          animationDelay: '0s',
+          animationDuration: '8s'
+        }}></div>
+      </div>
+      <div className="absolute animate-float-slow opacity-15">
+        <div className="w-1.5 h-1.5 bg-foreground/10 rounded-full" style={{ 
+          left: '80%', 
+          top: '30%',
+          animationDelay: '2s',
+          animationDuration: '6s'
+        }}></div>
+      </div>
+      <div className="absolute animate-float-slow opacity-10">
+        <div className="w-1 h-1 bg-foreground/10 rounded-full" style={{ 
+          left: '60%', 
+          top: '15%',
+          animationDelay: '4s',
+          animationDuration: '10s'
+        }}></div>
+      </div>
+      <div className="absolute animate-float-slow opacity-20">
+        <div className="w-2 h-2 bg-foreground/5 rounded-full" style={{ 
+          left: '30%', 
+          top: '40%',
+          animationDelay: '1s',
+          animationDuration: '7s'
+        }}></div>
+      </div>
+      <div className="absolute animate-float-slow opacity-15">
+        <div className="w-1.5 h-1.5 bg-foreground/5 rounded-full" style={{ 
+          left: '75%', 
+          top: '60%',
+          animationDelay: '3s',
+          animationDuration: '9s'
+        }}></div>
+      </div>
+    </div>
+  )
+}
 
 export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
   const [loading, setLoading] = useState(true)
@@ -198,35 +251,15 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
   }
 
   const handleProceedToDetails = () => {
-    if (selectedPaymentMethod) {
-      console.log('Selected payment method:', selectedPaymentMethod)
-      console.log('Payment method type:', selectedPaymentMethod.type)
-      console.log('Payment method URL:', selectedPaymentMethod.url)
+    if (!selectedPaymentMethod) return;
       
       if (selectedPaymentMethod.type === 'payment_link' && selectedPaymentMethod.url) {
-        // Ensure URL has proper protocol
-        let url = selectedPaymentMethod.url.trim()
-        if (!url.startsWith('http://') && !url.startsWith('https://')) {
-          url = 'https://' + url
-        }
-        
-        try {
-          console.log('Opening payment URL:', url)
-          // Open in new tab
-          window.open(url, '_blank', 'noopener,noreferrer')
-          
-          // Instead of going to confirmation, go to proof upload
-          setTimeout(() => {
-            setCurrentStep('proof-upload')
-          }, 1000)
-        } catch (error) {
-          console.error('Error opening payment URL:', error)
-          setError('Failed to open payment link. Please try again.')
-        }
-      } else {
-        setCurrentStep('payment-details')
-      }
+      // Open payment link in the same tab
+      window.location.href = selectedPaymentMethod.url;
+      return;
     }
+    
+    setCurrentStep('payment-details');
   }
 
   const handleProceedToUpload = () => {
@@ -236,55 +269,33 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
   const handleProofUpload = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!proofFile) {
-      setError('Please select a proof of payment file')
-      return
-    }
-
-    // Additional null checks for TypeScript
-    if (!selectedPaymentMethod || !checkoutData?.checkout_link) {
-      setError('Missing payment method or checkout link information')
-      return
-    }
-
-    // Validate amount - Simple fix to get the correct amount value
-    let finalAmount = '0'
-    
-    if (checkoutData.checkout_link.amount_type === 'fixed') {
-      // For fixed amounts, use the checkout link amount or custom price for products
-      const checkoutAmount = checkoutData.checkout_link.checkout_type === 'product' 
-        ? (checkoutData.checkout_link.custom_price || checkoutData.checkout_link.amount)
-        : checkoutData.checkout_link.amount
-      finalAmount = checkoutAmount?.toString() || '0'
-    } else {
-      // For custom amounts, use the amount state variable
-      finalAmount = amount || '0'
-    }
-    
-    console.log('💰 Amount validation:', {
-      amountType: checkoutData.checkout_link.amount_type,
-      checkoutType: checkoutData.checkout_link.checkout_type,
-      linkAmount: checkoutData.checkout_link.amount,
-      customPrice: checkoutData.checkout_link.custom_price,
-      stateAmount: amount,
-      finalAmount
-    })
-
-    if (!finalAmount || parseFloat(finalAmount) <= 0) {
-      setError('Please enter a valid amount')
+      setError('Please select a file to upload')
       return
     }
 
     setSubmitting(true)
+    setError(null)
 
     try {
+      // Create form data for file upload
       const formData = new FormData()
-      formData.append('proof', proofFile)
-      formData.append('customer_name', customerName.trim())
-      formData.append('customer_email', customerEmail.trim())
+      formData.append('proof_file', proofFile)
+      formData.append('checkout_slug', slug)
+      formData.append('customer_name', customerName)
+      formData.append('customer_email', customerEmail)
+      formData.append('selected_country', selectedCountry)
+      formData.append('selected_payment_method_id', selectedPaymentMethod?.id || '')
+      
+      // Determine the amount to send
+      let finalAmount: string
+      if (checkoutData.checkout_link.amount_type === 'fixed') {
+        finalAmount = checkoutData.checkout_link.checkout_type === 'product' 
+          ? (checkoutData.checkout_link.custom_price || checkoutData.checkout_link.amount).toString()
+          : checkoutData.checkout_link.amount.toString()
+      } else {
+        finalAmount = amount
+      }
       formData.append('amount', finalAmount)
-      formData.append('country', selectedCountry.trim())
-      formData.append('payment_method_id', selectedPaymentMethod.id.trim())
-      formData.append('checkout_link_id', checkoutData.checkout_link.id.trim())
 
       const response = await fetch(`/api/checkout/${slug}/submit`, {
         method: 'POST',
@@ -294,14 +305,15 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
       const result = await response.json()
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to submit payment proof')
+        throw new Error(result.error || 'Failed to submit payment')
       }
 
       setPaymentId(result.payment_id)
       setCurrentStep('confirmation')
+
     } catch (err) {
-      console.error('Upload error:', err)
-      setError(err instanceof Error ? err.message : 'Failed to upload proof')
+      console.error('Payment submission error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to submit payment')
     } finally {
       setSubmitting(false)
     }
@@ -309,69 +321,78 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
 
   const getStepTitle = () => {
     switch (currentStep) {
-      case 'details':
-        return 'Enter Your Details'
-      case 'payment-methods':
-        return 'Select Payment Method'
-      case 'payment-details':
-        return 'Payment Details'
-      case 'proof-upload':
-        return 'Upload Proof of Payment'
-      case 'confirmation':
-        return 'Payment Submitted'
-      default:
-        return 'Complete Your Payment'
+      case 'details': return 'Enter your details'
+      case 'payment-methods': return 'Choose payment method'
+      case 'payment-details': return 'Payment information'
+      case 'proof-upload': return 'Upload payment proof'
+      case 'confirmation': return 'Payment confirmed'
+      default: return 'Checkout'
+    }
+  }
+
+  const getStepDescription = () => {
+    switch (currentStep) {
+      case 'details': return 'Please provide your contact information and select your country to continue with the payment process.'
+      case 'payment-methods': return 'Select your preferred payment method from the available options below.'
+      case 'payment-details': return 'Copy the payment details below and complete your payment using your preferred app or bank. Once done, you\'ll need to upload a screenshot as proof.'
+      case 'proof-upload': return 'Upload a clear screenshot or photo of your payment confirmation to verify your transaction. Make sure all details are visible.'
+      case 'confirmation': return 'Your payment has been successfully submitted and is being processed.'
+      default: return ''
     }
   }
   
-  // Helper function to truncate text and manage expansion
   const renderDescription = (description: string) => {
-    const maxLength = 600 // Increased from 300 to show more text before truncation
-    const shouldTruncate = description.length > maxLength
+    if (!description) return null
     
-    if (!shouldTruncate) {
-      return (
-        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-          {description}
-        </p>
-      )
-    }
-    
-    const displayText = isDescriptionExpanded ? description : description.substring(0, maxLength) + '...'
+    const lines = description.split('\n')
+    const displayLines = isDescriptionExpanded ? lines : lines.slice(0, 3)
+    const hasMore = lines.length > 3
     
     return (
-      <div>
-        <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line mb-3">
-          {displayText}
-        </p>
+      <div className="text-sm text-muted-foreground leading-relaxed space-y-1">
+        {displayLines.map((line, index) => (
+          <p key={index} className="font-geist">{line}</p>
+        ))}
+        {hasMore && (
         <button
+            type="button"
           onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors text-sm font-medium font-geist mt-2"
         >
           {isDescriptionExpanded ? (
             <>
-              See less <ChevronUp className="h-4 w-4" />
+                Show less <ChevronUp className="h-3 w-3" />
             </>
           ) : (
             <>
-              See more <ChevronDown className="h-4 w-4" />
+                Show more <ChevronDown className="h-3 w-3" />
             </>
           )}
         </button>
+        )}
       </div>
     )
   }
 
+  const getCurrentAmount = () => {
+    if (checkoutData?.checkout_link?.amount_type === 'fixed') {
+      return checkoutData.checkout_link.checkout_type === 'product' 
+        ? (checkoutData.checkout_link.custom_price || checkoutData.checkout_link.amount)
+        : checkoutData.checkout_link.amount
+    }
+    return amount || '0'
+  }
+
+  const selectedCountryData = countries.find(c => c.code === selectedCountry)
+  const currency = selectedCountryData?.currency
+  const checkoutLink = checkoutData?.checkout_link
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 px-4 py-6">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center min-h-[400px]">
+      <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
-              <Spinner size="lg" className="mx-auto mb-4 text-gray-500" />
-              <p className="text-gray-600">Loading checkout...</p>
-            </div>
-          </div>
+          <Spinner size="lg" className="mx-auto mb-4" />
+          <p className="text-muted-foreground font-geist">Loading checkout...</p>
         </div>
       </div>
     )
@@ -379,157 +400,174 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
 
   if (error && !checkoutData) {
     return (
-      <div className="min-h-screen bg-gray-100 px-4 py-6">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center min-h-[400px]">
+      <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
-              <div className="flex items-center gap-2 text-gray-700 justify-center mb-4">
+          <div className="flex items-center gap-2 text-destructive justify-center mb-4">
                 <AlertCircle className="h-5 w-5" />
-                <span>{error}</span>
-              </div>
-            </div>
+            <span className="font-geist">{error}</span>
           </div>
         </div>
       </div>
     )
   }
 
-  const checkoutLink = checkoutData?.checkout_link
   if (!checkoutLink) {
     return (
-      <div className="min-h-screen bg-gray-100 px-4 py-6">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center min-h-[400px]">
+      <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
-              <div className="flex items-center gap-2 text-gray-700 justify-center">
+          <div className="flex items-center gap-2 text-destructive justify-center">
                 <AlertCircle className="h-5 w-5" />
-                <span>Checkout link not found</span>
-              </div>
-            </div>
+            <span className="font-geist">Checkout link not found</span>
           </div>
         </div>
       </div>
     )
   }
 
-  const selectedCountryData = countries.find(c => c.code === selectedCountry)
-  const currency = selectedCountryData?.currency
-
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-6">
-      <div className={cn(
-        "mx-auto space-y-4",
-        checkoutLink.checkout_type === 'product' && currentStep === 'details' 
-          ? "max-w-6xl" 
-          : "max-w-md"
-      )}>
-        <div className="bg-white rounded-2xl p-6 text-center">
-          {checkoutLink.logo_url && (
-            <img src={checkoutLink.logo_url} alt="Merchant Logo" className="h-8 mx-auto mb-4 object-contain"/>
-          )}
-          <h1 className="text-lg font-medium text-gray-900">Complete Your Payment</h1>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
+          {/* Left Section - Static Content with Animations */}
+          <div className="bg-muted/30 p-8 lg:p-12 flex flex-col justify-center border-r border-border relative overflow-hidden">
+            <FallingItems />
+            
+            {checkoutLink.checkout_type === 'product' ? (
+              // Product Checkout Left Section
+              <div className="max-w-md mx-auto w-full relative z-10">
+                {/* Heading and Amount */}
+                <div className="mb-8">
+                  <div className="text-lg text-muted-foreground font-geist mb-3">
+                    Complete your payment
+                  </div>
+                  <div className="text-3xl font-bold text-foreground font-geist mb-2">
+                    {getCurrentAmount()} {currency?.code}
         </div>
-
-        {(() => {
-          const isProductCheckout = checkoutLink.checkout_type === 'product'
-          const isDetailsStep = currentStep === 'details'
-          console.log('Rendering decision:', {
-            checkout_type: checkoutLink.checkout_type,
-            currentStep,
-            isProductCheckout,
-            isDetailsStep,
-            willShowProductLayout: isProductCheckout && isDetailsStep
-          })
-          return isProductCheckout && isDetailsStep
-        })() ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-            {/* Product Information Card */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col h-[700px]">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                  <div className="text-sm text-muted-foreground font-geist">
                 {checkoutLink.product_name}
-              </h2>
+                  </div>
+                </div>
               
+                {/* Product Image */}
               {checkoutLink.product_image_url && (
-                <div className="bg-gray-100 rounded-2xl p-4 mb-6">
+                  <div className="mb-6">
                   <img 
                     src={checkoutLink.product_image_url} 
                     alt={checkoutLink.product_name || 'Product'} 
-                    className="w-full h-48 object-cover rounded-xl"
+                      className="w-full h-64 object-cover rounded-lg border border-border"
                   />
                 </div>
               )}
               
+                {/* Product Description */}
               {checkoutLink.product_description && (
-                <div className="flex-1 overflow-y-auto mb-6">
+                  <div>
                   {renderDescription(checkoutLink.product_description)}
                 </div>
               )}
-              
-              {checkoutLink.amount_type === 'fixed' && (
-                <div className="border-t border-gray-200 pt-4 mt-auto">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 text-sm font-medium">PRICE</span>
-                    <span className="text-2xl font-bold text-gray-900">
-                      {currency ? (
-                        `${checkoutLink.checkout_type === 'product' ? (checkoutLink.custom_price || checkoutLink.amount) : checkoutLink.amount} ${currency.code}`
-                      ) : (
-                        `${checkoutLink.checkout_type === 'product' ? (checkoutLink.custom_price || checkoutLink.amount) : checkoutLink.amount}`
-                      )}
-                    </span>
+              </div>
+            ) : (
+              // Simple Checkout Left Section
+              <div className="max-w-md mx-auto w-full text-center relative z-10">
+                <div className="text-lg text-muted-foreground font-geist mb-4">
+                  Complete your payment
+                </div>
+                {checkoutLink.amount_type === 'fixed' ? (
+                  <div>
+                    <div className="text-4xl font-bold text-foreground font-geist mb-4">
+                      {getCurrentAmount()} {currency?.code}
+                    </div>
+                    <div className="text-lg text-muted-foreground font-geist mb-2">
+                      Payment Required
+                    </div>
+                    <div className="text-sm text-muted-foreground font-geist">
+                      Complete the form to proceed with your payment
+                    </div>
                   </div>
+                ) : (
+                  <div>
+                    <div className="text-2xl font-bold text-foreground font-geist mb-4">
+                      Enter Payment Amount
+                    </div>
+                    <div className="text-base text-muted-foreground font-geist">
+                      Please specify the amount you'd like to pay and complete your details
+                    </div>
+                  </div>
+                )}
                 </div>
               )}
             </div>
 
-            {/* Checkout Form Card */}
-            <div className="bg-white rounded-2xl p-6 flex flex-col h-[700px]">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-medium text-gray-900">Enter Your Details</h2>
+          {/* Right Section - Dynamic Forms */}
+          <div className="p-8 lg:p-12 flex flex-col">
+            <div className="max-w-md mx-auto w-full flex-1 flex flex-col">
+              {/* Header with back button for non-initial steps */}
+              <div className="mb-8">
+                {(currentStep !== 'details' && currentStep !== 'confirmation') && (
+                  <button 
+                    onClick={() => { 
+                      if (currentStep === 'payment-methods') setCurrentStep('details'); 
+                      else if (currentStep === 'payment-details') setCurrentStep('payment-methods'); 
+                      else if (currentStep === 'proof-upload') setCurrentStep('payment-details');
+                    }} 
+                    className="flex items-center justify-center w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors mb-6"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </button>
+                )}
+                <div className="text-center">
+                  <h1 className="text-2xl font-bold text-foreground font-geist mb-3">{getStepTitle()}</h1>
+                  <p className="text-sm text-muted-foreground font-geist max-w-sm mx-auto leading-relaxed">{getStepDescription()}</p>
+                </div>
               </div>
               
+              {/* Error Display */}
               {error && (
-                <div className="flex items-center gap-2 p-3 border border-red-200 bg-red-50 rounded-lg text-red-800 text-sm mb-6">
-                  <AlertCircle className="h-4 w-4" />
-                  <span>{error}</span>
+                <div className="flex items-center gap-2 p-4 border border-destructive/20 bg-destructive/10 rounded-lg text-destructive text-sm mb-6">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                  <span className="font-geist">{error}</span>
                 </div>
               )}
               
-              <form onSubmit={handleDetailsSubmit} className="space-y-4 flex-1 flex flex-col">
+              {/* Step Content */}
+              <div className="flex-1 flex flex-col">
+                {currentStep === 'details' && (
+                  <form onSubmit={handleDetailsSubmit} className="space-y-6 flex-1 flex flex-col">
                 <div>
-                  <Label htmlFor="customerName" className="text-sm font-medium text-gray-700 mb-2 block">Full Name</Label>
+                      <Label htmlFor="customerName" className="text-sm font-medium text-foreground mb-2 block font-geist">Full name</Label>
                   <Input 
                     id="customerName" 
                     type="text" 
                     value={customerName} 
                     onChange={(e) => setCustomerName(e.target.value)} 
                     placeholder="Enter your full name" 
-                    className="w-full bg-gray-100 border-0 rounded-xl h-12" 
+                        className="w-full h-12 font-geist border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
                     required
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="customerEmail" className="text-sm font-medium text-gray-700 mb-2 block">Email Address</Label>
+                      <Label htmlFor="customerEmail" className="text-sm font-medium text-foreground mb-2 block font-geist">Email address</Label>
                   <Input 
                     id="customerEmail" 
                     type="email" 
                     value={customerEmail} 
                     onChange={(e) => setCustomerEmail(e.target.value)} 
                     placeholder="Enter your email address" 
-                    className="w-full bg-gray-100 border-0 rounded-xl h-12" 
+                        className="w-full h-12 font-geist border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
                     required
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="country" className="text-sm font-medium text-gray-700 mb-2 block">Country</Label>
+                      <Label htmlFor="country" className="text-sm font-medium text-foreground mb-2 block font-geist">Country</Label>
                   <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                    <SelectTrigger className="w-full bg-gray-100 border-0 rounded-xl h-12">
-                      <SelectValue placeholder="Select Country" />
+                        <SelectTrigger className="w-full h-12 font-geist">
+                          <SelectValue placeholder="Select your country" />
                     </SelectTrigger>
                     <SelectContent>
                       {countries.map((c) => (
-                        <SelectItem key={c.code} value={c.code}>
+                            <SelectItem key={c.code} value={c.code} className="font-geist">
                           {c.name} ({c.currency?.code})
                         </SelectItem>
                       ))}
@@ -539,7 +577,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                 
                 {checkoutLink.amount_type === 'flexible' && (
                   <div>
-                    <Label htmlFor="amount" className="text-sm font-medium text-gray-700 mb-2 block">Amount</Label>
+                        <Label htmlFor="amount" className="text-sm font-medium text-foreground mb-2 block font-geist">Amount</Label>
                     <div className="relative">
                       <Input 
                         id="amount" 
@@ -549,24 +587,24 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                         value={amount} 
                         onChange={(e) => setAmount(e.target.value)} 
                         placeholder="Enter amount" 
-                        className="w-full bg-gray-100 border-0 rounded-xl h-12 pr-20" 
+                            className="w-full h-12 pr-20 font-geist text-lg border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
                         required
                       />
                       {currency && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <Badge variant="secondary" className="bg-gray-700 text-white rounded-full px-3 py-1 text-xs">
+                              <span className="text-muted-foreground font-geist text-sm">
                             {currency.code}
-                          </Badge>
+                              </span>
                         </div>
                       )}
                     </div>
                   </div>
                 )}
                 
-                <div className="pt-4 mt-auto">
+                    <div className="mt-auto pt-6">
                   <Button 
                     type="submit" 
-                    className="w-full btn-primary rounded-xl h-12" 
+                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-geist" 
                     disabled={submitting}
                   >
                     {submitting ? (
@@ -575,113 +613,81 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                         Loading...
                       </>
                     ) : (
-                      'Continue to Payment'
+                          'Continue'
                     )}
                   </Button>
                 </div>
               </form>
-            </div>
+                )}
+
+                {currentStep === 'payment-methods' && (
+                  <div className="space-y-6 flex-1 flex flex-col">
+                    {paymentMethods.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-muted-foreground font-geist">No payment methods available for {selectedCountryData?.name}</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl p-6">
-            <div className="text-center mb-6">
-              {(currentStep === 'payment-methods' || currentStep === 'payment-details' || currentStep === 'proof-upload') && (
-                <div className="flex items-center justify-center relative mb-2">
-                  <button onClick={() => { if (currentStep === 'payment-methods') setCurrentStep('details'); else if (currentStep === 'payment-details') setCurrentStep('payment-methods'); else if (currentStep === 'proof-upload') setCurrentStep('payment-details');}} className="absolute left-0 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors" title="Go back">
-                    <ArrowLeft className="h-5 w-5 text-gray-600" />
-                  </button>
-                  <h2 className="text-2xl font-medium text-gray-900">{getStepTitle()}</h2>
-                </div>
-              )}
-              {(currentStep === 'details' || currentStep === 'confirmation') && (
-                <h2 className="text-2xl font-medium text-gray-900">{getStepTitle()}</h2>
+                      <div className="space-y-3 flex-1">
+                        {paymentMethods.sort((a,b) => a.display_order - b.display_order).map((method) => (
+                          <div 
+                            key={method.id} 
+                            className={cn(
+                              "rounded-lg p-4 cursor-pointer transition-all duration-200 border",
+                              selectedPaymentMethod?.id === method.id 
+                                ? "border-foreground bg-background shadow-sm" 
+                                : "border-border hover:border-muted-foreground hover:bg-muted/50"
+                            )} 
+                            onClick={() => handlePaymentMethodSelect(method)}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-4 h-4 rounded-full border-2 flex items-center justify-center",
+                                selectedPaymentMethod?.id === method.id 
+                                  ? "border-foreground bg-foreground" 
+                                  : "border-muted-foreground"
+                              )}>
+                                {selectedPaymentMethod?.id === method.id && (
+                                  <div className="w-2 h-2 rounded-full bg-background"></div>
               )}
             </div>
-            {error && (
-              <div className="flex items-center gap-2 p-3 border border-gray-300 bg-gray-100 rounded-lg text-gray-800 text-sm mb-6">
-                <AlertCircle className="h-4 w-4" />
-                <span>{error}</span>
-              </div>
-            )}
-            {currentStep === 'details' && (
-              <form onSubmit={handleDetailsSubmit} className="space-y-4">
+                              {method.icon_url && (
+                                <img src={method.icon_url} alt={method.name} className="w-5 h-5 object-contain"/>
+                              )}
                 <div>
-                  <Label htmlFor="customerName" className="text-sm font-medium text-gray-700 mb-2 block">Name</Label>
-                  <Input id="customerName" type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Enter your full name" className="w-full bg-gray-100 border-0 rounded-xl h-12" required/>
+                                <h4 className="font-medium text-sm text-foreground font-geist">{method.name}</h4>
                 </div>
-                <div>
-                  <Label htmlFor="customerEmail" className="text-sm font-medium text-gray-700 mb-2 block">e-mail</Label>
-                  <Input id="customerEmail" type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="Enter your email address" className="w-full bg-gray-100 border-0 rounded-xl h-12" required/>
-                </div>
-                <div>
-                  <Label htmlFor="country" className="text-sm font-medium text-gray-700 mb-2 block">Country</Label>
-                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                    <SelectTrigger className="w-full bg-gray-100 border-0 rounded-xl h-12"><SelectValue placeholder="Select Country" /></SelectTrigger>
-                    <SelectContent>{countries.map((c) => (<SelectItem key={c.code} value={c.code}>{c.name} ({c.currency?.code})</SelectItem>))}</SelectContent>
-                  </Select>
-                </div>
-                {checkoutLink.amount_type === 'flexible' && (
-                  <div>
-                    <Label htmlFor="amount" className="text-sm font-medium text-gray-700 mb-2 block">Amount</Label>
-                    <div className="relative">
-                      <Input id="amount" type="number" step="0.01" min="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Enter amount" className="w-full bg-gray-100 border-0 rounded-xl h-12 pr-20" required/>
-                      {currency && (<div className="absolute right-3 top-1/2 -translate-y-1/2"><Badge variant="secondary" className="bg-gray-700 text-white rounded-full px-3 py-1 text-xs">{currency.code}</Badge></div>)}
-                    </div>
-                  </div>
-                )}
-                <div className="pt-4">
-                  <Button type="submit" className="w-full btn-primary rounded-xl h-12" disabled={submitting}>
-                    {submitting ? (<><Spinner size="sm" className="mr-2" />Loading...</>) : 'CONTINUE'}
-                  </Button>
-                </div>
-              </form>
-            )}
-            {currentStep === 'payment-methods' && (
-              <div className="space-y-4">
-                <div className="text-center mb-4"><p className="text-gray-600 text-sm">Amount: {checkoutLink.amount_type === 'fixed' ? (checkoutLink.checkout_type === 'product' ? (checkoutLink.custom_price || checkoutLink.amount) : checkoutLink.amount) : amount} {currency?.code}</p></div>
-                {paymentMethods.length === 0 ? (
-                  <div className="text-center py-8"><p className="text-gray-600">No payment methods available for {selectedCountryData?.name}</p></div>
-                ) : (
-                  <div className="space-y-3 min-h-[300px]">
-                    {paymentMethods.sort((a,b) => a.display_order - b.display_order).map((method) => (
-                      <div key={method.id} className={cn("rounded-2xl p-4 cursor-pointer transition-all duration-200", selectedPaymentMethod?.id === method.id ? "bg-gray-600 text-white" : "bg-gray-100 hover:bg-gray-200")} onClick={() => handlePaymentMethodSelect(method)}>
-                          <div className="flex items-center gap-3">
-                            <div className={cn("w-5 h-5 rounded-full border-2 flex items-center justify-center", selectedPaymentMethod?.id === method.id ? "border-white bg-white" : "border-gray-400")}>{selectedPaymentMethod?.id === method.id && (<div className="w-2 h-2 rounded-full bg-gray-600"></div>)}</div>
-                            {method.icon_url && (<img src={method.icon_url} alt={method.name} className="w-6 h-6 object-contain"/>)}
-                            <div>
-                              <h4 className={cn("font-medium text-sm", selectedPaymentMethod?.id === method.id ? "text-white" : "text-gray-900")}>{method.name}</h4>
                             </div>
                         </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
-                <div className="pt-4">
-                  <Button onClick={handleProceedToDetails} disabled={!selectedPaymentMethod} className="w-full btn-primary rounded-xl h-12">
+                    )}
+                    
+                    <div className="mt-auto pt-6">
+                      <Button 
+                        onClick={handleProceedToDetails} 
+                        disabled={!selectedPaymentMethod} 
+                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-geist"
+                      >
                     {selectedPaymentMethod?.type === 'payment_link' ? (
-                      <>Pay with {selectedPaymentMethod.name}<ArrowRight className="ml-2 h-4 w-4" /></>
+                          <>Pay with {selectedPaymentMethod.name}</>
                     ) : (
-                      <>Continue<ArrowRight className="ml-2 h-4 w-4" /></>
+                          <>Continue</>
                     )}
                   </Button>
                 </div>
               </div>
             )}
+
             {currentStep === 'payment-details' && selectedPaymentMethod && (
-              <div className="space-y-6">
-                <div className="text-center">
-                  <p className="text-xl font-semibold text-gray-800 mb-1">{checkoutLink.amount_type === 'fixed' ? (checkoutLink.checkout_type === 'product' ? (checkoutLink.custom_price || checkoutLink.amount) : checkoutLink.amount) : amount} {currency?.code}</p>
-                  <p className="text-sm text-gray-500">{selectedPaymentMethod.name}</p>
-                </div>
-                
-                <div className="bg-gray-100 rounded-2xl p-5 space-y-4">
-                  <h3 className="text-sm font-medium text-gray-700 text-center mb-3">Send payment to:</h3>
+                  <div className="space-y-6 flex-1 flex flex-col">
+                    <div className="bg-background rounded-lg p-6 space-y-4 border border-border">
+                      <h3 className="text-sm font-medium text-foreground text-center mb-4 font-geist">Send payment to:</h3>
                   
                   {/* Display instructions if available */}
                   {selectedPaymentMethod.instructions_for_checkout && (
-                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <h4 className="text-sm font-medium text-yellow-800 mb-2">Payment Instructions:</h4>
-                      <div className="text-sm text-yellow-700 whitespace-pre-line">
+                        <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                          <h4 className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2 font-geist">Payment Instructions:</h4>
+                          <div className="text-sm text-amber-700 dark:text-amber-300 whitespace-pre-line font-geist">
                         {selectedPaymentMethod.instructions_for_checkout}
                       </div>
                     </div>
@@ -690,96 +696,87 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                   {selectedPaymentMethod.account_details && selectedPaymentMethod.account_details.length > 0 ? (
                     <div className="space-y-3">
                       {selectedPaymentMethod.account_details.map((field, index) => (
-                        <div key={field.id || index} className="flex items-stretch space-x-2 min-h-[44px]">
-                          <div className="bg-white rounded-lg px-3 py-2 text-sm text-gray-700 w-2/5 flex items-center overflow-hidden">
-                            <span className="truncate" title={field.label}>{field.label}</span>
-                          </div>
-                          <div className="flex-1 bg-white rounded-lg px-3 py-2 text-sm text-gray-900 font-medium flex items-center justify-between min-w-0 overflow-hidden">
-                            <span 
-                              className={`flex-1 truncate ${isTruncated(field.value) ? 'font-mono text-xs' : ''} mr-2`} 
-                              title={isTruncated(field.value) ? `Full value: ${field.value}` : field.value}
-                            >
-                              {formatValueForDisplay(field.value)}
-                            </span>
-                            <button 
-                              type="button" 
-                              onClick={() => handleCopy(field.value)} 
-                              className="flex-shrink-0 p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors" 
-                              title={`Copy ${isTruncated(field.value) ? 'full value' : 'value'} to clipboard`}
-                            >
-                              <Copy className="h-4 w-4" />
-                            </button>
-                          </div>
+                            <div key={field.id || index} className="flex items-center justify-between p-4 bg-muted/50 rounded border">
+                              <div className="text-sm font-medium text-foreground font-geist">
+                                {field.label}
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="text-sm font-medium text-foreground font-geist font-mono">
+                                  {formatValueForDisplay(field.value)}
+                                </div>
+                                <button 
+                                  type="button" 
+                                  onClick={() => handleCopy(field.value)} 
+                                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors" 
+                                    title="Copy to clipboard"
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </button>
+                              </div>
                         </div>
                       ))}
                       {selectedPaymentMethod.additional_info && (
-                        <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                          <p className="text-sm text-blue-800">{selectedPaymentMethod.additional_info}</p>
+                            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                              <p className="text-sm text-blue-800 dark:text-blue-200 font-geist">{selectedPaymentMethod.additional_info}</p>
                         </div>
                       )}
                 </div>
                   ) : (
-                    <div className="text-center text-gray-500">
-                      <p>Payment method information will be displayed here</p>
+                        <div className="text-center text-muted-foreground">
+                          <p className="font-geist">Payment method information will be displayed here</p>
                     </div>
                   )}
                 </div>
                 
-                {/* Important note about proof of payment - moved below payment details and styled in yellow */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-medium text-yellow-900 mb-1">Important Note</h4>
-                      <p className="text-sm text-yellow-800">
-                        After completing your payment using the details above, you will need to upload proof of payment (receipt, screenshot, etc.) on the next page for verification.
-                      </p>
+                                        {/* Important note about proof of payment */}
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-1 font-geist">Next Step</h4>
+                          <p className="text-sm text-amber-800 dark:text-amber-200 font-geist">
+                            After completing your payment, take a screenshot showing the transaction details and upload it on the next page. Ensure the amount, date, and reference are clearly visible for quick verification.
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
                 
-                <div className="pt-4">
-                  <Button onClick={handleProceedToUpload} className="w-full btn-primary rounded-xl h-12">
-                    Continue to Upload Proof
+                    <div className="mt-auto pt-6">
+                      <Button 
+                        onClick={handleProceedToUpload} 
+                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-geist"
+                      >
+                        Continue to upload proof
                   </Button>
                 </div>
               </div>
             )}
+
             {currentStep === 'proof-upload' && (
-              <form onSubmit={handleProofUpload} className="space-y-6">
-                <div className="text-center">
-                  <p className="text-xl font-semibold text-gray-800 mb-1">
-                    {(() => {
-                      // Use the same amount calculation logic as validation
-                      if (checkoutLink.amount_type === 'fixed') {
-                        const checkoutAmount = checkoutLink.checkout_type === 'product' 
-                          ? (checkoutLink.custom_price || checkoutLink.amount)
-                          : checkoutLink.amount;
-                        return checkoutAmount;
-                      } else {
-                        return amount;
-                      }
-                    })()} {currency?.code}
-                  </p>
-                  <p className="text-sm text-gray-500">Upload proof of payment</p>
-                </div>
-                <div className="border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-gray-400 transition-colors">
+                  <form onSubmit={handleProofUpload} className="space-y-6 flex-1 flex flex-col">
+                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center hover:border-muted-foreground/50 transition-colors">
                   <div className="space-y-4">
-                    <div className="mx-auto w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <Upload className="h-6 w-6 text-gray-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Payment Proof</h3>
-                      <p className="text-sm text-gray-600 mb-4">Please upload a screenshot, photo, or PDF showing your payment confirmation</p>
-                      
-                      {/* Supported file types information */}
-                      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800 font-medium mb-1">Supported File Types:</p>
-                        <div className="text-xs text-blue-700 space-y-1">
-                          <p>• Images: JPG, PNG, GIF, BMP, WebP, SVG</p>
-                          <p>• Documents: PDF</p>
-                          <p>• Maximum file size: 10MB</p>
+                        <div className="mx-auto w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                          <Upload className="h-6 w-6 text-muted-foreground" />
                         </div>
+                        <div>
+                          <h3 className="text-lg font-medium text-foreground mb-2 font-geist text-center">Choose your file</h3>
+                          <p className="text-sm text-muted-foreground mb-4 font-geist text-center">Upload clear proof of your payment transaction</p>
+                          
+                          {/* Enhanced file guidance */}
+                          <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
+                            <p className="text-sm text-blue-800 dark:text-blue-200 font-geist font-medium mb-2">What to include in your proof:</p>
+                            <ul className="text-xs text-blue-700 dark:text-blue-300 font-geist text-left space-y-1">
+                              <li>• Transaction amount and date</li>
+                              <li>• Payment reference number</li>
+                              <li>• Recipient details (if visible)</li>
+                              <li>• Payment confirmation status</li>
+                            </ul>
+                            <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-700">
+                              <p className="text-xs text-blue-800 dark:text-blue-200 font-geist">
+                                <span className="font-medium">Supported formats:</span> JPG, PNG, PDF • <span className="font-medium">Max size:</span> 10MB
+                              </p>
+                            </div>
                       </div>
                       
                       <input
@@ -797,65 +794,63 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                             }
                             setError(null)
                             setProofFile(file)
-                          } else {
-                            setProofFile(null)
                           }
                         }}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-background file:text-gray-700 hover:file:bg-gray-100"
+                            className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-muted file:text-foreground hover:file:bg-muted/80 file:cursor-pointer cursor-pointer font-geist"
                         required
                       />
-                    </div>
+                          
                     {proofFile && (
-                      <div className="text-sm text-green-600 bg-green-50 rounded-lg p-3">
-                        <div className="flex items-center justify-center gap-2">
-                          <CheckCircle className="h-4 w-4" />
-                          <span>Selected: {proofFile.name}</span>
-                        </div>
-                        <p className="text-xs text-green-500 mt-1">
-                          File size: {(proofFile.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
+                            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <span className="text-sm text-green-800 dark:text-green-200 font-geist">{proofFile.name}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="pt-4">
-                  <Button type="submit" className="w-full btn-primary rounded-xl h-12" disabled={submitting || !proofFile}>
+                    </div>
+                    
+                    <div className="mt-auto pt-6">
+                      <Button 
+                        type="submit" 
+                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-geist" 
+                        disabled={submitting || !proofFile}
+                      >
                     {submitting ? (
                       <>
                         <Spinner size="sm" className="mr-2" />
-                        Uploading...
+                            Submitting...
                       </>
                     ) : (
-                      'Submit Payment Proof'
+                          'Submit payment'
                     )}
                   </Button>
                 </div>
               </form>
             )}
+
             {currentStep === 'confirmation' && (
-              <div className="text-center space-y-6">
-                <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-8 w-8 text-green-600" />
+                  <div className="text-center space-y-6 flex-1 flex flex-col items-center justify-center">
+                    <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+                      <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Payment Submitted Successfully!</h3>
-                  <p className="text-gray-600 mb-4">
-                    Thank you! Your payment has been submitted for review.
-                  </p>
+                      <h3 className="text-xl font-bold text-foreground mb-2 font-geist">Payment submitted!</h3>
+                      <p className="text-muted-foreground font-geist">Your payment proof has been uploaded and is being reviewed.</p>
                   {paymentId && (
-                    <div className="bg-background rounded-lg p-4 text-left">
-                      <p className="text-sm text-gray-600 mb-1">Reference ID:</p>
-                      <p className="text-sm font-mono text-gray-900">{paymentId}</p>
+                        <div className="mt-4 p-4 bg-muted rounded-lg">
+                          <p className="text-sm text-muted-foreground font-geist">
+                            Reference: <span className="font-mono text-foreground">{paymentId}</span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
                     </div>
                   )}
-                  <p className="text-sm text-gray-500 mt-4">
-                    We will review your payment and confirm within 24 hours.
-                  </p>
-                </div>
               </div>
-            )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
