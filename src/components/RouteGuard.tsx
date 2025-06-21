@@ -1,14 +1,20 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Spinner } from '@/components/ui/spinner'
 
+/**
+ * RouteGuard - A simple component to handle role-based routing
+ * Include this at the top level of your layout for protected routes
+ */
 export function RouteGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const [isLoading, setIsLoading] = useState(true)
-  
+  const [shouldRedirect, setShouldRedirect] = useState(false)
+
   useEffect(() => {
     let isMounted = true
 
@@ -16,8 +22,17 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
       try {
         const supabase = createClient()
         
-        // Get current session
-        const { data: { session } } = await supabase.auth.getSession()
+        // Get current session with better error handling
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        
+        // Handle auth errors gracefully
+        if (sessionError) {
+          console.warn('Session error, redirecting to signin:', sessionError.message)
+          if (isMounted && pathname !== '/signin' && pathname !== '/signup') {
+            router.push('/signin')
+          }
+          return
+        }
         
         if (!session) {
           // No session - redirect to signin
@@ -27,7 +42,6 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
           }
         } else {
           // Has session - check role and route accordingly
-          const userEmail = session.user.email || ''
           
           // Get user profile from DB with better error handling
           let userProfile = null
@@ -47,10 +61,10 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
             console.warn('Profile fetch failed:', error)
           }
           
-          // Check super admin based ONLY on database role (no email checking)
+          // ONLY use database role, no hardcoded emails
           const isSuperAdmin = userProfile?.role === 'super_admin'
           
-          console.log('RouteGuard - User Role Check:', {
+          console.log('Route Guard - User Role Check:', {
             userEmail: session.user.email,
             userId: session.user.id,
             databaseRole: userProfile?.role,
@@ -132,10 +146,14 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, router])
 
-  if (isLoading) {
+  // Show spinner while loading or redirecting
+  if (isLoading || shouldRedirect) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Spinner size="lg" className="mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       </div>
     )
   }

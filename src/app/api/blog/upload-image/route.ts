@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
+import sharp from 'sharp'
 
 export async function POST(request: NextRequest) {
   console.log('🚀 Blog image upload started');
@@ -34,9 +35,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user has permission to upload blog images
-    if (!['super_admin', 'content_author'].includes(userData.role)) {
+    if (!['super_admin'].includes(userData.role)) {
       return NextResponse.json(
-        { error: 'Insufficient permissions' },
+        { error: 'Insufficient permissions - only super admins can upload blog images' },
         { status: 403 }
       )
     }
@@ -71,45 +72,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file size (5MB limit)
-    if (imageFile.size > 5 * 1024 * 1024) {
+    // Validate file size (10MB limit for original, will be resized)
+    if (imageFile.size > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'Image size must be less than 5MB' },
+        { error: 'Image size must be less than 10MB' },
         { status: 400 }
       )
     }
 
-    console.log('📊 Image file received:', {
+    console.log('📊 Original image file received:', {
       hasImageFile: !!imageFile,
       imageFileType: imageFile?.type,
       imageFileName: imageFile?.name,
       imageFileSize: imageFile?.size
     })
 
-    console.log('🗄️ Creating service client for file upload...')
-    // Create service role client for file upload (same as payment proofs)
-    const serviceSupabase = createServiceClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
-    )
-
-    console.log('📤 Uploading blog image...')
-    // Upload image file to Supabase Storage (same pattern as payment proofs)
-    const fileExtension = imageFile.name.split('.').pop()
-    const fileName = `${randomUUID()}.${fileExtension}`
-    const filePath = `blog-posts/${fileName}`
-
-    console.log('📋 Upload details:', {
-      fileName,
-      filePath,
-      fileSize: imageFile.size,
-      fileType: imageFile.type
-    })
-
-    let fileBuffer
+    // Get original file buffer
+    let originalBuffer
     try {
-      fileBuffer = await imageFile.arrayBuffer()
-      console.log('✅ File buffer created, size:', fileBuffer.byteLength)
+      originalBuffer = await imageFile.arrayBuffer()
+      console.log('✅ Original file buffer created, size:', originalBuffer.byteLength)
     } catch (bufferError) {
       console.error('❌ File buffer error:', bufferError)
       return NextResponse.json(
@@ -118,34 +100,94 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { error: uploadError } = await serviceSupabase.storage
-      .from('blog-images')
-      .upload(filePath, fileBuffer, {
-        cacheControl: '3600',
-        upsert: false,
-        contentType: imageFile.type || 'application/octet-stream'
+    // ✨ Resize image using Sharp for consistency across blog posts
+    console.log('🔧 Resizing image for blog consistency...')
+    let resizedBuffer
+    try {
+      resizedBuffer = await sharp(originalBuffer)
+        .resize(1200, 675, {
+          fit: 'cover', // Crop to fit exact dimensions
+          position: 'center' // Center the crop
+        })
+        .jpeg({ 
+          quality: 85, // Good quality while keeping file size reasonable
+          progressive: true // Better loading experience
+        })
+        .toBuffer()
+      
+      console.log('✅ Image resized successfully:', {
+        originalSize: originalBuffer.byteLength,
+        resizedSize: resizedBuffer.byteLength,
+        dimensions: '1200x675',
+        quality: '85%',
+        reduction: `${Math.round((1 - resizedBuffer.byteLength / originalBuffer.byteLength) * 100)}%`
       })
-
-    if (uploadError) {
-      console.error('❌ File upload error:', uploadError)
+    } catch (resizeError) {
+      console.error('❌ Image resize error:', resizeError)
       return NextResponse.json(
-        { error: 'Failed to upload image file' },
+        { error: 'Failed to process image' },
         { status: 500 }
       )
     }
-    console.log('✅ File uploaded to:', filePath)
+
+    console.log('🗄️ Using authenticated client for file upload...')
+    // Use the authenticated client instead of service role
+    // Since we already checked permissions above, this should work
+
+    console.log('📤 Uploading resized blog image...')
+    // Upload resized image file to Supabase Storage
+    const fileName = `${randomUUID()}.jpg` // Always save as optimized JPEG
+    const filePath = `blog-posts/${fileName}`
+
+    console.log('📋 Upload details:', {
+      fileName,
+      filePath,
+      originalSize: originalBuffer.byteLength,
+      resizedSize: resizedBuffer.byteLength,
+      dimensions: '1200x675px',
+      format: 'JPEG'
+    })
+
+    const { error: uploadError } = await supabase.storage
+      .from('blog-images')
+      .upload(filePath, resizedBuffer, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: 'image/jpeg' // Always JPEG after processing
+      })
+
+    if (uploadError) {
+      console.error('❌ File upload error:', {
+        error: uploadError,
+        message: uploadError.message,
+        filePath,
+        bucketName: 'blog-images'
+      })
+      return NextResponse.json(
+        { error: `Failed to upload image file: ${uploadError.message}` },
+        { status: 500 }
+      )
+    }
+    console.log('✅ Resized image uploaded to:', filePath)
 
     // Get public URL for the uploaded file
-    const { data: urlData } = serviceSupabase.storage
+    const { data: urlData } = supabase.storage
       .from('blog-images')
       .getPublicUrl(filePath)
 
-    console.log('✅ Blog image uploaded successfully:', urlData.publicUrl)
+    console.log('✅ Blog image processed and uploaded successfully:', urlData.publicUrl)
 
     return NextResponse.json({
       success: true,
       imageUrl: urlData.publicUrl,
-      filePath: filePath
+      filePath: filePath,
+      processing: {
+        originalSize: originalBuffer.byteLength,
+        resizedSize: resizedBuffer.byteLength,
+        dimensions: '1200x675',
+        format: 'JPEG',
+        quality: 85
+      }
     })
 
   } catch (error) {

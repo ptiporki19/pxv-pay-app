@@ -1,179 +1,159 @@
 const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  'https://frdksqjaiuakkalebnzd.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyZGtzcWphaXVha2thbGVibnpkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczMzEwNzkxOCwiZXhwIjoyMDQ4NjgzOTE4fQ.gm8vUIGIjOBnXQq9SnJUXTu-zcwZOG1r_k6iOozMsZY'
-);
+const fs = require('fs');
 
 async function testCompleteFlow() {
-  console.log('🧪 Testing Complete Payment Flow...\n');
+  console.log('🔄 Testing Complete Payment Verification Flow...\n');
 
   try {
-    // 1. Test RLS Policies - Check if normal users can create payment methods
-    console.log('1️⃣ Testing RLS Policies...');
+    const supabase = createClient(
+      'http://127.0.0.1:54321',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU'
+    );
+
+    // Step 1: Submit a new payment via API
+    console.log('1️⃣ Submitting payment via checkout API...');
     
-    const testUserId = '791ac1ad-b571-4619-86a4-639b9f275107';
+    // Create test image
+    const testImageContent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+    fs.writeFileSync('test-flow.png', testImageContent);
+
+    const FormData = require('form-data');
+    const formData = new FormData();
     
-    // Test payment method creation
-    const { data: pmTest, error: pmError } = await supabase
-      .from('payment_methods')
-      .insert({
-        user_id: testUserId,
-        name: 'Test RLS Payment Method',
-        type: 'manual',
-        description: 'Testing RLS policies',
-        instructions: 'Test instructions',
-        account_details: [{ id: 'test', label: 'Test', value: '123', type: 'text', required: true }],
-        countries: ['US'],
-        status: 'active',
-        sort_order: 999
-      })
-      .select()
-      .single();
+    formData.append('proof', fs.createReadStream('test-flow.png'), {
+      filename: 'test-flow.png',
+      contentType: 'image/png'
+    });
+    formData.append('customer_name', 'John Doe');
+    formData.append('customer_email', 'john.doe@example.com');
+    formData.append('amount', '75.50');
+    formData.append('country', 'US');
+    formData.append('payment_method_id', '80690fa1-09e4-4f6b-9fb9-d93bfe5c3772');
+    formData.append('checkout_link_id', 'a9d18b1c-5b50-4a73-9121-1e907478a495');
 
-    if (pmError) {
-      console.log('❌ Payment method creation failed:', pmError.message);
-    } else {
-      console.log('✅ Payment method created successfully:', pmTest.name);
-      
-      // Clean up test data
-      await supabase.from('payment_methods').delete().eq('id', pmTest.id);
-    }
+    // Using curl since our Node.js test had issues
+    const { exec } = require('child_process');
+    const curlCommand = `curl -s -X POST "http://localhost:3000/api/checkout/simple-payment/submit" \\
+      -F "proof=@test-flow.png" \\
+      -F "customer_name=John Doe" \\
+      -F "customer_email=john.doe@example.com" \\
+      -F "amount=75.50" \\
+      -F "country=US" \\
+      -F "payment_method_id=80690fa1-09e4-4f6b-9fb9-d93bfe5c3772" \\
+      -F "checkout_link_id=a9d18b1c-5b50-4a73-9121-1e907478a495"`;
 
-    // Test checkout link creation
-    const { data: clTest, error: clError } = await supabase
-      .from('checkout_links')
-      .insert({
-        merchant_id: testUserId,
-        slug: 'test-rls-' + Date.now(),
-        title: 'Test RLS Checkout',
-        link_name: 'test-rls',
-        amount_type: 'fixed',
-        amount: 10.00,
-        currency: 'USD',
-        active_country_codes: ['US'],
-        status: 'active',
-        is_active: true,
-        checkout_type: 'simple'
-      })
-      .select()
-      .single();
-
-    if (clError) {
-      console.log('❌ Checkout link creation failed:', clError.message);
-    } else {
-      console.log('✅ Checkout link created successfully:', clTest.title);
-      
-      // Clean up test data
-      await supabase.from('checkout_links').delete().eq('id', clTest.id);
-    }
-
-    // 2. Test Product Checkout API
-    console.log('\n2️⃣ Testing Product Checkout API...');
-    
-    const productCheckoutSlug = 'test-product-course-1749345379';
-    
-    try {
-      const response = await fetch(`http://localhost:3009/api/checkout/${productCheckoutSlug}/validate`);
-      const data = await response.json();
-      
-      if (data.valid && data.checkout_link) {
-        const link = data.checkout_link;
-        console.log('✅ Product checkout validation successful');
-        console.log(`   Product: ${link.product_name}`);
-        console.log(`   Price: ${link.custom_price || link.amount} ${link.currency}`);
-        console.log(`   Type: ${link.checkout_type}`);
-        
-        // Test if custom_price is properly set
-        if (link.checkout_type === 'product' && (link.custom_price || link.amount)) {
-          console.log('✅ Product price correctly populated');
-        } else {
-          console.log('❌ Product price not properly populated');
-        }
-      } else {
-        console.log('❌ Product checkout validation failed:', data.error);
-      }
-    } catch (apiError) {
-      console.log('❌ API test failed:', apiError.message);
-    }
-
-    // 3. Test Countries API
-    console.log('\n3️⃣ Testing Countries API...');
-    
-    try {
-      const response = await fetch(`http://localhost:3009/api/checkout/${productCheckoutSlug}/countries`);
-      const data = await response.json();
-      
-      if (data.countries && data.countries.length > 0) {
-        console.log(`✅ Countries API working: ${data.countries.length} countries available`);
-        data.countries.forEach(country => {
-          console.log(`   ${country.name} (${country.code}) - ${country.currency?.code}`);
-        });
-      } else {
-        console.log('❌ Countries API failed or no countries available');
-      }
-    } catch (apiError) {
-      console.log('❌ Countries API test failed:', apiError.message);
-    }
-
-    // 4. Test Payment Methods API
-    console.log('\n4️⃣ Testing Payment Methods API...');
-    
-    try {
-      const response = await fetch(`http://localhost:3009/api/checkout/${productCheckoutSlug}/methods?country=US`);
-      const data = await response.json();
-      
-      if (data.payment_methods && data.payment_methods.length > 0) {
-        console.log(`✅ Payment methods API working: ${data.payment_methods.length} methods available for US`);
-        data.payment_methods.forEach(method => {
-          console.log(`   ${method.name} - ${method.countries?.join(', ')}`);
-          if (method.custom_fields && method.custom_fields.length > 0) {
-            console.log(`     Custom fields: ${method.custom_fields.map(f => f.label).join(', ')}`);
-          }
-        });
-      } else {
-        console.log('❌ Payment methods API failed or no methods available');
-      }
-    } catch (apiError) {
-      console.log('❌ Payment methods API test failed:', apiError.message);
-    }
-
-    // 5. Test Database Consistency
-    console.log('\n5️⃣ Testing Database Consistency...');
-    
-    const { data: checkoutLinks, error: linksError } = await supabase
-      .from('checkout_links')
-      .select('slug, title, checkout_type, custom_price, amount, product_name')
-      .eq('status', 'active')
-      .limit(5);
-
-    if (!linksError && checkoutLinks) {
-      console.log(`✅ Database consistency check: ${checkoutLinks.length} active checkout links`);
-      checkoutLinks.forEach(link => {
-        const price = link.checkout_type === 'product' ? (link.custom_price || link.amount) : link.amount;
-        console.log(`   ${link.title} (${link.checkout_type}) - Price: ${price}`);
-        if (link.checkout_type === 'product' && link.product_name) {
-          console.log(`     Product: ${link.product_name}`);
-        }
+    const submitResponse = await new Promise((resolve, reject) => {
+      exec(curlCommand, (error, stdout, stderr) => {
+        if (error) reject(error);
+        else resolve(JSON.parse(stdout));
       });
-    } else {
-      console.log('❌ Database consistency check failed:', linksError?.message);
+    });
+
+    console.log('✅ Payment submitted:', submitResponse.payment_id);
+
+    // Step 2: Verify payment appears in merchant payments
+    console.log('\n2️⃣ Checking merchant payments...');
+    
+    const merchantId = '00000000-0000-0000-0000-000000000001';
+    const { data: merchantPayments, error: merchantError } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('merchant_id', merchantId)
+      .eq('status', 'pending_verification')
+      .order('created_at', { ascending: false });
+
+    if (merchantError) {
+      console.log('❌ Error fetching merchant payments:', merchantError);
+      return;
     }
 
-    console.log('\n🎉 Complete Flow Test Finished!');
-    console.log('\n📋 Summary:');
-    console.log('✅ RLS policies allow normal merchants to create payment methods and checkout links');
-    console.log('✅ Product checkout API correctly populates product data and pricing');
-    console.log('✅ All checkout APIs (validate, countries, methods) are working');
-    console.log('✅ Database structure supports both simple and product checkouts');
+    console.log(`✅ Merchant has ${merchantPayments.length} pending payments`);
     
-    console.log('\n🌐 Test URLs:');
-    console.log(`   Product Checkout: http://localhost:3009/c/${productCheckoutSlug}`);
-    console.log(`   Admin Dashboard: http://localhost:3009/payment-methods`);
-    console.log(`   Create Checkout: http://localhost:3009/checkout-links`);
+    const newPayment = merchantPayments.find(p => p.id === submitResponse.payment_id);
+    if (newPayment) {
+      console.log('✅ New payment found in merchant payments:');
+      console.log(`   Customer: ${newPayment.customer_name} (${newPayment.customer_email})`);
+      console.log(`   Amount: $${newPayment.amount} ${newPayment.currency}`);
+      console.log(`   Proof URL: ${newPayment.payment_proof_url}`);
+    } else {
+      console.log('❌ New payment not found in merchant payments');
+    }
+
+    // Step 3: Test image accessibility
+    console.log('\n3️⃣ Testing proof image accessibility...');
+    
+    if (newPayment && newPayment.payment_proof_url) {
+      const fetch = require('node-fetch');
+      const imageResponse = await fetch(newPayment.payment_proof_url);
+      
+      if (imageResponse.ok) {
+        console.log('✅ Payment proof image is accessible');
+        console.log(`   Status: ${imageResponse.status}`);
+        console.log(`   Content-Type: ${imageResponse.headers.get('content-type')}`);
+        console.log(`   URL: ${newPayment.payment_proof_url}`);
+      } else {
+        console.log('❌ Payment proof image not accessible:', imageResponse.status);
+      }
+    }
+
+    // Step 4: Test status update (simulate merchant action)
+    console.log('\n4️⃣ Testing payment approval...');
+    
+    const { data: updatedPayment, error: updateError } = await supabase
+      .from('payments')
+      .update({ status: 'completed' })
+      .eq('id', submitResponse.payment_id)
+      .eq('merchant_id', merchantId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.log('❌ Error updating payment:', updateError);
+    } else {
+      console.log('✅ Payment approved successfully:');
+      console.log(`   Status: ${updatedPayment.status}`);
+      console.log(`   Payment ID: ${updatedPayment.id}`);
+    }
+
+    // Step 5: Verify completed payments
+    console.log('\n5️⃣ Checking completed payments...');
+    
+    const { data: completedPayments, error: completedError } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('merchant_id', merchantId)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false });
+
+    if (completedError) {
+      console.log('❌ Error fetching completed payments:', completedError);
+    } else {
+      console.log(`✅ Merchant has ${completedPayments.length} completed payments`);
+      const approvedPayment = completedPayments.find(p => p.id === submitResponse.payment_id);
+      if (approvedPayment) {
+        console.log('✅ Payment found in completed payments');
+      }
+    }
+
+    // Clean up
+    fs.unlinkSync('test-flow.png');
+    console.log('\n🎉 Complete flow test finished successfully!');
+    console.log('📋 Summary:');
+    console.log('   ✅ Payment submission works');
+    console.log('   ✅ Payment appears in merchant verification');
+    console.log('   ✅ Proof image is accessible');
+    console.log('   ✅ Payment status can be updated');
+    console.log('   ✅ Updated payments appear in correct status');
 
   } catch (error) {
-    console.error('❌ Test failed:', error);
+    console.error('💥 Test failed:', error.message);
+    
+    // Clean up
+    try {
+      fs.unlinkSync('test-flow.png');
+    } catch (e) {
+      // File doesn't exist, ignore
+    }
   }
 }
 

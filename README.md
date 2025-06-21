@@ -1,183 +1,164 @@
-# Supabase CLI
+# PXV Pay
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+A modern, secure, and user-friendly payment collection platform. Empowering individuals and businesses to collect payments globally using local payment methods.
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+## Tech Stack
 
-This repository contains all the functionality for Supabase CLI.
+- **Frontend**: Next.js 15 (App Router), TypeScript, TailwindCSS, Shadcn UI components, Zustand for state management
+- **Backend**: Supabase for authentication, database, and storage
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+## Detailed Setup Instructions
 
-## Getting started
+### Prerequisites
 
-### Install the CLI
+- Node.js (LTS version)
+- npm or yarn
+- Docker (for local Supabase)
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+### Step 1: Clone and Install Dependencies
 
 ```bash
-npm i supabase --save-dev
+git clone [repository-url]
+cd pxv-pay
+npm install
 ```
 
-To install the beta release channel:
+### Step 2: Set Up Local Supabase
+
+1. Initialize Supabase in your project:
 
 ```bash
-npm i supabase@beta --save-dev
+npx supabase init
 ```
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
-
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
-
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
-
-<details>
-  <summary><b>macOS</b></summary>
-
-  Available via [Homebrew](https://brew.sh). To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Windows</b></summary>
-
-  Available via [Scoop](https://scoop.sh). To install:
-
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
-
-  To upgrade:
-
-  ```powershell
-  scoop update supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Linux</b></summary>
-
-  Available via [Homebrew](https://brew.sh) and Linux packages.
-
-  #### via Homebrew
-
-  To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
+2. Start local Supabase:
 
 ```bash
-supabase bootstrap
+npm run supabase:start
 ```
 
-Or using npx:
+3. Copy the Supabase URL and anon key from the output. They should look like:
+
+```
+API URL: http://127.0.0.1:54321
+anon key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+```
+
+### Step 3: Set Up Environment Variables
+
+Create a `.env.local` file in the root of the project with the following content (replacing with your actual values):
+
+```
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-from-output
+```
+
+### Step 4: Set Up Database Schema
+
+1. Access the Supabase Studio at http://127.0.0.1:54323
+
+2. Go to the SQL Editor tab
+
+3. Copy the contents of the `supabase/manual-setup.sql` file
+
+4. Paste into the SQL Editor and execute it
+
+This will:
+- Create the necessary tables and types
+- Set up Row Level Security (RLS) policies
+- Create triggers for user registration
+- Create a sample super admin user
+
+### Step 5: Run the Development Server
 
 ```bash
-npx supabase bootstrap
+npm run dev
 ```
 
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+The application should now be running at [http://localhost:3000](http://localhost:3000).
 
-## Docs
+## Initial Login
 
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+To log in as the super admin:
 
-## Breaking changes
+1. Go to http://127.0.0.1:54323 (Supabase Studio)
+2. Navigate to Authentication > Users
+3. Find the user with email `admin@pxvpay.com`
+4. Click "Reset password" and set a password
+5. Use these credentials to log in to the application
 
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+## Database Schema Overview
 
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+The initial database setup includes:
 
-## Developing
+- `users` table with RLS policies for data security
+- User role management (super_admin, registered_user, subscriber, free_user)
+- Trigger to automatically create user profiles on signup
 
-To run from source:
+## Project Structure
 
-```sh
-# Go >= 1.22
-go run . help
 ```
+pxv-pay/
+├── src/
+│   ├── app/                   # Next.js App Router pages
+│   │   ├── (admin)/           # Admin panel routes
+│   │   ├── (auth)/            # Authentication routes
+│   │   ├── (checkout)/        # Checkout flow routes
+│   │   ├── api/               # API routes
+│   │   ├── globals.css        # Global CSS
+│   │   ├── layout.tsx         # Root layout
+│   │   └── page.tsx           # Home page
+│   ├── components/            # React components
+│   │   ├── admin/             # Admin-specific components
+│   │   ├── auth/              # Authentication components
+│   │   ├── checkout/          # Checkout components
+│   │   └── ui/                # Shadcn UI components
+│   ├── contexts/              # React contexts
+│   ├── hooks/                 # Custom React hooks
+│   ├── lib/                   # Utility functions and libraries
+│   │   ├── supabase/          # Supabase client
+│   │   ├── rbac.ts            # Role-based access control
+│   │   ├── store.ts           # Zustand stores
+│   │   └── utils.ts           # Utility functions
+│   ├── styles/                # Additional styles
+│   ├── types/                 # TypeScript types
+│   └── middleware.ts          # Next.js middleware
+├── public/                    # Static files
+├── supabase/                  # Supabase migrations and seed data
+├── .env.local                 # Local environment variables
+├── next.config.js             # Next.js configuration
+├── tailwind.config.js         # Tailwind CSS configuration
+└── tsconfig.json              # TypeScript configuration
+```
+
+## Helpful Commands
+
+```bash
+# Start Supabase locally
+npm run supabase:start
+
+# Check Supabase status (including URL and keys)
+npm run supabase:status
+
+# Stop Supabase
+npm run supabase:stop
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm run start
+```
+
+## Troubleshooting
+
+- **Environment Variables Not Loading**: Make sure your `.env.local` file is created in the root of the project.
+- **Authentication Issues**: Check if Supabase is running and your database schema is set up correctly.
+- **Database Reset**: If needed, you can reset your local Supabase database with `npx supabase db reset`.
+
+## License
+
+[License information]

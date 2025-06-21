@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,6 +22,8 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
+import { useToast } from '@/hooks/use-toast'
+import { ToastDisplay } from '@/components/ui/toast-display'
 
 interface BlogPost {
   id: string
@@ -46,6 +48,7 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
   const router = useRouter()
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { toasts, success, error, removeToast } = useToast()
 
   const [formData, setFormData] = useState({
     title: initialData.title,
@@ -64,7 +67,6 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
   const [isLoading, setIsLoading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   // Auto-generate slug from title
   const generateSlug = (title: string) => {
@@ -107,19 +109,18 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file')
+      error('Invalid file type', 'Please select a valid image file')
       return
     }
 
-    // Validate file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image size must be less than 5MB')
+    // Validate file size (10MB limit - will be automatically resized)
+    if (file.size > 10 * 1024 * 1024) {
+      error('File too large', 'Image size must be less than 10MB')
       return
     }
 
     try {
       setUploadingImage(true)
-      setError(null)
 
       console.log('📤 Uploading blog image via API...', {
         fileName: file.name,
@@ -142,16 +143,18 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
         throw new Error(result.error || 'Failed to upload image')
       }
 
-      console.log('✅ Image uploaded successfully:', result.imageUrl)
+      console.log('✅ Image uploaded and resized successfully:', result.imageUrl)
       
       setFormData(prev => ({
         ...prev,
         featured_image: result.imageUrl
       }))
 
+      success('Image uploaded successfully', 'Your featured image has been uploaded, automatically resized to 1200x675px, and optimized for web display.')
+
     } catch (err: any) {
       console.error('Error uploading image:', err)
-      setError(`Failed to upload image: ${err.message || 'Unknown error'}. You can use the URL input instead.`)
+      error('Upload failed', `Failed to upload image: ${err.message || 'Unknown error'}. You can use the URL input instead.`)
     } finally {
       setUploadingImage(false)
       if (fileInputRef.current) {
@@ -163,8 +166,17 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!formData.title.trim()) {
+      error('Title required', 'Please enter a title for your blog post.')
+      return
+    }
+
+    if (!formData.content.trim()) {
+      error('Content required', 'Please add some content to your blog post.')
+      return
+    }
+
     setIsLoading(true)
-    setError(null)
 
     try {
       const updateData = {
@@ -173,19 +185,25 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
         updated_at: new Date().toISOString()
       }
 
-      const { data, error } = await supabase
+      const { data, error: updateError } = await supabase
         .from('blog_posts')
         .update(updateData)
         .eq('id', initialData.id)
         .select()
         .single()
 
-      if (error) throw error
+      if (updateError) throw updateError
 
-      router.push('/blog-management')
-    } catch (err) {
+      success('Blog post updated!', `Your ${formData.published ? 'published' : 'draft'} blog post has been updated successfully.`)
+      
+      // Small delay to show the success message before redirecting
+      setTimeout(() => {
+        router.push('/blog-management')
+      }, 1500)
+
+    } catch (err: any) {
       console.error('Error updating blog post:', err)
-      setError('Failed to update blog post. Please try again.')
+      error('Failed to update blog post', err.message || 'Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -197,20 +215,25 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
     }
 
     setIsDeleting(true)
-    setError(null)
 
     try {
-      const { error } = await supabase
+      const { error: deleteError } = await supabase
         .from('blog_posts')
         .delete()
         .eq('id', initialData.id)
 
-      if (error) throw error
+      if (deleteError) throw deleteError
 
-      router.push('/blog-management')
-    } catch (err) {
+      success('Blog post deleted', 'The blog post has been permanently deleted.')
+      
+      // Small delay to show the success message before redirecting
+      setTimeout(() => {
+        router.push('/blog-management')
+      }, 1500)
+
+    } catch (err: any) {
       console.error('Error deleting blog post:', err)
-      setError('Failed to delete blog post. Please try again.')
+      error('Failed to delete blog post', err.message || 'Please try again.')
     } finally {
       setIsDeleting(false)
     }
@@ -224,6 +247,9 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Toast Notifications */}
+      <ToastDisplay toasts={toasts} onRemove={removeToast} />
+      
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
@@ -269,12 +295,6 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
           </Button>
         </div>
       </div>
-
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">
         {/* Main Content */}
@@ -344,7 +364,7 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
             <CardHeader>
               <CardTitle>Featured Image</CardTitle>
               <CardDescription>
-                Upload an image for the blog post
+                Upload an image for the blog post. Images are automatically resized to 1200x675px and optimized for web display.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -389,6 +409,11 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
                   className="hidden"
                 />
                 
+                <p className="text-xs text-muted-foreground">
+                  Supports: JPEG, PNG, GIF, WebP • Max size: 10MB<br />
+                  Images are automatically resized to 1200×675px for consistency
+                </p>
+                
                 {/* Alternative direct URL input */}
                 <div className="mt-3">
                   <p className="text-sm text-muted-foreground mb-2">
@@ -401,12 +426,6 @@ export default function BlogPostEditForm({ user, initialData }: BlogPostEditForm
                     onChange={(e) => setFormData(prev => ({ ...prev, featured_image: e.target.value }))}
                   />
                 </div>
-                
-                {error && error.includes('image') && (
-                  <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-600 dark:text-red-400">
-                    {error}
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
