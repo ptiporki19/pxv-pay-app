@@ -173,6 +173,17 @@ export interface Payment {
   updated_at?: string
 }
 
+export interface Brand {
+  id?: string
+  merchant_id?: string
+  name: string
+  logo_url: string
+  is_active: boolean
+  subscription_tier?: string
+  created_at?: string
+  updated_at?: string
+}
+
 // Countries API
 export const countriesApi = {
   getAll: async (): Promise<Country[]> => {
@@ -1840,6 +1851,355 @@ export const checkoutLinksApi = {
     if (error) {
       console.error('Error deleting checkout link:', error)
       throw new Error(error.message)
+    }
+  }
+}
+
+// Brands API
+export const brandsApi = {
+  getAll: async (): Promise<Brand[]> => {
+    try {
+      // Get current user with better error handling (copying product API pattern)
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.log('User not authenticated, returning empty brands list')
+        return []
+      }
+      
+      if (!authData?.user) {
+        console.log('User not authenticated, returning empty brands list')
+        return []
+      }
+
+      // Get the database user ID using email lookup (like product API)
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', authData.user.email)
+        .single()
+
+      if (userError || !userData) {
+        console.log('User not found in database, returning empty brands list')
+        return []
+      }
+
+      const { data, error } = await supabase
+        .from('brands')
+        .select('*')
+        .eq('merchant_id', userData.id)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching brands:', error)
+        throw new Error(error.message)
+      }
+
+      return data || []
+    } catch (error) {
+      console.error('Error in getAll brands:', error)
+      throw error
+    }
+  },
+
+  getById: async (id: string): Promise<Brand> => {
+    // Get current user (copying product API pattern)
+    const { data: authData, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !authData?.user) {
+      throw new Error('User not authenticated')
+    }
+
+    // Get the database user ID using email lookup (like product API)
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', authData.user.email)
+      .single()
+
+    if (userError || !userData) {
+      throw new Error('Failed to get user information')
+    }
+
+    const { data, error } = await supabase
+      .from('brands')
+      .select('*')
+      .eq('id', id)
+      .eq('merchant_id', userData.id)
+      .single()
+
+    if (error) {
+      console.error('Error fetching brand:', error)
+      throw new Error(error.message)
+    }
+
+    if (!data) {
+      throw new Error('Brand not found')
+    }
+
+    return data
+  },
+
+  create: async (brand: Omit<Brand, 'id' | 'merchant_id' | 'created_at' | 'updated_at'>): Promise<Brand> => {
+    try {
+      // Get current user with better error handling (copying product API pattern)
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('Authentication error:', authError)
+        throw new Error(`Authentication failed: ${authError.message}`)
+      }
+      
+      if (!authData?.user) {
+        throw new Error('User not authenticated - please log in and try again')
+      }
+
+      const authUser = authData.user
+      console.log('Creating brand for auth user:', authUser.id, authUser.email)
+
+      // Get the database user ID using email lookup (like product API)
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', authUser.email)
+        .single()
+
+      if (userError) {
+        console.error('Error fetching user data:', userError)
+        throw new Error('Failed to get user information')
+      }
+
+      if (!userData) {
+        throw new Error('User not found in database')
+      }
+
+      console.log('Using database user ID:', userData.id)
+
+      // Check brand limits (future subscription feature)
+      const existingBrands = await brandsApi.getAll()
+      const BRAND_LIMITS = {
+        free: 10,     // Generous MVP limit
+        pro: 50,      // Future pro limit  
+        enterprise: -1 // Future unlimited
+      }
+      
+      // For MVP, all users get generous limits
+      const userLimit = BRAND_LIMITS.free
+      if (userLimit > 0 && existingBrands.length >= userLimit) {
+        throw new Error(`You have reached the maximum number of brands (${userLimit}). Upgrade your plan for more brands.`)
+      }
+
+      const brandData = {
+        ...brand,
+        merchant_id: userData.id, // Use database user ID instead of auth user ID
+        subscription_tier: 'free' // Future: get from user's actual subscription
+      }
+
+      console.log('Inserting brand data:', brandData)
+
+      const { data, error } = await supabase
+        .from('brands')
+        .insert([brandData])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Database insert error:', error)
+        
+        // Provide specific error messages for common issues
+        if (error.code === '42501') {
+          throw new Error('Permission denied - you do not have access to create brands')
+        }
+        
+        if (error.code === '23505') {
+          if (error.message.includes('brands_merchant_id_name_key')) {
+            throw new Error(`A brand with the name "${brand.name}" already exists`)
+          }
+          throw new Error('A brand with this name already exists')
+        }
+        
+        if (error.message) {
+          throw new Error(`Database error: ${error.message}`)
+        }
+        
+        throw new Error('Failed to create brand - unknown database error')
+      }
+
+      if (!data) {
+        throw new Error('Brand creation failed - no data returned')
+      }
+      
+      console.log('Brand created successfully:', data.id)
+      return data
+    } catch (error) {
+      console.error('Error creating brand:', error)
+      
+      // Ensure we always throw an Error object with a message
+      if (error instanceof Error) {
+        throw error
+      }
+      
+      // Handle cases where error might be empty object or weird format
+      if (typeof error === 'object' && error !== null) {
+        const errorMsg = (error as any).message || (error as any).error || JSON.stringify(error)
+        throw new Error(`Brand creation failed: ${errorMsg}`)
+      }
+      
+      throw new Error('Brand creation failed due to an unknown error')
+    }
+  },
+
+  update: async (id: string, brand: Partial<Omit<Brand, 'id' | 'merchant_id' | 'created_at' | 'updated_at'>>): Promise<Brand> => {
+    // Get current user (copying product API pattern)
+    const { data: authData, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !authData?.user) {
+      throw new Error('User not authenticated')
+    }
+
+    // Get the database user ID using email lookup (like product API)
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', authData.user.email)
+      .single()
+
+    if (userError || !userData) {
+      throw new Error('Failed to get user information')
+    }
+
+    const { data, error } = await supabase
+      .from('brands')
+      .update(brand)
+      .eq('id', id)
+      .eq('merchant_id', userData.id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating brand:', error)
+      
+      if (error.code === '23505') {
+        if (error.message.includes('brands_merchant_id_name_key')) {
+          throw new Error(`A brand with the name "${brand.name}" already exists`)
+        }
+        throw new Error('A brand with this name already exists')
+      }
+      
+      throw new Error(error.message || 'Failed to update brand')
+    }
+
+    if (!data) {
+      throw new Error('Brand not found or you do not have permission to update it')
+    }
+
+    return data
+  },
+
+  delete: async (id: string): Promise<void> => {
+    // Get current user (copying product API pattern)
+    const { data: authData, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !authData?.user) {
+      throw new Error('User not authenticated')
+    }
+
+    // Get the database user ID using email lookup (like product API)
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', authData.user.email)
+      .single()
+
+    if (userError || !userData) {
+      throw new Error('Failed to get user information')
+    }
+
+    // Check if brand is being used by any checkout links
+    const { data: checkoutLinks, error: checkError } = await supabase
+      .from('checkout_links')
+      .select('id, title')
+      .eq('brand_id', id)
+      .eq('merchant_id', userData.id)
+      .limit(1)
+
+    if (checkError) {
+      console.error('Error checking brand usage:', checkError)
+      throw new Error('Failed to check if brand is in use')
+    }
+
+    if (checkoutLinks && checkoutLinks.length > 0) {
+      throw new Error('Cannot delete brand that is being used by checkout links. Please update those checkout links first.')
+    }
+
+    const { error } = await supabase
+      .from('brands')
+      .delete()
+      .eq('id', id)
+      .eq('merchant_id', userData.id)
+
+    if (error) {
+      console.error('Error deleting brand:', error)
+      throw new Error(error.message)
+    }
+  },
+
+  // Helper function to upload brand logo
+  uploadLogo: async (file: File, brandName: string): Promise<string> => {
+    try {
+      // Get current user (copying product API pattern)
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !authData?.user) {
+        throw new Error('User not authenticated')
+      }
+
+      // Get the database user ID using email lookup (like product API)
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', authData.user.email)
+        .single()
+
+      if (userError || !userData) {
+        throw new Error('Failed to get user information')
+      }
+
+      // Validate file
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Please upload an image file')
+      }
+
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        throw new Error('Image file must be less than 2MB')
+      }
+
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${userData.id}/${brandName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}.${fileExt}`
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('brand-logos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) {
+        console.error('Error uploading logo:', error)
+        throw new Error(error.message)
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('brand-logos')
+        .getPublicUrl(data.path)
+
+      return urlData.publicUrl
+    } catch (error) {
+      console.error('Error in uploadLogo:', error)
+      throw error
     }
   }
 } 

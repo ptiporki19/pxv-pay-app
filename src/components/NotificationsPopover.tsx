@@ -37,6 +37,7 @@ interface Notification {
     currency?: string
     checkout_link_id?: string
     merchant_id?: string
+    ticket_id?: string
   }
 }
 
@@ -160,6 +161,25 @@ export function NotificationsPopover() {
     return date.toLocaleDateString()
   }
   
+  const markAsRead = async (id: string) => {
+    try {
+      // Update notification in Supabase
+      const { error } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', id)
+      
+      if (error) throw error
+      
+      // Update local state
+      setNotifications(notifications.map(notification => 
+        notification.id === id ? { ...notification, is_read: true } : notification
+      ))
+    } catch (error: any) {
+      console.error('Error marking notification as read:', error.message)
+    }
+  }
+  
   const markAllAsRead = async () => {
     try {
       const { data: sessionData } = await supabase.auth.getSession()
@@ -208,6 +228,19 @@ export function NotificationsPopover() {
     setOpen(false)
     
     // Navigate based on notification type and data
+    if (notification.data?.ticket_id) {
+      // For support ticket notifications, trigger the floating widget
+      // We'll dispatch a custom event to open the widget and show the specific ticket
+      const event = new CustomEvent('openSupportWidget', { 
+        detail: { 
+          ticketId: notification.data.ticket_id,
+          tab: 'history'
+        } 
+      })
+      window.dispatchEvent(event)
+      return
+    }
+    
     if (notification.data?.payment_id) {
       // For payment-related notifications, redirect to transaction detail page
       if (notification.title.includes('Payment Received') || notification.title.includes('Payment Submitted')) {
@@ -218,27 +251,25 @@ export function NotificationsPopover() {
         router.push(`/transactions/${notification.data.payment_id}`)
       }
     } else {
+      // Check if it's a support-related notification by title/message content
+      const isSupportNotification = notification.title.includes('Support') || 
+                                   notification.title.includes('Ticket') || 
+                                   notification.title.includes('Reply') ||
+                                   notification.message.includes('ticket') ||
+                                   notification.message.includes('support')
+      
+      if (isSupportNotification) {
+        // Open the floating widget for support notifications
+        const event = new CustomEvent('openSupportWidget', { 
+          detail: { 
+            tab: 'history'
+          } 
+        })
+        window.dispatchEvent(event)
+    } else {
       // Default fallback: navigate to transactions page
       router.push('/transactions')
     }
-  }
-
-  const markAsRead = async (id: string) => {
-    try {
-      // Update notification in Supabase
-      const { error } = await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('id', id)
-      
-      if (error) throw error
-      
-      // Update local state
-      setNotifications(notifications.map(notification => 
-        notification.id === id ? { ...notification, is_read: true } : notification
-      ))
-    } catch (error: any) {
-      console.error('Error marking notification as read:', error.message)
     }
   }
 

@@ -429,17 +429,36 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
           {/* Left Section - Static Content with Animations */}
-          <div className="bg-muted/30 p-8 lg:p-12 flex flex-col justify-center border-r border-border relative overflow-hidden">
+          <div className="bg-muted/30 p-8 lg:p-12 flex flex-col border-r border-border relative overflow-hidden">
             <FallingItems />
             
+            {/* Brand Header - Aligned with "Enter your details" at the very top */}
+            <div className="mb-8 relative z-10">
+              {checkoutData?.brand ? (
+                <div className="flex items-center gap-3">
+                  <img 
+                    src={checkoutData.brand.logo_url} 
+                    alt={checkoutData.brand.name}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                  <div className="text-lg font-semibold text-foreground font-geist">
+                    {checkoutData.brand.name}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-lg text-muted-foreground font-geist">
+                  Complete your payment
+                </div>
+              )}
+            </div>
+            
+            {/* Main Content - Centered */}
+            <div className="flex-1 flex items-center justify-center">
             {checkoutLink.checkout_type === 'product' ? (
               // Product Checkout Left Section
               <div className="max-w-md mx-auto w-full relative z-10">
-                {/* Heading and Amount */}
-                <div className="mb-8">
-                  <div className="text-lg text-muted-foreground font-geist mb-3">
-                    Complete your payment
-                  </div>
+                {/* Amount and Product Info */}
+                <div className="mb-8 text-center">
                   <div className="text-3xl font-bold text-foreground font-geist mb-2">
                     {getCurrentAmount()} {currency?.code}
         </div>
@@ -469,9 +488,6 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
             ) : (
               // Simple Checkout Left Section
               <div className="max-w-md mx-auto w-full text-center relative z-10">
-                <div className="text-lg text-muted-foreground font-geist mb-4">
-                  Complete your payment
-                </div>
                 {checkoutLink.amount_type === 'fixed' ? (
                   <div>
                     <div className="text-4xl font-bold text-foreground font-geist mb-4">
@@ -494,9 +510,10 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     </div>
                   </div>
                 )}
-                </div>
-              )}
+              </div>
+            )}
             </div>
+          </div>
 
           {/* Right Section - Dynamic Forms */}
           <div className="p-8 lg:p-12 flex flex-col">

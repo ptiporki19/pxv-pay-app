@@ -1,18 +1,23 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Admin client with service role key to bypass RLS
-export function createAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    throw new Error('Missing Supabase environment variables for admin client')
+// This admin client is REQUIRED for any server-side operations that
+// need to bypass RLS, such as creating notifications for other users
+// or fetching user data with elevated privileges.
+// It should only be used in server-side code (e.g., server actions, API routes).
+export const createAdminClient = () => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Missing Supabase URL or Service Role Key for admin client.')
   }
 
-  return createClient(supabaseUrl, supabaseServiceKey, {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
+    {
     auth: {
+        // This is a service role client, so we don't need to persist sessions.
       autoRefreshToken: false,
-      persistSession: false
+        persistSession: false,
+      },
     }
-  })
+  )
 } 

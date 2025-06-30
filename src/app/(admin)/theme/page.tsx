@@ -1,193 +1,205 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { PlusCircle, Search, Edit, Trash2, MoreHorizontal, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { useNotificationActions } from '@/providers/notification-provider'
-import { Theme, themesApi } from '@/lib/supabase/client-api'
-import { Palette, Plus, Edit, Trash2, Eye } from 'lucide-react'
+import { Brand, brandsApi } from '@/lib/supabase/client-api'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
-export default function ThemeCustomizationPage() {
-  const [themes, setThemes] = useState<Theme[]>([])
+export default function BrandManagementPage() {
+  const [brands, setBrands] = useState<Brand[]>([])
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState<string>("all")
 
   // Use notification actions hook
   const { showSuccess, showError } = useNotificationActions()
 
   useEffect(() => {
-    loadThemes()
-  }, [])
+    loadBrands()
+  }, [searchQuery, statusFilter])
 
-  const loadThemes = async () => {
+  const loadBrands = async () => {
     try {
       setLoading(true)
-      const themesData = await themesApi.getAll()
-      setThemes(themesData)
+      const brandsData = await brandsApi.getAll()
+      
+      // Filter by search query and status if provided
+      let filteredData = brandsData
+      
+      if (searchQuery.trim()) {
+        filteredData = filteredData.filter(brand => 
+          brand.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      }
+
+      if (statusFilter !== "all") {
+        filteredData = filteredData.filter(brand => 
+          statusFilter === "active" ? brand.is_active : !brand.is_active
+        )
+      }
+
+      setBrands(filteredData)
     } catch (error) {
-      console.error('Error loading themes:', error)
-      showError('Error', 'Failed to load themes')
+      console.error('Error loading brands:', error)
+      showError('Error', 'Failed to load brands')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDelete = async (theme: Theme) => {
-    if (!confirm(`Are you sure you want to delete the theme "${theme.name}"?`)) {
+  const handleDelete = async (brand: Brand) => {
+    if (!brand.id || !confirm(`Are you sure you want to delete the brand "${brand.name}"?`)) {
       return
     }
 
     try {
-      await themesApi.delete(theme.id!)
-      setThemes(themes.filter(t => t.id !== theme.id))
-      showSuccess('Success', `Theme "${theme.name}" deleted successfully`)
+      await brandsApi.delete(brand.id)
+      setBrands(brands.filter(b => b.id !== brand.id))
+      showSuccess('Success', `Brand "${brand.name}" deleted successfully`)
     } catch (error: any) {
-      console.error('Error deleting theme:', error)
-      showError('Error', error.message || 'Failed to delete theme')
+      console.error('Error deleting brand:', error)
+      showError('Error', error.message || 'Failed to delete brand')
     }
   }
 
-  const handleSetActive = async (theme: Theme) => {
-    try {
-      const updatedTheme = await themesApi.setActive(theme.id!)
-      // Update themes list to reflect the active status change
-      setThemes(themes.map(t => ({
-        ...t,
-        is_active: t.id === theme.id
-      })))
-      showSuccess('Success', `Theme "${updatedTheme.name}" is now active`)
-    } catch (error: any) {
-      console.error('Error setting active theme:', error)
-      showError('Error', error.message || 'Failed to set active theme')
-    }
+  const formatCreatedDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString()
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Theme Customization</h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Customize your payment portal themes and branding
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight font-geist">Brand Management</h1>
+          <p className="text-muted-foreground">Manage brands for your checkout pages.</p>
+        </div>
+      </div>
+
+      <div className="flex items-center py-4 gap-4 justify-between">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search brands..."
+              className="w-full bg-background pl-8 h-11 font-geist"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px] h-11 font-geist">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="font-geist">All Status</SelectItem>
+              <SelectItem value="active" className="font-geist">Active</SelectItem>
+              <SelectItem value="inactive" className="font-geist">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <Link href="/theme/create">
-          <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Theme
-            </Button>
+          <Button className="h-11 font-geist">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Brand
+          </Button>
         </Link>
       </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded"></div>
-                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      <div className="border rounded-lg">
+        {/* Table Header */}
+        <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+          <div className="w-[250px]">Brand Name</div>
+          <div className="w-[120px]">Logo</div>
+          <div className="w-[120px]">Created</div>
+          <div className="w-[100px] text-center">Status</div>
+          <div className="w-[100px] text-right">Actions</div>
         </div>
-      ) : themes.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Palette className="h-12 w-12 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No Themes Yet</h3>
-            <p className="text-gray-500 dark:text-gray-400 text-center mb-4">
-              Create your first custom theme to personalize your payment portal
-            </p>
-            <Link href="/theme/create">
-              <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Your First Theme
-            </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {themes.map((theme) => (
-            <Card key={theme.id} className="relative">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    {theme.name}
-                    {theme.is_active && <Badge variant="default">Active</Badge>}
-                  </CardTitle>
-                </div>
-                <CardDescription>
-                  Font: {theme.font_family} • Radius: {theme.border_radius}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <div 
-                      className="w-6 h-6 rounded border" 
-                      style={{ backgroundColor: theme.primary_color }}
-                      title={`Primary: ${theme.primary_color}`}
-                    />
-                    <div 
-                      className="w-6 h-6 rounded border" 
-                      style={{ backgroundColor: theme.secondary_color }}
-                      title={`Secondary: ${theme.secondary_color}`}
-                    />
-                    <div 
-                      className="w-6 h-6 rounded border" 
-                      style={{ backgroundColor: theme.accent_color }}
-                      title={`Accent: ${theme.accent_color}`}
-                    />
-                    <div 
-                      className="w-6 h-6 rounded border" 
-                      style={{ backgroundColor: theme.success_color }}
-                      title={`Success: ${theme.success_color}`}
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    {!theme.is_active && (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleSetActive(theme)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Activate
-                      </Button>
-                    )}
-                    <Link href={`/theme/edit/${theme.id}`}>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    </Link>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleDelete(theme)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
-                </div>
+        
+        {/* Table Body */}
+        {loading ? (
+          <div className="px-4 py-12 text-center text-muted-foreground">
+            <div className="text-base font-medium font-geist">Loading brands...</div>
+          </div>
+        ) : brands.length > 0 ? (
+          brands.map((brand) => (
+            <div key={brand.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
+              <div className="w-[250px] flex items-center space-x-3">
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{brand.name}</span>
               </div>
-            </CardContent>
-          </Card>
-          ))}
-        </div>
-      )}
-    </div>
+              <div className="w-[120px]">
+                <img 
+                  src={brand.logo_url} 
+                  alt={brand.name}
+                  className="w-8 h-8 rounded-full object-cover border"
+                />
+              </div>
+              <div className="w-[120px]">
+                <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatCreatedDate(brand.created_at)}</span>
+              </div>
+              <div className="w-[100px] text-center">
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "font-geist",
+                    brand.is_active && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
+                    !brand.is_active && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
+                  )}
+                >
+                  {brand.is_active ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+              <div className="w-[100px] text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/theme/edit/${brand.id || ''}`} className="font-geist">
+                        <Edit className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleDelete(brand)}
+                      className="text-red-600 font-geist"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="px-4 py-12 text-center text-muted-foreground">
+            <div className="text-base font-medium font-geist">No brands found. Add one to get started.</div>
+          </div>
+        )}
+      </div>
+    </>
   )
 } 

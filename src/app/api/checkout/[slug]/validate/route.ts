@@ -52,6 +52,24 @@ export async function GET(
       }
     }
 
+    // Get brand information if brand_id exists
+    let brandData = null
+    if (checkoutLink.brand_id) {
+      const { data: brand, error: brandError } = await supabase
+        .from('brands')
+        .select('*')
+        .eq('id', checkoutLink.brand_id)
+        .eq('is_active', true)
+        .single()
+
+      if (!brandError && brand) {
+        brandData = brand
+        console.log('Brand data fetched:', brand.name)
+      } else if (brandError) {
+        console.error('Error fetching brand:', brandError)
+      }
+    }
+
     // Get merchant checkout settings if they exist
     const { data: merchantSettings } = await supabase
       .from('merchant_checkout_settings')
@@ -62,7 +80,8 @@ export async function GET(
     const result: CheckoutValidationResult = {
       valid: true,
       checkout_link: checkoutLink,
-      merchant_settings: merchantSettings || undefined
+      merchant_settings: merchantSettings || undefined,
+      brand: brandData || undefined
     }
 
     return NextResponse.json(result)

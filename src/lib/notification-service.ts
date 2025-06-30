@@ -16,6 +16,19 @@ export interface NotificationData {
   persistent?: boolean
 }
 
+export type NotificationType = 'new_ticket' | 'ticket_reply' | 'ticket_status_change'
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: NotificationType
+  title: string
+  message: string
+  data?: Record<string, any>
+  read: boolean
+  created_at: string
+}
+
 export class NotificationService {
   private static instance: NotificationService
   private supabase = createClient()

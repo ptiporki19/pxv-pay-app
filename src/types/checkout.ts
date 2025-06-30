@@ -104,6 +104,15 @@ export interface CheckoutValidationResult {
   error?: string
   checkout_link?: CheckoutLink
   merchant_settings?: MerchantCheckoutSettings
+  brand?: {
+    id: string
+    name: string
+    logo_url: string
+    merchant_id: string
+    is_active: boolean
+    created_at: string
+    updated_at: string
+  }
 }
 
 export interface Country {

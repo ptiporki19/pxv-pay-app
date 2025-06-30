@@ -39,13 +39,13 @@ import { createClient } from "@/lib/supabase/client"
 import { z } from "zod"
 import { productTemplatesApi } from "@/lib/supabase/product-templates-api"
 import type { ProductTemplate } from "@/types/content"
-import { paymentMethodsApi } from "@/lib/supabase/client-api"
-import { countriesApi } from "@/lib/supabase/client-api"
+import { paymentMethodsApi, countriesApi, brandsApi, Brand } from "@/lib/supabase/client-api"
 
 // Enhanced form validation schema
 const enhancedCheckoutLinkFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(100, "Title must be less than 100 characters"),
   link_name: z.string().min(1, "Link name is required").max(50, "Link name must be less than 50 characters"),
+  brand_id: z.string().min(1, "Please select a brand for your checkout page"),
   checkout_type: z.enum(["simple", "product"], {
     required_error: "Please select a checkout type",
   }),
@@ -144,14 +144,17 @@ export function EnhancedCreateCheckoutLinkForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [countries, setCountries] = useState<Country[]>([])
   const [loadingCountries, setLoadingCountries] = useState(true)
+  const [brands, setBrands] = useState<Brand[]>([])
+  const [loadingBrands, setLoadingBrands] = useState(true)
   const [productTemplates, setProductTemplates] = useState<ProductTemplate[]>([])
   const [showProductModal, setShowProductModal] = useState(false)
   const [customPriceValidated, setCustomPriceValidated] = useState(false)
   const router = useRouter()
   
-  // Load countries and products on component mount
+  // Load countries, brands, and products on component mount
   useEffect(() => {
     loadCountriesWithPaymentMethods()
+    loadBrands()
     loadProducts()
   }, [])
 
@@ -238,6 +241,23 @@ export function EnhancedCreateCheckoutLinkForm() {
       })
     }
   }
+
+  const loadBrands = async () => {
+    try {
+      setLoadingBrands(true)
+      const brandsData = await brandsApi.getAll()
+      setBrands(brandsData)
+    } catch (error) {
+      console.error('Error loading brands:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load brands. Please refresh the page.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingBrands(false)
+    }
+  }
   
   // Initialize the form with default values
   const form = useForm<EnhancedCheckoutLinkFormValues>({
@@ -245,6 +265,7 @@ export function EnhancedCreateCheckoutLinkForm() {
     defaultValues: {
       title: "",
       link_name: "",
+      brand_id: "",
       checkout_type: "simple",
       amount_type: "fixed",
       amount: 0,
@@ -451,6 +472,7 @@ export function EnhancedCreateCheckoutLinkForm() {
         slug: slug,
         title: values.title,
         link_name: values.link_name,
+        brand_id: values.brand_id,
         currency: selectedCountry.currency_code,
         status: values.status,
         active_country_codes: values.country_codes,
@@ -830,6 +852,56 @@ export function EnhancedCreateCheckoutLinkForm() {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={form.control}
+                      name="brand_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Brand Identity *</FormLabel>
+                          <Select 
+                            onValueChange={field.onChange} 
+                            value={field.value}
+                            disabled={loadingBrands}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={loadingBrands ? "Loading brands..." : "Select brand for checkout"} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {brands.map((brand) => (
+                                <SelectItem key={brand.id} value={brand.id!}>
+                                  <div className="flex items-center gap-2">
+                                    <img 
+                                      src={brand.logo_url} 
+                                      alt={brand.name}
+                                      className="w-5 h-5 rounded-full object-cover"
+                                    />
+                                    <span>{brand.name}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            This brand's logo and name will be displayed on the checkout page
+                          </FormDescription>
+                          {brands.length === 0 && !loadingBrands && (
+                            <div className="mt-2">
+                              <p className="text-sm text-amber-600">
+                                No brands available.{' '}
+                                <Link href="/theme/create" className="underline hover:text-amber-700">
+                                  Create your first brand
+                                </Link>
+                                {' '}to get started.
+                              </p>
+                            </div>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </CardContent>
                 </Card>
 
@@ -1130,7 +1202,7 @@ export function EnhancedCreateCheckoutLinkForm() {
                       Cancel
                     </Button>
                   </Link>
-                  <Button type="submit" disabled={isLoading || countries.length === 0}>
+                  <Button type="submit" disabled={isLoading || countries.length === 0 || brands.length === 0}>
                     {isLoading ? "Creating..." : "Create Checkout Link"}
                   </Button>
                 </div>

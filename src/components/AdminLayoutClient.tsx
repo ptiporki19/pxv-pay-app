@@ -2,13 +2,13 @@
 
 import Link from 'next/link'
 import { 
-  UserIcon, 
-  Cog6ToothIcon, 
-  XMarkIcon, 
-  ChevronLeftIcon, 
-  ChevronRightIcon, 
-  Bars3Icon 
-} from '@heroicons/react/24/solid'
+  User as UserIcon, 
+  Settings as Cog6ToothIcon, 
+  X as XMarkIcon, 
+  ChevronLeft as ChevronLeftIcon, 
+  ChevronRight as ChevronRightIcon, 
+  Menu as Bars3Icon 
+} from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -53,7 +53,7 @@ const merchantNavItems = [
   { label: 'Dashboard', path: '/dashboard', iconName: 'Home' },
   { label: 'Checkout Links', path: '/checkout-links', iconName: 'Link2' },
   { label: 'Payment Methods', path: '/payment-methods', iconName: 'CreditCard' },
-  { label: 'Theme Customization', path: '/theme', iconName: 'Palette' },
+  { label: 'Brand Management', path: '/theme', iconName: 'Building2' },
   { label: 'Product Management', path: '/content', iconName: 'Package' },
   { label: 'Payment Verification', path: '/verification', iconName: 'Shield' },
 ]
@@ -61,6 +61,7 @@ const merchantNavItems = [
 // Super admin only items
 const superAdminItems = [
   { label: 'Super Admin Dashboard', path: '/super-admin', iconName: 'Crown' },
+  { label: 'Support Tickets', path: '/super-admin/support-tickets', iconName: 'MessageCircle' },
   { label: 'Users', path: '/users', iconName: 'Users' },
   { label: 'Blog Management', path: '/blog-management', iconName: 'FileText' },
   { label: 'Audit Logs', path: '/audit-logs', iconName: 'FileText' },
@@ -106,8 +107,6 @@ export function AdminLayoutClient({
             </Link>
             {!sidebarCollapsed && (
               <Button
-                variant="ghost"
-                size="icon"
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                 className="h-8 w-8 rounded-lg hover:bg-violet-500/50 text-white hover:text-white transition-all duration-200 hover:scale-105"
               >
@@ -176,8 +175,6 @@ export function AdminLayoutClient({
         {/* Enhanced Collapse/Expand Button Extension */}
         {sidebarCollapsed && (
           <Button
-            variant="ghost"
-            size="icon"
             onClick={() => setSidebarCollapsed(false)}
             className="absolute -right-3 top-10 h-7 w-7 rounded-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white shadow-xl border-2 border-white dark:border-gray-800 z-40 transition-all duration-200 hover:scale-110 animate-pulse hover:animate-none"
           >
@@ -194,7 +191,7 @@ export function AdminLayoutClient({
             <Link href={isSuperAdmin ? "/super-admin" : "/dashboard"} className="flex items-center">
               <DashboardBrand />
             </Link>
-            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} className="text-white hover:bg-violet-500">
+            <Button onClick={() => setIsMobileMenuOpen(false)} className="text-white hover:bg-violet-500">
               <XMarkIcon className="h-5 w-5" />
               <span className="sr-only">Close sidebar</span>
             </Button>
@@ -224,8 +221,6 @@ export function AdminLayoutClient({
           <div className="flex items-center gap-3 bg-gradient-to-r from-violet-600 to-violet-700 dark:from-violet-700 dark:to-violet-800 rounded-2xl shadow-2xl px-4 py-3 border border-violet-500/20">
             {/* Mobile menu button */}
             <Button
-              variant="ghost"
-              size="icon"
               className="md:hidden h-8 w-8 rounded-lg hover:bg-violet-500/50 text-white transition-all duration-200 hover:scale-105"
               onClick={() => setIsMobileMenuOpen(true)}
             >
@@ -238,7 +233,7 @@ export function AdminLayoutClient({
             {/* Enhanced User Profile Section */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 hover:bg-violet-500/50 text-white p-2 rounded-xl transition-all duration-200 hover:scale-105">
+                <Button className="flex items-center gap-2 hover:bg-violet-500/50 text-white p-2 rounded-xl transition-all duration-200 hover:scale-105">
                   <Avatar className="h-7 w-7 border-2 border-violet-300/60 hover:border-violet-200 transition-all duration-200">
                     <AvatarImage src="" alt={userName} />
                     <AvatarFallback className="text-xs bg-violet-500 text-white font-bold font-geist">

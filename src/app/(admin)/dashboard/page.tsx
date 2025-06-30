@@ -3,10 +3,10 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from '@/components/ui/button'
 import { 
-  ArrowTopRightOnSquareIcon as ExternalLink,
-  InformationCircleIcon as InfoIcon,
-  PlusIcon as Plus
-} from '@heroicons/react/24/solid'
+  ExternalLink,
+  Info as InfoIcon,
+  Plus
+} from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/server'
@@ -16,6 +16,7 @@ import {
   TotalPaymentsWidget,
   ProductsWidget
 } from '@/components/dashboard/merchant-stats-widgets'
+import { FloatingChatWidgetWrapper } from '@/components/FloatingChatWidgetWrapper'
 
 
 export const metadata: Metadata = {
@@ -111,7 +112,7 @@ export default async function DashboardPage() {
       <div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">Performance Metrics</h2>
-          <Button size="lg" className="gap-2 font-bold violet-gradient hover:violet-gradient-hover font-geist" asChild>
+          <Button className="gap-2 font-bold violet-gradient hover:violet-gradient-hover font-geist text-lg px-8 py-3" asChild>
           <Link href="/checkout-links/create">
             <Plus className="h-5 w-5" />
             Create Checkout Link
@@ -135,7 +136,7 @@ export default async function DashboardPage() {
               Monitor all payment transactions and their status
             </p>
           </div>
-          <Button variant="outline" size="default" className="gap-2 font-bold font-geist" asChild>
+          <Button className="gap-2 font-bold font-geist border border-input bg-background hover:bg-accent hover:text-accent-foreground" asChild>
             <Link href="/transactions">
               <ExternalLink className="h-4 w-4" />
               View All Transactions
@@ -183,7 +184,7 @@ export default async function DashboardPage() {
                     <div className="w-[140px] text-right">
                         <div className="flex justify-end gap-2">
                           {/* Transaction Details Link */}
-                          <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                          <Button className="h-8 w-8 hover:bg-accent hover:text-accent-foreground" asChild>
                             <Link href={`/transactions/${payment.fullId}`}>
                               <InfoIcon className="h-4 w-4" />
                               <span className="sr-only">View Transaction Details</span>
@@ -211,7 +212,7 @@ export default async function DashboardPage() {
                       <div className="flex flex-col items-center gap-2">
                     <p className="text-base font-bold text-muted-foreground font-geist">No transactions found</p>
                     <p className="text-sm text-muted-foreground font-geist">Start by creating your first checkout link</p>
-                    <Button size="sm" className="mt-2 font-bold font-geist" asChild>
+                    <Button className="mt-2 font-bold font-geist" asChild>
                           <Link href="/checkout-links/create">Create Checkout Link</Link>
                         </Button>
                       </div>
@@ -221,6 +222,11 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+      
+      {/* Floating Chat Widget - Only for merchants (not super admins) */}
+      {userData?.role !== 'super_admin' && (
+        <FloatingChatWidgetWrapper />
+      )}
     </div>
   )
 } 
