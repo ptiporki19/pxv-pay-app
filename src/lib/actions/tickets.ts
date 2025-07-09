@@ -193,6 +193,9 @@ export async function replyToTicket(formData: FormData) {
       throw new Error('You must be logged in to reply to tickets')
     }
 
+    // Import email service for support notifications
+    const { emailService } = await import('@/lib/email-service')
+
     // Extract data from FormData
     const ticket_id = formData.get('ticket_id') as string
     const message = formData.get('message') as string
@@ -321,6 +324,29 @@ export async function replyToTicket(formData: FormData) {
         console.error('⚠️ Notification sending failed (reply still created):', notificationError);
         // Don't fail the reply creation if notifications fail
       }
+
+      // 📧 Send email notification to user about admin reply
+      try {
+        // Get user email from auth
+        const { data: userData } = await adminSupabase.auth.admin.getUserById(ticket.user_id)
+        if (userData.user?.email) {
+          const userName = userData.user.email.split('@')[0] || 'User'
+          await emailService.sendSupportReplyNotificationEmail(
+            userData.user.email,
+            userName,
+            {
+              ticketId: ticket_id,
+              subject: ticket.subject,
+              replyPreview: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+              isAdminReply: true
+            }
+          )
+          console.log('✅ Support reply email sent to user')
+        }
+      } catch (emailError) {
+        console.error('⚠️ Failed to send reply email to user:', emailError)
+        // Don't fail reply creation if email fails
+      }
     } else {
       // If it's a user reply, notify super admins
       console.log('🔔 Sending user reply notifications to super admins...');
@@ -391,6 +417,9 @@ export async function createTicket(formData: FormData) {
     // Use the admin client for database operations and notifications
     const adminSupabase = await createAdminClient()
     
+    // Import email service for support notifications
+    const { emailService } = await import('@/lib/email-service')
+    
     // Use the auth user ID directly since we removed foreign key constraints
     const actualUserId = user.id
     
@@ -414,8 +443,27 @@ export async function createTicket(formData: FormData) {
       throw new Error('Failed to create ticket')
     }
 
-    // 🔔 Send real-time notifications (same approach as payment proof)
+    // 🔔 Send real-time notifications and emails
     console.log('🔔 Sending new support ticket notifications...');
+    
+    // 📧 Send email confirmation to user
+    try {
+      const userName = user.email?.split('@')[0] || 'User'
+      await emailService.sendSupportTicketConfirmationEmail(
+        user.email!,
+        userName,
+        {
+          ticketId: ticket.id,
+          subject: ticket.subject,
+          category: category_id, // We'll improve this to get actual category name
+          priority: ticket.priority
+        }
+      )
+      console.log('✅ Support ticket confirmation email sent to user')
+    } catch (emailError) {
+      console.error('⚠️ Failed to send confirmation email to user:', emailError)
+      // Don't fail ticket creation if email fails
+    }
     
     try {
       // Get super admins and send notifications to them

@@ -38,13 +38,13 @@ const Hero = () => {
             <div className="space-y-8">
               {/* Massive, impactful heading */}
               <h1 className="font-heading text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tight text-black dark:text-white leading-[0.85]">
-                <span className="block">Global Payments,</span>
-                <span className="block text-violet-600 dark:text-violet-400">Local Methods</span>
+                <span className="block">Beyond</span>
+                <span className="block text-violet-600 dark:text-violet-400">Boundaries</span>
               </h1>
 
               {/* Larger, more readable description */}
               <p className="text-xl md:text-2xl lg:text-3xl text-gray-600 dark:text-gray-400 leading-relaxed font-light max-w-2xl">
-                Empower your business with PXV Pay's customizable payment platform. Configure your own payment methods and accept payments worldwide with transparent pricing.
+                Empower your business with complete control over payments. Create, customize, and collect—exactly how you want it.
               </p>
             </div>
 

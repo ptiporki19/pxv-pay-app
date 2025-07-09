@@ -279,12 +279,12 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
     try {
       // Create form data for file upload
       const formData = new FormData()
-      formData.append('proof_file', proofFile)
-      formData.append('checkout_slug', slug)
+      formData.append('proof', proofFile)
+      formData.append('checkout_link_id', checkoutData.checkout_link.id)
       formData.append('customer_name', customerName)
       formData.append('customer_email', customerEmail)
-      formData.append('selected_country', selectedCountry)
-      formData.append('selected_payment_method_id', selectedPaymentMethod?.id || '')
+      formData.append('country', selectedCountry)
+      formData.append('payment_method_id', selectedPaymentMethod?.id || '')
       
       // Determine the amount to send
       let finalAmount: string

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
+import { emailService } from '@/lib/email-service'
 
 export async function POST(
   request: NextRequest,
@@ -239,7 +240,7 @@ export async function POST(
 
     console.log('✅ Payment created successfully:', paymentId);
 
-    // 🔔 Send real-time notifications
+    // 🔔 Send real-time notifications and email notifications
     console.log('🔔 Sending real-time notifications...');
     
     try {
@@ -263,7 +264,7 @@ export async function POST(
       // 2. Get super admins and send notifications to them too
       const { data: superAdmins } = await serviceSupabase
         .from('users')
-        .select('id')
+        .select('id, email')
         .eq('role', 'super_admin');
 
       if (superAdmins && superAdmins.length > 0) {
@@ -287,6 +288,82 @@ export async function POST(
       }
 
       console.log('✅ Real-time notifications sent successfully');
+
+      // 📧 Send email notifications
+      console.log('📧 Sending email notifications...');
+      
+      // 1. Send confirmation email to customer
+      const customerEmailSent = await emailService.sendPaymentProofSubmittedEmail(
+        customerEmail,
+        customerName,
+        {
+          amount: amount,
+          currency: finalCurrency,
+          paymentMethod: paymentMethod.name
+        }
+      );
+
+      if (customerEmailSent) {
+        console.log('✅ Customer confirmation email sent');
+      } else {
+        console.warn('⚠️ Customer confirmation email failed');
+      }
+
+      // 2. Get merchant details and send notification email
+      const { data: merchantData } = await serviceSupabase
+        .from('users')
+        .select('email')
+        .eq('id', checkoutLink.merchant_id)
+        .single();
+
+      if (merchantData?.email) {
+        const merchantEmailSent = await emailService.sendNewPaymentNotificationEmail(
+          merchantData.email,
+          'Merchant', // We can improve this later by storing merchant names
+          {
+            id: paymentId,
+            customerName: customerName,
+            customerEmail: customerEmail,
+            amount: amount,
+            currency: finalCurrency,
+            paymentMethod: paymentMethod.name,
+            proofUrl: urlData.publicUrl
+          }
+        );
+
+        if (merchantEmailSent) {
+          console.log('✅ Merchant notification email sent');
+        } else {
+          console.warn('⚠️ Merchant notification email failed');
+        }
+      }
+
+      // 3. Send admin notification emails
+      if (superAdmins && superAdmins.length > 0) {
+        for (const admin of superAdmins) {
+          if (admin.email) {
+            const adminEmailSent = await emailService.sendAdminPaymentNotificationEmail(
+              admin.email,
+              {
+                amount: amount.toString(),
+                currency: finalCurrency,
+                paymentMethod: paymentMethod.name,
+                customerName: customerName,
+                merchantName: merchantData?.email?.split('@')[0] || 'Unknown Merchant'
+              }
+            );
+
+            if (adminEmailSent) {
+              console.log(`✅ Admin notification email sent to ${admin.email}`);
+            } else {
+              console.warn(`⚠️ Admin notification email failed for ${admin.email}`);
+            }
+          }
+        }
+      }
+
+      console.log('✅ Email notifications processing completed');
+
     } catch (notificationError) {
       console.error('⚠️ Notification sending failed (payment still created):', notificationError);
       // Don't fail the payment creation if notifications fail

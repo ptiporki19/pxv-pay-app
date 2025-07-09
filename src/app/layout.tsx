@@ -28,9 +28,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "PXV Pay | Global Payments, Local Methods",
-  description: "Empower your business with PXV Pay's modern, secure payment platform. Collect payments globally using local payment methods.",
-  keywords: "payment processing, global payments, local payment methods, fintech, secure payments",
+  title: "PXV Pay | Beyond Boundaries",
+  description: "Empower your business with PXV Pay's customizable payment platform. Accept payments worldwide with transparent pricing and complete control.",
+  keywords: "payment platform, business payments, fintech, secure payments, payment links",
 };
 
 export const viewport: Viewport = {

@@ -2,6 +2,7 @@
 
 import { createClient as createServerContextClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { emailService } from '@/lib/email-service'
 
 export async function signUpAction(formData: {
   email: string
@@ -50,6 +51,44 @@ export async function signUpAction(formData: {
           console.warn('Profile creation failed, but auth user exists:', profileError.message)
         } else {
           console.log('User profile created successfully')
+          
+          // 📧 Send welcome email to new user
+          try {
+            await emailService.sendWelcomeEmail(
+              formData.email,
+              formData.fullName || formData.email.split('@')[0]
+            )
+            console.log('✅ Welcome email sent to new user')
+          } catch (emailError) {
+            console.warn('⚠️ Welcome email failed:', emailError)
+          }
+
+          // 📧 Send new user notification to super admins
+          try {
+            const { data: superAdmins } = await supabaseAdmin
+              .from('users')
+              .select('email')
+              .eq('role', 'super_admin')
+
+            if (superAdmins && superAdmins.length > 0) {
+              for (const admin of superAdmins) {
+                if (admin.email) {
+                  await emailService.sendNewUserSignupNotificationEmail(
+                    admin.email,
+                    {
+                      email: formData.email,
+                      name: formData.fullName,
+                      role: 'registered_user',
+                      signupDate: new Date().toISOString()
+                    }
+                  )
+                }
+              }
+              console.log('✅ Admin notification emails sent for new user signup')
+            }
+          } catch (adminEmailError) {
+            console.warn('⚠️ Admin notification emails failed:', adminEmailError)
+          }
         }
       } catch (profileError) {
         console.warn('Profile creation error:', profileError)
