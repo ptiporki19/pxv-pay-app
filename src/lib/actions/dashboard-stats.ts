@@ -302,3 +302,56 @@ export async function getProductsCount() {
     return { success: false, error: 'Server error', count: 0 }
   }
 } 
+
+export async function getCheckoutLinksCount() {
+  try {
+    console.log('🔄 Server: Fetching checkout links count...')
+    
+    const supabase = await createClient()
+    
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return { success: false, error: 'Not authenticated', count: 0 }
+    }
+
+    // Get user profile to check role and ID
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('role, id')
+      .eq('email', session.user.email)
+      .single()
+
+    if (!userProfile) {
+      return { success: false, error: 'User not found', count: 0 }
+    }
+
+    const isSuperAdminEmail = session.user.email === 'admin@pxvpay.com' ||
+                              session.user.email === 'dev-admin@pxvpay.com' ||
+                              session.user.email === 'superadmin@pxvpay.com'
+    const isSuperAdmin = userProfile.role === 'super_admin' || isSuperAdminEmail
+
+    let query = supabase
+      .from('checkout_links')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'active')
+
+    // Super admins see all checkout links, merchants see only their own
+    if (!isSuperAdmin) {
+      query = query.eq('merchant_id', userProfile.id)
+    }
+
+    const { count, error } = await query
+
+    if (error) {
+      console.error('❌ Server: Checkout links query failed:', error)
+      return { success: false, error: error.message, count: 0 }
+    }
+
+    console.log('✅ Server: Checkout links count:', count, 'for user:', session.user.email)
+    return { success: true, error: null, count: count || 0 }
+
+  } catch (error) {
+    console.error('💥 Server: Exception in getCheckoutLinksCount:', error)
+    return { success: false, error: 'Server error', count: 0 }
+  }
+} 

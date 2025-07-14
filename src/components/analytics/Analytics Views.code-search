@@ -1,0 +1,9 @@
+# Query: Analytics Views
+# ContextLines: 1
+
+1 result - 1 file
+
+src/components/analytics/analytics-dashboard.tsx:
+  373              <CardHeader className="pb-3">
+  374:               <CardTitle className="text-lg font-bold tracking-tight text-gray-900 dark:text-white font-geist">Plateform Analtics</CardTitle>
+  375              </CardHeader>

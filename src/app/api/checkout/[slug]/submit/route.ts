@@ -297,7 +297,7 @@ export async function POST(
         customerEmail,
         customerName,
         {
-          amount: amount,
+          amount: amount.toString(),
           currency: finalCurrency,
           paymentMethod: paymentMethod.name
         }
@@ -324,7 +324,7 @@ export async function POST(
             id: paymentId,
             customerName: customerName,
             customerEmail: customerEmail,
-            amount: amount,
+            amount: amount.toString(),
             currency: finalCurrency,
             paymentMethod: paymentMethod.name,
             proofUrl: urlData.publicUrl
