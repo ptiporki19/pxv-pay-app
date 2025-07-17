@@ -24,22 +24,21 @@ import { NotificationsPopover } from '@/components/NotificationsPopover'
 import { ThemeToggleButton } from '@/components/theme-toggle-button'
 import { useState } from 'react'
 
-// Enhanced violet-themed logo component with better typography
+// Company logo component with actual SVG logo
 const DashboardBrand = ({ collapsed = false }: { collapsed?: boolean }) => (
-  <div className="flex items-center space-x-3 group">
+  <div className="flex items-center space-x-2 group">
     <div className="relative">
-      <div className="w-11 h-11 bg-gradient-to-br from-violet-500 to-violet-700 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:from-violet-400 group-hover:to-violet-600 shadow-lg hover:shadow-xl transform group-hover:scale-105">
-        <span className="text-white font-black text-xl tracking-tight font-geist">P</span>
-      </div>
+      <img 
+        src="/logo.svg" 
+        alt="Company Logo" 
+        className="w-30 h-30 transition-all duration-300 group-hover:scale-105"
+      />
     </div>
     {!collapsed && (
       <div className="transition-all duration-300">
-        <span className="text-xl font-black text-white tracking-tight group-hover:text-violet-100 transition-colors duration-300 font-geist">
-          PXV Pay
+        <span className="text-3xl font-black text-white tracking-tight group-hover:text-violet-100 transition-colors duration-300 font-fascinate">
+          PXV
         </span>
-        <div className="text-xs text-violet-200 font-bold opacity-75 group-hover:opacity-100 transition-opacity duration-300 font-geist tracking-wide">
-          Payment Platform
-        </div>
       </div>
     )}
   </div>
@@ -56,6 +55,11 @@ const merchantNavItems = [
   { label: 'Brand Management', path: '/theme', iconName: 'Building2' },
   { label: 'Product Management', path: '/content', iconName: 'Package' },
   { label: 'Payment Verification', path: '/verification', iconName: 'Shield' },
+]
+
+// Hidden navigation items (accessible via URL but not shown in nav)
+const hiddenNavItems = [
+  { label: 'Analytics', path: '/old-dashboard', iconName: 'Activity' },
 ]
 
 // Super admin only items
@@ -106,12 +110,12 @@ export function AdminLayoutClient({
               <DashboardBrand collapsed={sidebarCollapsed} />
             </Link>
             {!sidebarCollapsed && (
-              <Button
+              <div
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="h-8 w-8 rounded-lg hover:bg-violet-500/50 text-white hover:text-white transition-all duration-200 hover:scale-105"
+                className="h-10 w-10 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105"
               >
-                <ChevronLeftIcon className="h-4 w-4" />
-              </Button>
+                <Bars3Icon className="h-5 w-5 text-white" />
+              </div>
             )}
           </div>
 
@@ -123,7 +127,7 @@ export function AdminLayoutClient({
                 href={item.path}
                 iconName={item.iconName}
                 collapsed={sidebarCollapsed}
-                className="font-bold text-white hover:text-white text-sm tracking-wide font-geist"
+                className="font-bold text-white hover:text-white text-sm tracking-wide font-roboto"
               >
                 {!sidebarCollapsed && item.label}
               </ActiveNavLink>
@@ -149,10 +153,10 @@ export function AdminLayoutClient({
             {/* Enhanced Company Footer */}
             {!sidebarCollapsed && (
               <div className="px-4 py-4">
-                <p className="text-xs text-violet-100/90 dark:text-violet-200/90 text-center font-bold tracking-wide font-geist">
+                <p className="text-xs text-violet-100/90 dark:text-violet-200/90 text-center font-bold tracking-wide font-roboto">
                   © All rights reserved to
                 </p>
-                <p className="text-xs text-white font-black text-center tracking-wider mt-1 font-geist">
+                <p className="text-xs text-white font-black text-center tracking-wider mt-1 font-roboto">
                   Primex Vanguard
                 </p>
               </div>
@@ -163,7 +167,7 @@ export function AdminLayoutClient({
               <div className="p-4 flex justify-center">
                 <Avatar className="h-10 w-10 border-2 border-violet-300/60 hover:border-violet-200 transition-all duration-200 hover:scale-105">
                   <AvatarImage src="" alt={userName} />
-                  <AvatarFallback className="text-sm bg-violet-500 text-white font-bold font-geist">
+                  <AvatarFallback className="text-sm bg-violet-500 text-white font-bold font-roboto">
                     {userName.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -172,16 +176,17 @@ export function AdminLayoutClient({
           </div>
         </div>
 
-        {/* Enhanced Collapse/Expand Button Extension */}
-        {sidebarCollapsed && (
-          <Button
-            onClick={() => setSidebarCollapsed(false)}
-            className="absolute -right-3 top-10 h-7 w-7 rounded-full bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white shadow-xl border-2 border-white dark:border-gray-800 z-40 transition-all duration-200 hover:scale-110 animate-pulse hover:animate-none"
-          >
-            <ChevronRightIcon className="h-3.5 w-3.5" />
-          </Button>
-        )}
       </aside>
+
+      {/* Sidebar Toggle Button - Outside sidebar */}
+      {sidebarCollapsed && (
+        <div 
+          onClick={() => setSidebarCollapsed(false)}
+          className="fixed left-28 top-8 h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center cursor-pointer transition-all duration-200 hover:from-violet-400 hover:to-violet-600 shadow-lg hover:shadow-xl transform hover:scale-105 z-40"
+        >
+          <Bars3Icon className="h-6 w-6 text-white" />
+        </div>
+      )}
 
       {/* Enhanced Mobile sidebar overlay */}
       <div className={`md:hidden fixed inset-0 z-40 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
@@ -203,7 +208,7 @@ export function AdminLayoutClient({
                 href={item.path}
                 iconName={item.iconName}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="font-bold text-white hover:text-white text-sm tracking-wide font-geist"
+                className="font-bold text-white hover:text-white text-sm tracking-wide font-roboto"
               >
                 {item.label}
               </ActiveNavLink>
@@ -216,66 +221,82 @@ export function AdminLayoutClient({
       <div className={`flex-1 transition-all duration-300 ease-in-out ${
         sidebarCollapsed ? 'md:ml-28' : 'md:ml-72'
       }`}>
-        {/* Enhanced Fixed Header */}
-        <header className="fixed top-4 right-4 z-20">
-          <div className="flex items-center gap-3 bg-gradient-to-r from-violet-600 to-violet-700 dark:from-violet-700 dark:to-violet-800 rounded-2xl shadow-2xl px-4 py-3 border border-violet-500/20">
+        {/* Simple Scrollable Header */}
+        <header className="relative top-0 z-20 transition-all duration-300 ease-in-out">
+          <div className="flex items-center justify-between px-6 py-4">
             {/* Mobile menu button */}
             <Button
-              className="md:hidden h-8 w-8 rounded-lg hover:bg-violet-500/50 text-white transition-all duration-200 hover:scale-105"
+              variant="ghost"
+              size="icon"
+              className="md:hidden h-8 w-8 rounded-lg hover:bg-violet-100 dark:hover:bg-violet-900/30 text-violet-600 dark:text-violet-600 transition-all duration-200"
               onClick={() => setIsMobileMenuOpen(true)}
             >
               <Bars3Icon className="h-5 w-5" />
             </Button>
 
+            {/* Desktop spacer */}
+            <div className="hidden md:block flex-1"></div>
+
+            {/* Header Actions */}
+            <div className="flex items-center gap-3">
+              <div className="[&_button]:text-violet-600 [&_button]:dark:text-violet-600 [&_button:hover]:bg-violet-100 [&_button:hover]:dark:bg-violet-900/30">
             <NotificationsPopover />
+              </div>
+              <div className="[&_button]:text-violet-600 [&_button]:dark:text-violet-600 [&_button:hover]:bg-violet-100 [&_button:hover]:dark:bg-violet-900/30">
             <ThemeToggleButton />
+              </div>
             
-            {/* Enhanced User Profile Section */}
+              {/* User Profile Section */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="flex items-center gap-2 hover:bg-violet-500/50 text-white p-2 rounded-xl transition-all duration-200 hover:scale-105">
-                  <Avatar className="h-7 w-7 border-2 border-violet-300/60 hover:border-violet-200 transition-all duration-200">
+                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-violet-100 dark:hover:bg-violet-900/30 p-2 rounded-xl transition-all duration-200">
+                    <Avatar className="h-7 w-7 border border-violet-200 dark:border-violet-700">
                     <AvatarImage src="" alt={userName} />
-                    <AvatarFallback className="text-xs bg-violet-500 text-white font-bold font-geist">
+                      <AvatarFallback className="text-xs bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 font-bold font-roboto">
                       {userName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-bold text-white hidden sm:block tracking-wide font-geist">{userName}</span>
+                    <span className="text-sm font-bold text-violet-600 dark:text-violet-600 hidden sm:block tracking-wide font-roboto">{userName}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <div className="flex items-center justify-start gap-2 p-2">
                   <Avatar className="h-9 w-9 border border-violet-200 dark:border-violet-700">
                     <AvatarImage src="" alt={userName} />
-                    <AvatarFallback className="text-sm bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 font-bold font-geist">
+                      <AvatarFallback className="text-sm bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-300 font-bold font-roboto">
                       {userName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-bold leading-none font-geist">{userName}</p>
-                    <p className="text-xs leading-none text-gray-500 dark:text-gray-400 font-geist">{userEmail}</p>
+                      <p className="text-sm font-bold leading-none font-roboto">{userName}</p>
+                      <p className="text-xs leading-none text-gray-500 dark:text-gray-400 font-roboto">{userEmail}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Link href="/profile" className="flex w-full items-center font-bold font-geist">
+                    <Link href="/profile" className="flex w-full items-center font-bold font-roboto">
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Link href="/settings" className="flex w-full items-center font-bold font-geist">
+                    <Link href="/settings" className="flex w-full items-center font-bold font-roboto">
                     <Cog6ToothIcon className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <LogoutButton className="flex w-full items-center font-bold font-roboto text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300" />
+                  </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           </div>
         </header>
 
-        {/* Fixed Main content - Single scroll */}
-        <main className="min-h-screen pt-24 pb-8 px-8">
+        {/* Main content without top padding since header scrolls */}
+        <main className="min-h-screen pb-8 px-8">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

@@ -66,7 +66,7 @@ function AnalyticsWidget({ title, icon, description, fetchFunction, href, format
 
   return (
     <Link href={href}>
-      <Card className={`violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50 h-full ${href.includes('?view=') ? 'cursor-pointer' : ''}`}>
+      <Card className={`transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50 h-full ${href.includes('?view=') ? 'cursor-pointer' : ''}`}>
         <CardContent className="p-6 h-full flex flex-col justify-between">
           <div className="flex items-center justify-between">
             {/* Icon Section */}
@@ -77,15 +77,15 @@ function AnalyticsWidget({ title, icon, description, fetchFunction, href, format
             </div>
             {/* Value Section */}
             <div className="flex-1 min-w-0 text-right">
-              <div className={`font-black tracking-tight text-gray-900 dark:text-white font-geist mb-2 ${valueClassName || 'text-3xl lg:text-4xl'}`}>
+              <div className={`font-black tracking-tight text-gray-900 dark:text-white font-roboto mb-2 ${valueClassName || 'text-3xl lg:text-4xl'}`}>
                 {loading ? '...' : (formatValue ? formatValue(value) : value)}
               </div>
             </div>
           </div>
           {/* Content Section */}
           <div>
-            <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white font-geist mb-1">{title}</h3>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 font-geist">
+            <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white font-roboto mb-1">{title}</h3>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 font-roboto">
               {description}
             </p>
           </div>

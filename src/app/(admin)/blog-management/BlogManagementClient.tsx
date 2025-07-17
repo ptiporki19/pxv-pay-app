@@ -182,7 +182,7 @@ export default function BlogManagementClient({
         <div className="rounded-md border">
           <div className="border rounded-lg">
             {/* Table Header */}
-            <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+            <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
               <div className="w-[200px]">Title</div>
               <div className="w-[100px]">Status</div>
               <div className="w-[120px]">Author</div>
@@ -195,13 +195,13 @@ export default function BlogManagementClient({
               {posts.map((post) => (
               <div key={post.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
                 <div className="w-[200px]">
-                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100 font-geist">
+                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100 font-roboto">
                     {post.title}
                   </div>
-                  <div className="text-xs text-muted-foreground font-geist">
+                  <div className="text-xs text-muted-foreground font-roboto">
                     {post.slug}
                       </div>
-                  <div className="text-xs text-muted-foreground mt-1 font-geist">
+                  <div className="text-xs text-muted-foreground mt-1 font-roboto">
                     {post.content && post.content.length > 100 
                       ? post.content.substring(0, 100) + '...' 
                       : post.content || 'No content'
@@ -211,23 +211,23 @@ export default function BlogManagementClient({
                 <div className="w-[100px]">
                     <Badge 
                     variant={post.published ? 'default' : 'secondary'}
-                    className="font-geist"
+                    className="font-roboto"
                     >
                       {post.published ? 'Published' : 'Draft'}
                     </Badge>
                 </div>
                 <div className="w-[120px]">
-                  <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                  <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                         {authors[post.author_id]?.email?.split('@')[0] || 'Unknown'}
                   </div>
                 </div>
                 <div className="w-[100px]">
-                  <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                  <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                     {new Date(post.created_at).toLocaleDateString()}
                       </span>
                     </div>
                 <div className="w-[100px]">
-                  <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                  <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                     {new Date(post.updated_at).toLocaleDateString()}
                   </span>
                     </div>
@@ -241,7 +241,7 @@ export default function BlogManagementClient({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
-                        <Link href={`/blog-management/${post.id}/edit`} className="font-geist">
+                        <Link href={`/blog-management/${post.id}/edit`} className="font-roboto">
                             Edit
                           </Link>
                         </DropdownMenuItem>
@@ -250,20 +250,20 @@ export default function BlogManagementClient({
                           href={`/blog/${post.slug}`} 
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-geist"
+                          className="font-roboto"
                         >
                             View
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => togglePublished(post)}
-                        className="text-red-600 font-geist"
+                        className="text-red-600 font-roboto"
                         >
                           {post.published ? 'Unpublish' : 'Publish'}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => handleDelete(post)}
-                        className="text-red-600 font-geist"
+                        className="text-red-600 font-roboto"
                         >
                         Delete
                         </DropdownMenuItem>

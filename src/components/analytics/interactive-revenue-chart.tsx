@@ -150,10 +150,10 @@ export function InteractiveRevenueChart() {
     <Card className="h-[500px]">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
-          <CardTitle className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">
+          <CardTitle className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">
             Total Amount Processed
           </CardTitle>
-          <CardDescription className="text-base font-medium text-gray-600 dark:text-gray-300 font-geist">
+          <CardDescription className="text-base font-medium text-gray-600 dark:text-gray-300 font-roboto">
             Daily processing amounts over the selected time period
           </CardDescription>
         </div>

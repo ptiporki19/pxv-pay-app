@@ -19,7 +19,7 @@ export function ThemeToggleButton() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" disabled className="text-white hover:bg-violet-500 hover:text-white transition-all duration-200 hover:scale-105">
+      <Button variant="ghost" size="icon" disabled className="transition-all duration-200 hover:scale-105">
         <SunIcon className="h-[1.2rem] w-[1.2rem]" />
         <span className="sr-only">Toggle theme</span>
       </Button>
@@ -29,7 +29,7 @@ export function ThemeToggleButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-white hover:bg-violet-500 hover:text-white transition-all duration-200 hover:scale-105">
+        <Button variant="ghost" size="icon" className="transition-all duration-200 hover:scale-105">
           {resolvedTheme === 'dark' ? (
             <MoonIcon className="h-[1.2rem] w-[1.2rem] transition-all" />
           ) : (

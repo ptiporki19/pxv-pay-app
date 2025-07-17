@@ -151,11 +151,11 @@ function TopCountriesWidget({ setActiveView }: { setActiveView: (view: Analytics
                   {countries.map((country, index) => (
                     <div key={country.country_name} className="flex items-center justify-between py-1">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="text-xs font-medium font-geist truncate" title={country.country_name}>
+                        <span className="text-xs font-medium font-roboto truncate" title={country.country_name}>
                           {country.country_name}
                         </span>
                       </div>
-                      <span className="text-xs font-bold font-geist text-violet-600 flex-shrink-0 ml-2">
+                      <span className="text-xs font-bold font-roboto text-violet-600 flex-shrink-0 ml-2">
                         {country.currency_code || 'USD'} {parseFloat(country.total_revenue).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                       </span>
                     </div>
@@ -178,33 +178,33 @@ function TopCountriesWidget({ setActiveView }: { setActiveView: (view: Analytics
                 <div className="flex items-center justify-between py-1">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <Package className="h-3 w-3 text-violet-600 flex-shrink-0" />
-                    <span className="text-xs font-medium font-geist truncate">
+                    <span className="text-xs font-medium font-roboto truncate">
                       Total Products
                     </span>
                   </div>
-                  <span className="text-xs font-bold font-geist text-violet-600 flex-shrink-0 ml-2">
+                  <span className="text-xs font-bold font-roboto text-violet-600 flex-shrink-0 ml-2">
                     {productsCount.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <LinkHero className="h-3 w-3 text-violet-600 flex-shrink-0" />
-                    <span className="text-xs font-medium font-geist truncate">
+                    <span className="text-xs font-medium font-roboto truncate">
                       Checkout Links
                     </span>
                   </div>
-                  <span className="text-xs font-bold font-geist text-violet-600 flex-shrink-0 ml-2">
+                  <span className="text-xs font-bold font-roboto text-violet-600 flex-shrink-0 ml-2">
                     {checkoutLinksCount.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-1">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <Clock className="h-3 w-3 text-violet-600 flex-shrink-0" />
-                    <span className="text-xs font-medium font-geist truncate">
+                    <span className="text-xs font-medium font-roboto truncate">
                       Pending Verifications
                     </span>
                   </div>
-                  <span className="text-xs font-bold font-geist text-violet-600 flex-shrink-0 ml-2">
+                  <span className="text-xs font-bold font-roboto text-violet-600 flex-shrink-0 ml-2">
                     {pendingVerificationsCount.toLocaleString()}
                   </span>
                 </div>
@@ -371,12 +371,12 @@ export function AnalyticsDashboard({ userData }: AnalyticsDashboardProps) {
           {/* Analytics Navigation */}
           <Card className="h-[280px]">
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-bold tracking-tight text-gray-900 dark:text-white font-geist">Plateform Analytics</CardTitle>
+              <CardTitle className="text-lg font-bold tracking-tight text-gray-900 dark:text-white font-roboto">Plateform Analytics</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
               <Button 
                 variant={activeView === 'revenue' ? 'default' : 'outline'} 
-                className="w-full justify-between font-geist py-2 h-auto" 
+                className="w-full justify-between font-roboto py-2 h-auto" 
                 onClick={() => setActiveView('revenue')}
               >
                 <span>Revenue Analytics</span>
@@ -384,7 +384,7 @@ export function AnalyticsDashboard({ userData }: AnalyticsDashboardProps) {
               </Button>
               <Button 
                 variant={activeView === 'geographic' ? 'default' : 'outline'} 
-                className="w-full justify-between font-geist py-2 h-auto" 
+                className="w-full justify-between font-roboto py-2 h-auto" 
                 onClick={() => setActiveView('geographic')}
               >
                 <span>Geographic Analytics</span>
@@ -392,7 +392,7 @@ export function AnalyticsDashboard({ userData }: AnalyticsDashboardProps) {
               </Button>
               <Button 
                 variant={activeView === 'payment-methods' ? 'default' : 'outline'} 
-                className="w-full justify-between font-geist py-2 h-auto" 
+                className="w-full justify-between font-roboto py-2 h-auto" 
                 onClick={() => setActiveView('payment-methods')}
               >
                 <span>Payment Methods</span>
@@ -400,7 +400,7 @@ export function AnalyticsDashboard({ userData }: AnalyticsDashboardProps) {
               </Button>
               <Button 
                 variant={activeView === 'checkout-links' ? 'default' : 'outline'} 
-                className="w-full justify-between font-geist py-2 h-auto" 
+                className="w-full justify-between font-roboto py-2 h-auto" 
                 onClick={() => setActiveView('checkout-links')}
               >
                 <span>Product Performance</span>
@@ -408,7 +408,7 @@ export function AnalyticsDashboard({ userData }: AnalyticsDashboardProps) {
               </Button>
               <Button 
                 variant={activeView === 'transactions' ? 'default' : 'outline'} 
-                className="w-full justify-between font-geist py-2 h-auto" 
+                className="w-full justify-between font-roboto py-2 h-auto" 
                 onClick={() => setActiveView('transactions')}
               >
                 <span>Transaction Stats</span>
@@ -429,12 +429,12 @@ export function AnalyticsDashboard({ userData }: AnalyticsDashboardProps) {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">Transaction History</CardTitle>
-              <CardDescription className="text-base font-medium text-gray-600 dark:text-gray-300 font-geist">
+              <CardTitle className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">Transaction History</CardTitle>
+              <CardDescription className="text-base font-medium text-gray-600 dark:text-gray-300 font-roboto">
                 Monitor all payment transactions and their status
               </CardDescription>
             </div>
-            <Button variant="outline" className="gap-2 font-bold font-geist" asChild>
+            <Button variant="outline" className="gap-2 font-bold font-roboto" asChild>
               <Link href="/transactions">
                 <ExternalLink className="h-4 w-4" />
                 View All Transactions
@@ -445,7 +445,7 @@ export function AnalyticsDashboard({ userData }: AnalyticsDashboardProps) {
         <CardContent>
           <Suspense fallback={
             <div className="rounded-lg border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-              <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-geist font-semibold text-sm">
+              <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-roboto font-semibold text-sm">
                 <div className="w-[120px]">Transaction ID</div>
                 <div className="w-[100px]">Date</div>
                 <div className="w-[160px]">Customer</div>
@@ -457,7 +457,7 @@ export function AnalyticsDashboard({ userData }: AnalyticsDashboardProps) {
               <div className="px-4 py-8 text-center text-muted-foreground">
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 className="h-6 w-6 animate-spin text-violet-600" />
-                  <span className="text-base font-bold font-geist">Loading transactions...</span>
+                  <span className="text-base font-bold font-roboto">Loading transactions...</span>
                 </div>
               </div>
             </div>

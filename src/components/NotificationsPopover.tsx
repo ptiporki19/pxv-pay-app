@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { formatDistanceToNow } from 'date-fns'
 
 interface Notification {
   id: string
@@ -30,15 +31,7 @@ interface Notification {
   type: string
   created_at: string
   user_id: string
-  data?: {
-    payment_id?: string
-    customer_name?: string
-    amount?: number
-    currency?: string
-    checkout_link_id?: string
-    merchant_id?: string
-    ticket_id?: string
-  }
+  data?: any // Changed to any to fix type casting issues
 }
 
 export function NotificationsPopover() {
@@ -82,10 +75,12 @@ export function NotificationsPopover() {
       if (error) throw error
       
       if (data) {
-        setNotifications(data.map(notification => ({
+        const formattedNotifications = (data || []).map(notification => ({
           ...notification,
-          time: getRelativeTime(notification.created_at)
-        })))
+          data: notification.data as any, // Type cast to fix JSON type issues
+          time: formatDistanceToNow(new Date(notification.created_at), { addSuffix: true }),
+        }))
+        setNotifications(formattedNotifications)
       }
     } catch (error: any) {
       console.error('Error fetching notifications:', error.message)
@@ -127,7 +122,7 @@ export function NotificationsPopover() {
           setNotifications(prev => [
             {
               ...newNotification,
-              time: getRelativeTime(newNotification.created_at)
+              time: formatDistanceToNow(new Date(newNotification.created_at), { addSuffix: true })
             },
             ...prev
           ])
@@ -290,7 +285,7 @@ export function NotificationsPopover() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative text-white hover:bg-violet-500 hover:text-white">
+        <Button variant="ghost" size="icon" className="relative">
           <BellIcon className="h-5 w-5" />
           <span className="sr-only">Notifications</span>
           {unreadCount > 0 && (
@@ -302,11 +297,11 @@ export function NotificationsPopover() {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
+        <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 font-roboto">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-medium">Notifications</h4>
             {unreadCount > 0 && (
-              <span className="inline-flex items-center rounded-full bg-violet-100 dark:bg-violet-800/50 px-2 py-0.5 text-xs font-medium text-violet-700 dark:text-violet-300">
+              <span className="inline-flex items-center rounded-full bg-gray-100 dark:bg-gray-700 px-2 py-0.5 text-xs font-medium text-gray-700 dark:text-gray-300">
                 {unreadCount} new
               </span>
             )}
@@ -315,7 +310,7 @@ export function NotificationsPopover() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="h-auto p-0 text-xs hover:bg-transparent hover:text-violet-600 dark:hover:text-violet-400"
+              className="h-auto p-0 text-xs hover:bg-transparent hover:text-gray-600 dark:hover:text-gray-400"
               onClick={markAllAsRead}
             >
               <CheckCircleIcon className="mr-1 h-3 w-3" />
@@ -336,18 +331,18 @@ export function NotificationsPopover() {
                   className={cn(
                     "flex gap-3 p-3 cursor-pointer transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50",
                     notification.is_read 
-                      ? "hover:bg-violet-50/50 dark:hover:bg-violet-900/10" 
-                      : "bg-violet-50/30 dark:bg-violet-900/10 hover:bg-violet-50/50 dark:hover:bg-violet-900/20"
+                      ? "hover:bg-gray-50 dark:hover:bg-gray-800" 
+                      : "bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700"
                   )}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/30">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
                     {getNotificationIcon(notification.type)}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <p className={cn(
-                        "text-sm font-geist",
+                        "text-sm font-roboto",
                         !notification.is_read && "font-medium"
                       )}>
                         {notification.title}
@@ -377,12 +372,7 @@ export function NotificationsPopover() {
             </div>
           </div>
         )}
-        <div className="p-3 border-t border-gray-100 dark:border-gray-700/50 bg-violet-50/30 dark:bg-violet-900/10">
-          <Button variant="outline" size="sm" className="w-full text-xs gap-1 font-geist hover:bg-violet-100 dark:hover:bg-violet-900/30">
-            <ClockIcon className="h-3.5 w-3.5" />
-            View all notifications
-          </Button>
-        </div>
+
       </PopoverContent>
     </Popover>
   )

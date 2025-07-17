@@ -44,7 +44,7 @@ export function UserCountWidget() {
   }, [])
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="transition-all duration-300 hover:scale-[1.02]">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">Total Users</CardTitle>
         <Users className="h-4 w-4 text-muted-foreground" />

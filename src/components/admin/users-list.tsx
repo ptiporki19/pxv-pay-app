@@ -257,7 +257,7 @@ export function UsersList() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-geist">User Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-roboto">User Management</h1>
           <p className="text-muted-foreground">Manage users and their permissions.</p>
         </div>
       </div>
@@ -268,22 +268,22 @@ export function UsersList() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search users..."
-              className="w-full bg-background pl-8 h-11 font-geist"
+              className="w-full bg-background pl-8 h-11 font-roboto"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
           <Select value={roleFilter} onValueChange={setRoleFilter}>
-            <SelectTrigger className="w-[180px] h-11 font-geist">
+            <SelectTrigger className="w-[180px] h-11 font-roboto">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Filter by role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="font-geist">All Roles</SelectItem>
-              <SelectItem value="super_admin" className="font-geist">Super Admin</SelectItem>
-              <SelectItem value="registered_user" className="font-geist">Registered User</SelectItem>
-              <SelectItem value="subscriber" className="font-geist">Subscriber</SelectItem>
-              <SelectItem value="free_user" className="font-geist">Free User</SelectItem>
+              <SelectItem value="all" className="font-roboto">All Roles</SelectItem>
+              <SelectItem value="super_admin" className="font-roboto">Super Admin</SelectItem>
+              <SelectItem value="registered_user" className="font-roboto">Registered User</SelectItem>
+              <SelectItem value="subscriber" className="font-roboto">Subscriber</SelectItem>
+              <SelectItem value="free_user" className="font-roboto">Free User</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -292,7 +292,7 @@ export function UsersList() {
             onClick={syncUsersFromAuth} 
             disabled={isSyncing} 
             variant="outline" 
-            className="h-11 font-geist"
+            className="h-11 font-roboto"
           >
             {isSyncing ? (
               <>
@@ -307,7 +307,7 @@ export function UsersList() {
             )}
           </Button>
           <Link href="/users/create">
-            <Button className="h-11 font-geist">
+            <Button className="h-11 font-roboto">
               <UserPlus className="mr-2 h-4 w-4" />
               Add User
             </Button>
@@ -317,7 +317,7 @@ export function UsersList() {
 
       <div className="border rounded-lg">
         {/* Table Header */}
-        <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+        <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
           <div className="w-[200px]">User</div>
           <div className="w-[120px] text-center">Role</div>
           <div className="w-[100px] text-center">Status</div>
@@ -328,7 +328,7 @@ export function UsersList() {
         {/* Table Body */}
         {isLoading ? (
           <div className="px-4 py-12 text-center text-muted-foreground">
-            <div className="text-base font-medium font-geist">Loading users...</div>
+            <div className="text-base font-medium font-roboto">Loading users...</div>
           </div>
         ) : users.length > 0 ? (
           users.map((user) => (
@@ -343,14 +343,14 @@ export function UsersList() {
                     )}
                   </div>
                   <div>
-                    <p className="font-medium text-sm text-gray-900 dark:text-gray-100 font-geist">{user.email}</p>
-                    <p className="text-xs text-gray-500 font-geist">ID: {user.id.slice(0, 8)}...</p>
+                    <p className="font-medium text-sm text-gray-900 dark:text-gray-100 font-roboto">{user.email}</p>
+                    <p className="text-xs text-gray-500 font-roboto">ID: {user.id.slice(0, 8)}...</p>
                   </div>
                 </div>
               </div>
               <div className="w-[120px] text-center">
                 <Badge className={cn(
-                  "font-geist",
+                  "font-roboto",
                   user.role === 'super_admin' && 'bg-black text-white dark:bg-gray-100 dark:text-black',
                   user.role === 'subscriber' && 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400',
                   user.role === 'registered_user' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400'
@@ -362,7 +362,7 @@ export function UsersList() {
               </div>
               <div className="w-[100px] text-center">
                 <Badge className={cn(
-                  "font-geist",
+                  "font-roboto",
                   user.active 
                     ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400'
                     : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
@@ -371,7 +371,7 @@ export function UsersList() {
                 </Badge>
               </div>
               <div className="w-[120px]">
-                <div className="flex items-center gap-1 text-sm text-gray-900 dark:text-gray-100 font-geist">
+                <div className="flex items-center gap-1 text-sm text-gray-900 dark:text-gray-100 font-roboto">
                   <Calendar className="h-3 w-3" />
                   {formatDate(user.created_at)}
                 </div>
@@ -386,28 +386,28 @@ export function UsersList() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/users/${user.id}/profile`} className="font-geist">
+                      <Link href={`/users/${user.id}/profile`} className="font-roboto">
                         <Eye className="mr-2 h-4 w-4" />
                         View Profile
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'registered_user')} className="font-geist">
+                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'registered_user')} className="font-roboto">
                       <User className="mr-2 h-4 w-4" />
                       Make User
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'subscriber')} className="font-geist">
+                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'subscriber')} className="font-roboto">
                       <Shield className="mr-2 h-4 w-4" />
                       Make Subscriber
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'super_admin')} className="font-geist">
+                    <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'super_admin')} className="font-roboto">
                       <Crown className="mr-2 h-4 w-4" />
                       Make Super Admin
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => handleStatusToggle(user.id, user.active)}
                       className={cn(
-                        "font-geist",
+                        "font-roboto",
                         user.active ? 'text-red-600' : 'text-green-600'
                       )}
                     >
@@ -423,10 +423,10 @@ export function UsersList() {
             <div className="flex flex-col items-center gap-4">
               <User className="h-12 w-12 text-gray-400" />
               <div>
-                <p className="font-medium font-geist">No users found</p>
-                <p className="text-sm font-geist">Users will appear here once they register or are synced.</p>
+                <p className="font-medium font-roboto">No users found</p>
+                <p className="text-sm font-roboto">Users will appear here once they register or are synced.</p>
               </div>
-              <Button onClick={syncUsersFromAuth} variant="outline" disabled={isSyncing} className="font-geist">
+              <Button onClick={syncUsersFromAuth} variant="outline" disabled={isSyncing} className="font-roboto">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 {isSyncing ? 'Syncing...' : 'Sync Users from Auth'}
               </Button>

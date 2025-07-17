@@ -351,13 +351,13 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
     return (
       <div className="text-sm text-muted-foreground leading-relaxed space-y-1">
         {displayLines.map((line, index) => (
-          <p key={index} className="font-geist">{line}</p>
+          <p key={index} className="font-roboto">{line}</p>
         ))}
         {hasMore && (
         <button
             type="button"
           onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors text-sm font-medium font-geist mt-2"
+            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors text-sm font-medium font-roboto mt-2"
         >
           {isDescriptionExpanded ? (
             <>
@@ -392,7 +392,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
       <div className="min-h-screen bg-background flex items-center justify-center">
             <div className="text-center">
           <Spinner size="lg" className="mx-auto mb-4" />
-          <p className="text-muted-foreground font-geist">Loading checkout...</p>
+          <p className="text-muted-foreground font-roboto">Loading checkout...</p>
         </div>
       </div>
     )
@@ -404,7 +404,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
             <div className="text-center">
           <div className="flex items-center gap-2 text-destructive justify-center mb-4">
                 <AlertCircle className="h-5 w-5" />
-            <span className="font-geist">{error}</span>
+            <span className="font-roboto">{error}</span>
           </div>
         </div>
       </div>
@@ -417,7 +417,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
             <div className="text-center">
           <div className="flex items-center gap-2 text-destructive justify-center">
                 <AlertCircle className="h-5 w-5" />
-            <span className="font-geist">Checkout link not found</span>
+            <span className="font-roboto">Checkout link not found</span>
           </div>
         </div>
       </div>
@@ -441,12 +441,12 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     alt={checkoutData.brand.name}
                     className="w-8 h-8 rounded-full object-cover"
                   />
-                  <div className="text-lg font-semibold text-foreground font-geist">
+                  <div className="text-lg font-semibold text-foreground font-roboto">
                     {checkoutData.brand.name}
                   </div>
                 </div>
               ) : (
-                <div className="text-lg text-muted-foreground font-geist">
+                <div className="text-lg text-muted-foreground font-roboto">
                   Complete your payment
                 </div>
               )}
@@ -459,10 +459,10 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
               <div className="max-w-md mx-auto w-full relative z-10">
                 {/* Amount and Product Info */}
                 <div className="mb-8 text-center">
-                  <div className="text-3xl font-bold text-foreground font-geist mb-2">
+                  <div className="text-3xl font-bold text-foreground font-roboto mb-2">
                     {getCurrentAmount()} {currency?.code}
         </div>
-                  <div className="text-sm text-muted-foreground font-geist">
+                  <div className="text-sm text-muted-foreground font-roboto">
                 {checkoutLink.product_name}
                   </div>
                 </div>
@@ -490,22 +490,22 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
               <div className="max-w-md mx-auto w-full text-center relative z-10">
                 {checkoutLink.amount_type === 'fixed' ? (
                   <div>
-                    <div className="text-4xl font-bold text-foreground font-geist mb-4">
+                    <div className="text-4xl font-bold text-foreground font-roboto mb-4">
                       {getCurrentAmount()} {currency?.code}
                     </div>
-                    <div className="text-lg text-muted-foreground font-geist mb-2">
+                    <div className="text-lg text-muted-foreground font-roboto mb-2">
                       Payment Required
                     </div>
-                    <div className="text-sm text-muted-foreground font-geist">
+                    <div className="text-sm text-muted-foreground font-roboto">
                       Complete the form to proceed with your payment
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <div className="text-2xl font-bold text-foreground font-geist mb-4">
+                    <div className="text-2xl font-bold text-foreground font-roboto mb-4">
                       Enter Payment Amount
                     </div>
-                    <div className="text-base text-muted-foreground font-geist">
+                    <div className="text-base text-muted-foreground font-roboto">
                       Please specify the amount you'd like to pay and complete your details
                     </div>
                   </div>
@@ -533,8 +533,8 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                   </button>
                 )}
                 <div className="text-center">
-                  <h1 className="text-2xl font-bold text-foreground font-geist mb-3">{getStepTitle()}</h1>
-                  <p className="text-sm text-muted-foreground font-geist max-w-sm mx-auto leading-relaxed">{getStepDescription()}</p>
+                  <h1 className="text-2xl font-bold text-foreground font-roboto mb-3">{getStepTitle()}</h1>
+                  <p className="text-sm text-muted-foreground font-roboto max-w-sm mx-auto leading-relaxed">{getStepDescription()}</p>
                 </div>
               </div>
               
@@ -542,7 +542,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
               {error && (
                 <div className="flex items-center gap-2 p-4 border border-destructive/20 bg-destructive/10 rounded-lg text-destructive text-sm mb-6">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  <span className="font-geist">{error}</span>
+                  <span className="font-roboto">{error}</span>
                 </div>
               )}
               
@@ -551,40 +551,40 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                 {currentStep === 'details' && (
                   <form onSubmit={handleDetailsSubmit} className="space-y-6 flex-1 flex flex-col">
                 <div>
-                      <Label htmlFor="customerName" className="text-sm font-medium text-foreground mb-2 block font-geist">Full name</Label>
+                      <Label htmlFor="customerName" className="text-sm font-medium text-foreground mb-2 block font-roboto">Full name</Label>
                   <Input 
                     id="customerName" 
                     type="text" 
                     value={customerName} 
                     onChange={(e) => setCustomerName(e.target.value)} 
                     placeholder="Enter your full name" 
-                        className="w-full h-12 font-geist border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
+                        className="w-full h-12 font-roboto border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
                     required
                   />
                 </div>
                 
                 <div>
-                      <Label htmlFor="customerEmail" className="text-sm font-medium text-foreground mb-2 block font-geist">Email address</Label>
+                      <Label htmlFor="customerEmail" className="text-sm font-medium text-foreground mb-2 block font-roboto">Email address</Label>
                   <Input 
                     id="customerEmail" 
                     type="email" 
                     value={customerEmail} 
                     onChange={(e) => setCustomerEmail(e.target.value)} 
                     placeholder="Enter your email address" 
-                        className="w-full h-12 font-geist border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
+                        className="w-full h-12 font-roboto border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
                     required
                   />
                 </div>
                 
                 <div>
-                      <Label htmlFor="country" className="text-sm font-medium text-foreground mb-2 block font-geist">Country</Label>
+                      <Label htmlFor="country" className="text-sm font-medium text-foreground mb-2 block font-roboto">Country</Label>
                   <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                        <SelectTrigger className="w-full h-12 font-geist">
+                        <SelectTrigger className="w-full h-12 font-roboto">
                           <SelectValue placeholder="Select your country" />
                     </SelectTrigger>
                     <SelectContent>
                       {countries.map((c) => (
-                            <SelectItem key={c.code} value={c.code} className="font-geist">
+                            <SelectItem key={c.code} value={c.code} className="font-roboto">
                           {c.name} ({c.currency?.code})
                         </SelectItem>
                       ))}
@@ -594,7 +594,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                 
                 {checkoutLink.amount_type === 'flexible' && (
                   <div>
-                        <Label htmlFor="amount" className="text-sm font-medium text-foreground mb-2 block font-geist">Amount</Label>
+                        <Label htmlFor="amount" className="text-sm font-medium text-foreground mb-2 block font-roboto">Amount</Label>
                     <div className="relative">
                       <Input 
                         id="amount" 
@@ -604,12 +604,12 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                         value={amount} 
                         onChange={(e) => setAmount(e.target.value)} 
                         placeholder="Enter amount" 
-                            className="w-full h-12 pr-20 font-geist text-lg border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
+                            className="w-full h-12 pr-20 font-roboto text-lg border-muted-foreground/20 focus:border-muted-foreground dark:border-muted-foreground/40 dark:focus:border-muted-foreground focus:ring-0" 
                         required
                       />
                       {currency && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                              <span className="text-muted-foreground font-geist text-sm">
+                              <span className="text-muted-foreground font-roboto text-sm">
                             {currency.code}
                               </span>
                         </div>
@@ -621,7 +621,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     <div className="mt-auto pt-6">
                   <Button 
                     type="submit" 
-                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-geist" 
+                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-roboto" 
                     disabled={submitting}
                   >
                     {submitting ? (
@@ -641,7 +641,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                   <div className="space-y-6 flex-1 flex flex-col">
                     {paymentMethods.length === 0 ? (
                       <div className="text-center py-12">
-                        <p className="text-muted-foreground font-geist">No payment methods available for {selectedCountryData?.name}</p>
+                        <p className="text-muted-foreground font-roboto">No payment methods available for {selectedCountryData?.name}</p>
           </div>
         ) : (
                       <div className="space-y-3 flex-1">
@@ -671,7 +671,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                                 <img src={method.icon_url} alt={method.name} className="w-5 h-5 object-contain"/>
                               )}
                 <div>
-                                <h4 className="font-medium text-sm text-foreground font-geist">{method.name}</h4>
+                                <h4 className="font-medium text-sm text-foreground font-roboto">{method.name}</h4>
                 </div>
                             </div>
                         </div>
@@ -683,7 +683,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                       <Button 
                         onClick={handleProceedToDetails} 
                         disabled={!selectedPaymentMethod} 
-                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-geist"
+                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-roboto"
                       >
                     {selectedPaymentMethod?.type === 'payment_link' ? (
                           <>Pay with {selectedPaymentMethod.name}</>
@@ -698,13 +698,13 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
             {currentStep === 'payment-details' && selectedPaymentMethod && (
                   <div className="space-y-6 flex-1 flex flex-col">
                     <div className="bg-background rounded-lg p-6 space-y-4 border border-border">
-                      <h3 className="text-sm font-medium text-foreground text-center mb-4 font-geist">Send payment to:</h3>
+                      <h3 className="text-sm font-medium text-foreground text-center mb-4 font-roboto">Send payment to:</h3>
                   
                   {/* Display instructions if available */}
                   {selectedPaymentMethod.instructions_for_checkout && (
                         <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                          <h4 className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2 font-geist">Payment Instructions:</h4>
-                          <div className="text-sm text-amber-700 dark:text-amber-300 whitespace-pre-line font-geist">
+                          <h4 className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2 font-roboto">Payment Instructions:</h4>
+                          <div className="text-sm text-amber-700 dark:text-amber-300 whitespace-pre-line font-roboto">
                         {selectedPaymentMethod.instructions_for_checkout}
                       </div>
                     </div>
@@ -714,11 +714,11 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     <div className="space-y-3">
                       {selectedPaymentMethod.account_details.map((field, index) => (
                             <div key={field.id || index} className="flex items-center justify-between p-4 bg-muted/50 rounded border">
-                              <div className="text-sm font-medium text-foreground font-geist">
+                              <div className="text-sm font-medium text-foreground font-roboto">
                                 {field.label}
                               </div>
                               <div className="flex items-center gap-3">
-                                <div className="text-sm font-medium text-foreground font-geist font-mono">
+                                <div className="text-sm font-medium text-foreground font-roboto font-mono">
                                   {formatValueForDisplay(field.value)}
                                 </div>
                                 <button 
@@ -734,13 +734,13 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                       ))}
                       {selectedPaymentMethod.additional_info && (
                             <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                              <p className="text-sm text-blue-800 dark:text-blue-200 font-geist">{selectedPaymentMethod.additional_info}</p>
+                              <p className="text-sm text-blue-800 dark:text-blue-200 font-roboto">{selectedPaymentMethod.additional_info}</p>
                         </div>
                       )}
                 </div>
                   ) : (
                         <div className="text-center text-muted-foreground">
-                          <p className="font-geist">Payment method information will be displayed here</p>
+                          <p className="font-roboto">Payment method information will be displayed here</p>
                     </div>
                   )}
                 </div>
@@ -750,8 +750,8 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                       <div className="flex items-start gap-3">
                         <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                         <div>
-                          <h4 className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-1 font-geist">Next Step</h4>
-                          <p className="text-sm text-amber-800 dark:text-amber-200 font-geist">
+                          <h4 className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-1 font-roboto">Next Step</h4>
+                          <p className="text-sm text-amber-800 dark:text-amber-200 font-roboto">
                             After completing your payment, take a screenshot showing the transaction details and upload it on the next page. Ensure the amount, date, and reference are clearly visible for quick verification.
                           </p>
                         </div>
@@ -761,7 +761,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     <div className="mt-auto pt-6">
                       <Button 
                         onClick={handleProceedToUpload} 
-                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-geist"
+                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-roboto"
                       >
                         Continue to upload proof
                   </Button>
@@ -777,20 +777,20 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                           <Upload className="h-6 w-6 text-muted-foreground" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-medium text-foreground mb-2 font-geist text-center">Choose your file</h3>
-                          <p className="text-sm text-muted-foreground mb-4 font-geist text-center">Upload clear proof of your payment transaction</p>
+                          <h3 className="text-lg font-medium text-foreground mb-2 font-roboto text-center">Choose your file</h3>
+                          <p className="text-sm text-muted-foreground mb-4 font-roboto text-center">Upload clear proof of your payment transaction</p>
                           
                           {/* Enhanced file guidance */}
                           <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-center">
-                            <p className="text-sm text-blue-800 dark:text-blue-200 font-geist font-medium mb-2">What to include in your proof:</p>
-                            <ul className="text-xs text-blue-700 dark:text-blue-300 font-geist text-left space-y-1">
+                            <p className="text-sm text-blue-800 dark:text-blue-200 font-roboto font-medium mb-2">What to include in your proof:</p>
+                            <ul className="text-xs text-blue-700 dark:text-blue-300 font-roboto text-left space-y-1">
                               <li>• Transaction amount and date</li>
                               <li>• Payment reference number</li>
                               <li>• Recipient details (if visible)</li>
                               <li>• Payment confirmation status</li>
                             </ul>
                             <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-700">
-                              <p className="text-xs text-blue-800 dark:text-blue-200 font-geist">
+                              <p className="text-xs text-blue-800 dark:text-blue-200 font-roboto">
                                 <span className="font-medium">Supported formats:</span> JPG, PNG, PDF • <span className="font-medium">Max size:</span> 10MB
                               </p>
                             </div>
@@ -813,14 +813,14 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                             setProofFile(file)
                           }
                         }}
-                            className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-muted file:text-foreground hover:file:bg-muted/80 file:cursor-pointer cursor-pointer font-geist"
+                            className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-muted file:text-foreground hover:file:bg-muted/80 file:cursor-pointer cursor-pointer font-roboto"
                         required
                       />
                           
                     {proofFile && (
                             <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center gap-2">
                               <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                              <span className="text-sm text-green-800 dark:text-green-200 font-geist">{proofFile.name}</span>
+                              <span className="text-sm text-green-800 dark:text-green-200 font-roboto">{proofFile.name}</span>
                       </div>
                     )}
                   </div>
@@ -830,7 +830,7 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                     <div className="mt-auto pt-6">
                       <Button 
                         type="submit" 
-                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-geist" 
+                        className="w-full h-12 bg-foreground hover:bg-foreground/90 text-background font-medium font-roboto" 
                         disabled={submitting || !proofFile}
                       >
                     {submitting ? (
@@ -852,11 +852,11 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                       <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
                 </div>
                 <div>
-                      <h3 className="text-xl font-bold text-foreground mb-2 font-geist">Payment submitted!</h3>
-                      <p className="text-muted-foreground font-geist">Your payment proof has been uploaded and is being reviewed.</p>
+                      <h3 className="text-xl font-bold text-foreground mb-2 font-roboto">Payment submitted!</h3>
+                      <p className="text-muted-foreground font-roboto">Your payment proof has been uploaded and is being reviewed.</p>
                   {paymentId && (
                         <div className="mt-4 p-4 bg-muted rounded-lg">
-                          <p className="text-sm text-muted-foreground font-geist">
+                          <p className="text-sm text-muted-foreground font-roboto">
                             Reference: <span className="font-mono text-foreground">{paymentId}</span>
                           </p>
                         </div>

@@ -88,7 +88,7 @@ export default function BrandManagementPage() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-geist">Brand Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-roboto">Brand Management</h1>
           <p className="text-muted-foreground">Manage brands for your checkout pages.</p>
         </div>
       </div>
@@ -99,25 +99,25 @@ export default function BrandManagementPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search brands..."
-              className="w-full bg-background pl-8 h-11 font-geist"
+              className="w-full bg-background pl-8 h-11 font-roboto"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px] h-11 font-geist">
+            <SelectTrigger className="w-[180px] h-11 font-roboto">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="font-geist">All Status</SelectItem>
-              <SelectItem value="active" className="font-geist">Active</SelectItem>
-              <SelectItem value="inactive" className="font-geist">Inactive</SelectItem>
+              <SelectItem value="all" className="font-roboto">All Status</SelectItem>
+              <SelectItem value="active" className="font-roboto">Active</SelectItem>
+              <SelectItem value="inactive" className="font-roboto">Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Link href="/theme/create">
-          <Button className="h-11 font-geist">
+          <Button className="h-11 font-roboto">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Brand
           </Button>
@@ -126,7 +126,7 @@ export default function BrandManagementPage() {
 
       <div className="border rounded-lg">
         {/* Table Header */}
-        <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+        <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
           <div className="w-[250px]">Brand Name</div>
           <div className="w-[120px]">Logo</div>
           <div className="w-[120px]">Created</div>
@@ -137,13 +137,13 @@ export default function BrandManagementPage() {
         {/* Table Body */}
         {loading ? (
           <div className="px-4 py-12 text-center text-muted-foreground">
-            <div className="text-base font-medium font-geist">Loading brands...</div>
+            <div className="text-base font-medium font-roboto">Loading brands...</div>
           </div>
         ) : brands.length > 0 ? (
           brands.map((brand) => (
             <div key={brand.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
               <div className="w-[250px] flex items-center space-x-3">
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{brand.name}</span>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">{brand.name}</span>
               </div>
               <div className="w-[120px]">
                 <img 
@@ -153,13 +153,13 @@ export default function BrandManagementPage() {
                 />
               </div>
               <div className="w-[120px]">
-                <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatCreatedDate(brand.created_at)}</span>
+                <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">{formatCreatedDate(brand.created_at)}</span>
               </div>
               <div className="w-[100px] text-center">
                 <Badge 
                   variant="outline" 
                   className={cn(
-                    "font-geist",
+                    "font-roboto",
                     brand.is_active && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
                     !brand.is_active && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
                   )}
@@ -177,14 +177,14 @@ export default function BrandManagementPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/theme/edit/${brand.id || ''}`} className="font-geist">
+                      <Link href={`/theme/edit/${brand.id || ''}`} className="font-roboto">
                         <Edit className="mr-2 h-4 w-4" />
                         <span>Edit</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => handleDelete(brand)}
-                      className="text-red-600 font-geist"
+                      className="text-red-600 font-roboto"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       <span>Delete</span>
@@ -196,7 +196,7 @@ export default function BrandManagementPage() {
           ))
         ) : (
           <div className="px-4 py-12 text-center text-muted-foreground">
-            <div className="text-base font-medium font-geist">No brands found. Add one to get started.</div>
+            <div className="text-base font-medium font-roboto">No brands found. Add one to get started.</div>
           </div>
         )}
       </div>

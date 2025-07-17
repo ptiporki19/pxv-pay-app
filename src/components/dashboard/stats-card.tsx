@@ -24,7 +24,7 @@ export function StatsCard({
 }: StatsCardProps) {
   return (
     <Link href={href}>
-      <Card className={`shadow-sm hover:shadow-md transition-shadow cursor-pointer ${className}`}>
+      <Card className={`transition-all duration-300 hover:scale-[1.02] cursor-pointer ${className}`}>
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">{title}</CardTitle>
           <div className={color ? `text-${color}-500` : "text-gray-500"}>

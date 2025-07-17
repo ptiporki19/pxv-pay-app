@@ -87,7 +87,7 @@ export function CurrenciesList() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-geist">Currencies</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-roboto">Currencies</h1>
           <p className="text-muted-foreground">Manage supported currencies for payments.</p>
         </div>
         <Link href="/currencies/create">
@@ -111,7 +111,7 @@ export function CurrenciesList() {
       </div>
 
       <div className="border rounded-lg">
-        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto">
           <div className="w-1/4">Currency Name</div>
           <div className="w-1/4">Currency Code</div>
           <div className="w-1/4">Symbol</div>
@@ -126,7 +126,7 @@ export function CurrenciesList() {
         ) : currencies.length > 0 ? (
           currencies.map((currency) => (
             <div key={currency.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200">
-              <div className="w-1/4 font-geist">{currency.name}</div>
+              <div className="w-1/4 font-roboto">{currency.name}</div>
               <div className="w-1/4">{currency.code}</div>
               <div className="w-1/4">{currency.symbol}</div>
               <div className="w-1/6 text-center">

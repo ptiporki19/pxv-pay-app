@@ -1,20 +1,20 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Roboto, Roboto_Mono, Inter, Fascinate } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationProvider } from "@/providers/notification-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import ConditionalFloatingChat from "@/components/ui/conditional-floating-chat";
 import "./globals.css";
 
-const geist = Geist({
-  variable: "--font-geist",
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
   display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "700", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const robotoMono = Roboto_Mono({
+  variable: "--font-roboto-mono",
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
@@ -25,6 +25,13 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+const fascinate = Fascinate({
+  variable: "--font-fascinate",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -48,7 +55,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geist.variable} ${geistMono.variable} ${inter.variable} antialiased text-foreground bg-background font-sans`}
+        className={`${roboto.variable} ${robotoMono.variable} ${inter.variable} ${fascinate.variable} antialiased text-foreground bg-background font-sans`}
       >
         <ThemeProvider defaultTheme="system" storageKey="pxv-theme">
           <NotificationProvider>

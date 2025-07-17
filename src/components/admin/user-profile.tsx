@@ -917,7 +917,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                 <div className="overflow-x-auto">
                   <div className="border rounded-lg">
                     {/* Table Header */}
-                    <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                    <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
                       <div className="w-[120px]">ID</div>
                       <div className="w-[100px]">Date</div>
                       <div className="w-[140px]">Customer</div>
@@ -936,32 +936,32 @@ export function UserProfile({ userId }: UserProfileProps) {
                                 {payment.id.slice(0, 8)}...
                               </div>
                               {payment.reference && (
-                              <div className="text-xs text-gray-500 font-geist">
+                              <div className="text-xs text-gray-500 font-roboto">
                                   Ref: {payment.reference}
                                 </div>
                               )}
                           </div>
                           <div className="w-[100px]">
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatDate(payment.created_at)}</span>
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">{formatDate(payment.created_at)}</span>
                           </div>
                           <div className="w-[140px]">
-                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                                 {payment.customer_name || payment.customer_email?.split('@')[0] || 'N/A'}
                               </div>
                               {payment.customer_email && (
-                              <div className="text-xs text-gray-500 font-geist">
+                              <div className="text-xs text-gray-500 font-roboto">
                                   {payment.customer_email}
                                 </div>
                               )}
                           </div>
                           <div className="w-[100px]">
-                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{formatCurrency(payment.amount, payment.currency)}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">{formatCurrency(payment.amount, payment.currency)}</span>
                           </div>
                           <div className="w-[100px]">
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{payment.payment_method}</span>
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">{payment.payment_method}</span>
                           </div>
                           <div className="w-[100px]">
-                            <Badge variant="outline" className={cn(getPaymentStatusBadgeClass(payment.status), "font-geist")}>
+                            <Badge variant="outline" className={cn(getPaymentStatusBadgeClass(payment.status), "font-roboto")}>
                                 {payment.status}
                               </Badge>
                           </div>
@@ -981,8 +981,8 @@ export function UserProfile({ userId }: UserProfileProps) {
                       ) : (
                       <div className="px-4 py-12 text-center">
                             <div className="text-gray-500">
-                          <div className="text-lg font-medium mb-2 font-geist">No transactions found</div>
-                          <div className="text-sm font-geist">Transactions will appear here once payments are processed.</div>
+                          <div className="text-lg font-medium mb-2 font-roboto">No transactions found</div>
+                          <div className="text-sm font-roboto">Transactions will appear here once payments are processed.</div>
                             </div>
                       </div>
                       )}
@@ -992,7 +992,7 @@ export function UserProfile({ userId }: UserProfileProps) {
 
               {payments.length > 10 && (
                 <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
-                  <div className="font-geist">Showing 10 of {payments.length} transactions</div>
+                  <div className="font-roboto">Showing 10 of {payments.length} transactions</div>
                 </div>
               )}
             </div>
@@ -1005,8 +1005,8 @@ export function UserProfile({ userId }: UserProfileProps) {
             <div className="p-6">
               <div className="mb-4 flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-semibold font-geist">Products</h2>
-                  <p className="text-sm text-muted-foreground font-geist">
+                  <h2 className="text-xl font-semibold font-roboto">Products</h2>
+                  <p className="text-sm text-muted-foreground font-roboto">
                     Manage product offerings and configurations
                   </p>
                 </div>
@@ -1017,7 +1017,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <div className="overflow-x-auto">
                     <div className="border rounded-lg">
                       {/* Table Header */}
-                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
                         <div className="w-[160px]">Product Name</div>
                         <div className="w-[120px]">Pricing</div>
                         <div className="w-[120px]">URL Slug</div>
@@ -1029,10 +1029,10 @@ export function UserProfile({ userId }: UserProfileProps) {
                         {checkoutLinks.map((link) => (
                         <div key={link.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
                           <div className="w-[160px]">
-                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{link.title}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">{link.title}</span>
                           </div>
                           <div className="w-[120px]">
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {link.amount_type === 'fixed' 
                                 ? formatCurrency(link.amount, link.currency)
                                 : `${formatCurrency(link.min_amount || 0, link.currency)} - ${formatCurrency(link.max_amount || 0, link.currency)}`
@@ -1040,10 +1040,10 @@ export function UserProfile({ userId }: UserProfileProps) {
                             </span>
                           </div>
                           <div className="w-[120px]">
-                            <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-geist">/{link.slug}</code>
+                            <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded font-roboto">/{link.slug}</code>
                           </div>
                           <div className="w-[100px]">
-                            <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className="font-geist">
+                            <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className="font-roboto">
                                 {link.status}
                               </Badge>
                           </div>
@@ -1066,8 +1066,8 @@ export function UserProfile({ userId }: UserProfileProps) {
               ) : (
                 <div className="text-center py-12">
                   <div className="text-gray-500">
-                    <div className="text-lg font-medium mb-2 font-geist">No products found</div>
-                    <div className="text-sm font-geist">Products will appear here once they are created.</div>
+                    <div className="text-lg font-medium mb-2 font-roboto">No products found</div>
+                    <div className="text-sm font-roboto">Products will appear here once they are created.</div>
                   </div>
                 </div>
               )}
@@ -1081,8 +1081,8 @@ export function UserProfile({ userId }: UserProfileProps) {
             <div className="p-6">
               <div className="mb-4 flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-semibold font-geist">Checkout Links</h2>
-                  <p className="text-sm text-muted-foreground font-geist">
+                  <h2 className="text-xl font-semibold font-roboto">Checkout Links</h2>
+                  <p className="text-sm text-muted-foreground font-roboto">
                     Direct payment links and checkout configurations
                   </p>
                 </div>
@@ -1093,7 +1093,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <div className="overflow-x-auto">
                     <div className="border rounded-lg">
                       {/* Table Header */}
-                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
                         <div className="w-[140px]">Link Title</div>
                         <div className="w-[100px]">Amount</div>
                         <div className="w-[120px]">Countries</div>
@@ -1106,24 +1106,24 @@ export function UserProfile({ userId }: UserProfileProps) {
                         {checkoutLinks.map((link) => (
                         <div key={link.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
                           <div className="w-[140px]">
-                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{link.title}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">{link.title}</span>
                           </div>
                           <div className="w-[100px]">
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {link.amount_type === 'fixed' 
                                 ? formatCurrency(link.amount, link.currency)
                                 : 'Flexible'
                               }</span></div>
                           <div className="w-[120px]">
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                                 {link.active_country_codes.length} countries
                               </span>
                           </div>
                           <div className="w-[100px]">
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatDate(link.created_at)}</span>
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">{formatDate(link.created_at)}</span>
                           </div>
                           <div className="w-[100px]">
-                            <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className="font-geist">
+                            <Badge variant={link.status === 'active' ? 'default' : 'secondary'} className="font-roboto">
                                 {link.status}
                               </Badge>
                           </div>
@@ -1146,8 +1146,8 @@ export function UserProfile({ userId }: UserProfileProps) {
               ) : (
                 <div className="text-center py-12">
                   <div className="text-gray-500">
-                    <div className="text-lg font-medium mb-2 font-geist">No checkout links found</div>
-                    <div className="text-sm font-geist">Checkout links will appear here once they are created.</div>
+                    <div className="text-lg font-medium mb-2 font-roboto">No checkout links found</div>
+                    <div className="text-sm font-roboto">Checkout links will appear here once they are created.</div>
                   </div>
                 </div>
               )}
@@ -1173,7 +1173,7 @@ export function UserProfile({ userId }: UserProfileProps) {
                   <div className="overflow-x-auto">
                     <div className="border rounded-lg">
                       {/* Table Header */}
-                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                      <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
                         <div className="w-[160px]">Method Name</div>
                         <div className="w-[120px]">Type</div>
                         <div className="w-[120px]">Countries</div>
@@ -1186,28 +1186,28 @@ export function UserProfile({ userId }: UserProfileProps) {
                         {paymentMethods.map((method) => (
                         <div key={method.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
                           <div className="w-[160px]">
-                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">{method.name}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">{method.name}</span>
                           </div>
                           <div className="w-[120px]">
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{method.type} payment</span>
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">{method.type} payment</span>
                           </div>
                           <div className="w-[120px]">
                               <div className="max-h-20 overflow-y-auto">
                                 {method.countries.length > 0 ? (
-                                <span className="text-xs bg-gray-100 px-2 py-1 rounded font-geist">
+                                <span className="text-xs bg-gray-100 px-2 py-1 rounded font-roboto">
                                     {method.countries.slice(0, 2).join(', ')}
                                     {method.countries.length > 2 && ` +${method.countries.length - 2} more`}
                                   </span>
                                 ) : (
-                                <span className="text-gray-500 font-geist">All countries</span>
+                                <span className="text-gray-500 font-roboto">All countries</span>
                                 )}
                               </div>
                           </div>
                           <div className="w-[100px]">
-                            <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">{formatDate(method.created_at)}</span>
+                            <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">{formatDate(method.created_at)}</span>
                           </div>
                           <div className="w-[100px]">
-                            <Badge variant={method.status === 'active' ? 'default' : 'secondary'} className="font-geist">
+                            <Badge variant={method.status === 'active' ? 'default' : 'secondary'} className="font-roboto">
                                 {method.status}
                               </Badge>
                           </div>
@@ -1225,8 +1225,8 @@ export function UserProfile({ userId }: UserProfileProps) {
               ) : (
                 <div className="text-center py-12">
                   <div className="text-gray-500">
-                    <div className="text-lg font-medium mb-2 font-geist">No payment methods found</div>
-                    <div className="text-sm font-geist">Payment methods will appear here once they are configured.</div>
+                    <div className="text-lg font-medium mb-2 font-roboto">No payment methods found</div>
+                    <div className="text-sm font-roboto">Payment methods will appear here once they are configured.</div>
                   </div>
                 </div>
               )}

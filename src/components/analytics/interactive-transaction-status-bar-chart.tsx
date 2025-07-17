@@ -46,10 +46,10 @@ export function InteractiveTransactionStatusBarChart() {
     return (
       <Card className="h-[500px]">
         <CardHeader className="pb-3">
-          <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">
+          <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">
             Transaction Stats
           </CardTitle>
-          <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-geist">
+          <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-roboto">
             Total transaction amounts by country
           </CardDescription>
         </CardHeader>
@@ -67,10 +67,10 @@ export function InteractiveTransactionStatusBarChart() {
     return (
       <Card className="h-[500px]">
         <CardHeader className="pb-3">
-          <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">
+          <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">
             Transaction Stats
           </CardTitle>
-          <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-geist">
+          <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-roboto">
             Total transaction amounts by country
           </CardDescription>
         </CardHeader>
@@ -96,10 +96,10 @@ export function InteractiveTransactionStatusBarChart() {
   return (
     <Card className="h-[500px]">
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">
+        <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">
           Transaction Stats
         </CardTitle>
-        <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-geist">
+        <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-roboto">
           Total transaction amounts by country
         </CardDescription>
       </CardHeader>

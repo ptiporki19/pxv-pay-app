@@ -135,7 +135,7 @@ export default function ProductManagementPage() {
       {/* Header - Same structure as payment methods */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-geist">Product Management</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-roboto">Product Management</h1>
           <p className="text-muted-foreground">Manage products for your checkout.</p>
         </div>
       </div>
@@ -147,24 +147,24 @@ export default function ProductManagementPage() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search products..."
-              className="w-full bg-background pl-8 h-11 font-geist"
+              className="w-full bg-background pl-8 h-11 font-roboto"
             />
           </div>
           <Select defaultValue="all">
-            <SelectTrigger className="w-[180px] h-11 font-geist">
+            <SelectTrigger className="w-[180px] h-11 font-roboto">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="font-geist">All Status</SelectItem>
-              <SelectItem value="active" className="font-geist">Active</SelectItem>
-              <SelectItem value="inactive" className="font-geist">Inactive</SelectItem>
-              <SelectItem value="draft" className="font-geist">Draft</SelectItem>
+              <SelectItem value="all" className="font-roboto">All Status</SelectItem>
+              <SelectItem value="active" className="font-roboto">Active</SelectItem>
+              <SelectItem value="inactive" className="font-roboto">Inactive</SelectItem>
+              <SelectItem value="draft" className="font-roboto">Draft</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Link href="/content/create">
-          <Button className="h-11 font-geist">
+          <Button className="h-11 font-roboto">
             <PlusCircle className="mr-2 h-4 w-4" />
             Add Product
           </Button>
@@ -173,7 +173,7 @@ export default function ProductManagementPage() {
 
       {/* Table - Same structure as payment methods */}
       <div className="border rounded-lg">
-        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto">
           <div className="w-1/3">Product Name</div>
           <div className="w-1/3">Description</div>
           <div className="w-1/6">Category</div>
@@ -198,7 +198,7 @@ export default function ProductManagementPage() {
                 )}
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-geist">{product.name}</span>
+                    <span className="font-roboto">{product.name}</span>
                     {product.is_featured && (
                       <Star className="h-3 w-3 text-yellow-500 fill-current" />
                     )}
@@ -212,7 +212,7 @@ export default function ProductManagementPage() {
                 <Badge 
                   variant="outline" 
                   className={cn(
-                    "font-geist",
+                    "font-roboto",
                     product.is_active && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
                     !product.is_active && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
                   )}

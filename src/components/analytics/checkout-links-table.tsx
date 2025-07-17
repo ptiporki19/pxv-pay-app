@@ -37,10 +37,10 @@ export function ProductPerformance() {
     return (
       <Card className="h-[500px]">
         <CardHeader className="pb-3">
-          <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">
+          <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">
             Product Performance
           </CardTitle>
-          <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-geist">
+          <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-roboto">
             Top performing products by revenue
           </CardDescription>
         </CardHeader>
@@ -58,10 +58,10 @@ export function ProductPerformance() {
     return (
       <Card className="h-[500px]">
         <CardHeader className="pb-3">
-          <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">
+          <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">
             Product Performance
           </CardTitle>
-          <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-geist">
+          <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-roboto">
             Top performing products by revenue
           </CardDescription>
         </CardHeader>
@@ -79,10 +79,10 @@ export function ProductPerformance() {
   return (
     <Card className="h-[500px]">
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">
+        <CardTitle className="text-xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">
           Product Performance
         </CardTitle>
-        <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-geist">
+        <CardDescription className="text-sm font-medium text-gray-600 dark:text-gray-300 font-roboto">
           Top performing products by revenue
         </CardDescription>
       </CardHeader>

@@ -159,7 +159,7 @@ export function RealTimeStats({ userRole = 'admin' }: RealTimeStatsProps) {
     <>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/users">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="transition-all duration-300 hover:scale-[1.02] cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
@@ -176,7 +176,7 @@ export function RealTimeStats({ userRole = 'admin' }: RealTimeStatsProps) {
         </Link>
 
         <Link href="/payment-methods">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="transition-all duration-300 hover:scale-[1.02] cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Payment Methods</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
@@ -195,7 +195,7 @@ export function RealTimeStats({ userRole = 'admin' }: RealTimeStatsProps) {
       
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-4">
         <Link href="/transactions">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="transition-all duration-300 hover:scale-[1.02] cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Payments</CardTitle>
               <CreditCard className="h-4 w-4 text-muted-foreground" />
@@ -212,7 +212,7 @@ export function RealTimeStats({ userRole = 'admin' }: RealTimeStatsProps) {
         </Link>
 
         <Link href="/transactions?status=pending">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="transition-all duration-300 hover:scale-[1.02] cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
               <Clock className="h-4 w-4 text-muted-foreground" />
@@ -229,7 +229,7 @@ export function RealTimeStats({ userRole = 'admin' }: RealTimeStatsProps) {
         </Link>
 
         <Link href="/transactions/verify">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card className="transition-all duration-300 hover:scale-[1.02] cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Verify Payments</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-muted-foreground" />

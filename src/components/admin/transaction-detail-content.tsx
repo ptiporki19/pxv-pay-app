@@ -572,7 +572,7 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
                     <div className="flex items-center gap-3">
                       <Button 
                         variant="destructive"
-                        className="gap-2 font-geist"
+                        className="gap-2 font-roboto"
                         onClick={() => handleVerifyPayment(transaction.id, 'failed')}
                       >
                         <XCircle className="h-4 w-4" />
@@ -580,7 +580,7 @@ export function TransactionDetailContent({ transactionId, backUrl = "/transactio
                       </Button>
                       <Button 
                         variant="default"
-                        className="gap-2 font-geist"
+                        className="gap-2 font-roboto"
                         onClick={() => handleVerifyPayment(transaction.id, 'completed')}
                       >
                         <CheckCircle className="h-4 w-4" />

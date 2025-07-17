@@ -178,12 +178,12 @@ export function TransactionsContent() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <Link href="/dashboard">
-            <Button variant="outline" size="sm" className="gap-2 font-bold font-geist">
+            <Button variant="outline" size="sm" className="gap-2 font-bold font-roboto">
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-geist">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white font-roboto">
             {userRole === 'super_admin' ? 'Platform Transactions' : 'My Transactions'}
           </h1>
         </div>
@@ -199,25 +199,25 @@ export function TransactionsContent() {
                     placeholder="Search transactions..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-11 font-geist"
+                    className="pl-10 h-11 font-roboto"
                   />
                 </div>
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px] h-11 font-geist">
+                  <SelectTrigger className="w-[180px] h-11 font-roboto">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="font-geist">All Status</SelectItem>
-                    <SelectItem value="completed" className="font-geist">Completed</SelectItem>
-                    <SelectItem value="pending_verification" className="font-geist">Pending Verification</SelectItem>
-                    <SelectItem value="pending" className="font-geist">Pending</SelectItem>
-                    <SelectItem value="failed" className="font-geist">Failed</SelectItem>
-                    <SelectItem value="refunded" className="font-geist">Refunded</SelectItem>
+                    <SelectItem value="all" className="font-roboto">All Status</SelectItem>
+                    <SelectItem value="completed" className="font-roboto">Completed</SelectItem>
+                    <SelectItem value="pending_verification" className="font-roboto">Pending Verification</SelectItem>
+                    <SelectItem value="pending" className="font-roboto">Pending</SelectItem>
+                    <SelectItem value="failed" className="font-roboto">Failed</SelectItem>
+                    <SelectItem value="refunded" className="font-roboto">Refunded</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="outline" className="gap-2 h-11 font-bold font-geist">
+              <Button variant="outline" className="gap-2 h-11 font-bold font-roboto">
                 <Download className="h-4 w-4" />
                 Export
               </Button>
@@ -226,30 +226,30 @@ export function TransactionsContent() {
             {/* Transaction Summary */}
             <div className="mb-6 grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div className="p-6 bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-900/30 dark:to-violet-800/20 rounded-xl border border-violet-200 dark:border-violet-700/50 shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="text-sm text-violet-600 dark:text-violet-400 font-bold font-geist mb-1">Total Transactions</div>
-                <div className="text-3xl font-black text-violet-700 dark:text-violet-300 font-geist">{transactions.length}</div>
-                <div className="text-xs text-violet-500 dark:text-violet-400 font-geist mt-1">All time</div>
+                <div className="text-sm text-violet-600 dark:text-violet-400 font-bold font-roboto mb-1">Total Transactions</div>
+                <div className="text-3xl font-black text-violet-700 dark:text-violet-300 font-roboto">{transactions.length}</div>
+                <div className="text-xs text-violet-500 dark:text-violet-400 font-roboto mt-1">All time</div>
               </div>
               <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/20 rounded-xl border border-green-200 dark:border-green-700/50 shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="text-sm text-green-600 dark:text-green-400 font-bold font-geist mb-1">Completed</div>
-                <div className="text-3xl font-black text-green-700 dark:text-green-300 font-geist">
+                <div className="text-sm text-green-600 dark:text-green-400 font-bold font-roboto mb-1">Completed</div>
+                <div className="text-3xl font-black text-green-700 dark:text-green-300 font-roboto">
                   {transactions.filter(t => t.status === 'completed').length}
                 </div>
-                <div className="text-xs text-green-500 dark:text-green-400 font-geist mt-1">Successfully processed</div>
+                <div className="text-xs text-green-500 dark:text-green-400 font-roboto mt-1">Successfully processed</div>
               </div>
               <div className="p-6 bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-800/20 rounded-xl border border-amber-200 dark:border-amber-700/50 shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="text-sm text-amber-600 dark:text-amber-400 font-bold font-geist mb-1">Pending Verification</div>
-                <div className="text-3xl font-black text-amber-700 dark:text-amber-300 font-geist">
+                <div className="text-sm text-amber-600 dark:text-amber-400 font-bold font-roboto mb-1">Pending Verification</div>
+                <div className="text-3xl font-black text-amber-700 dark:text-amber-300 font-roboto">
                   {transactions.filter(t => t.status === 'pending_verification').length}
                 </div>
-                <div className="text-xs text-amber-500 dark:text-amber-400 font-geist mt-1">Awaiting review</div>
+                <div className="text-xs text-amber-500 dark:text-amber-400 font-roboto mt-1">Awaiting review</div>
               </div>
               <div className="p-6 bg-gradient-to-br from-red-50 to-rose-100 dark:from-red-900/30 dark:to-rose-800/20 rounded-xl border border-red-200 dark:border-red-700/50 shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="text-sm text-red-600 dark:text-red-400 font-bold font-geist mb-1">Failed</div>
-                <div className="text-3xl font-black text-red-700 dark:text-red-300 font-geist">
+                <div className="text-sm text-red-600 dark:text-red-400 font-bold font-roboto mb-1">Failed</div>
+                <div className="text-3xl font-black text-red-700 dark:text-red-300 font-roboto">
                   {transactions.filter(t => t.status === 'failed').length}
                 </div>
-                <div className="text-xs text-red-500 dark:text-red-400 font-geist mt-1">Rejected payments</div>
+                <div className="text-xs text-red-500 dark:text-red-400 font-roboto mt-1">Rejected payments</div>
               </div>
             </div>
 
@@ -259,7 +259,7 @@ export function TransactionsContent() {
               <div className="overflow-x-auto">
                   <div className="border rounded-lg">
                     {/* Table Header - Exact copy from Platform Transactions */}
-                    <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                    <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
                       <div className="w-[120px]">Transaction ID</div>
                       <div className="w-[100px]">Date</div>
                       <div className="w-[140px]">Customer</div>
@@ -273,7 +273,7 @@ export function TransactionsContent() {
                     {/* Table Body - Exact copy from Platform Transactions */}
                     {isLoading ? (
                       <div className="px-4 py-12 text-center">
-                        <div className="text-gray-500 font-geist">Loading transactions...</div>
+                        <div className="text-gray-500 font-roboto">Loading transactions...</div>
                       </div>
                     ) : filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction) => (
@@ -283,44 +283,44 @@ export function TransactionsContent() {
                               {transaction.id.slice(0, 8)}...
                             </div>
                             {transaction.reference && (
-                              <div className="text-xs text-gray-500 font-geist">
+                              <div className="text-xs text-gray-500 font-roboto">
                                 Ref: {transaction.reference}
                               </div>
                             )}
                           </div>
                           <div className="w-[100px]">
-                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {formatDate(transaction.created_at)}
                             </div>
                           </div>
                           <div className="w-[140px]">
-                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
                             </div>
-                            <div className="text-xs text-gray-500 font-geist">
+                            <div className="text-xs text-gray-500 font-roboto">
                               {transaction.customer_email}
                             </div>
                           </div>
                           <div className="w-[140px]">
-                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                                 {userRole === 'super_admin' ? 'Merchant' : 'You'}
                               </div>
-                            <div className="text-xs text-gray-500 font-geist">
+                            <div className="text-xs text-gray-500 font-roboto">
                                 Current User
                               </div>
                           </div>
                           <div className="w-[100px]">
-                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">
                               {formatAmount(transaction.amount, transaction.currency)}
                             </div>
                           </div>
                           <div className="w-[120px]">
-                            <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                            <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {transaction.payment_method}
                             </div>
                           </div>
                           <div className="w-[100px]">
-                            <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-geist")}>
+                            <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-roboto")}>
                               {transaction.status.replace('_', ' ')}
                             </Badge>
                           </div>
@@ -334,12 +334,12 @@ export function TransactionsContent() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem asChild>
-                                  <Link href={`/transactions/${transaction.id}`} className="font-geist">
+                                  <Link href={`/transactions/${transaction.id}`} className="font-roboto">
                                     <Eye className="h-4 w-4 mr-2" />
                                     View Details
                                   </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem className="font-geist">
+                                <DropdownMenuItem className="font-roboto">
                                   <Download className="h-4 w-4 mr-2" />
                                   Download Receipt
                                 </DropdownMenuItem>
@@ -351,8 +351,8 @@ export function TransactionsContent() {
                     ) : (
                       <div className="px-4 py-12 text-center">
                           <div className="text-gray-500">
-                          <div className="text-lg font-medium mb-2 font-geist">No transactions found</div>
-                          <div className="text-sm font-geist">
+                          <div className="text-lg font-medium mb-2 font-roboto">No transactions found</div>
+                          <div className="text-sm font-roboto">
                               {searchTerm || statusFilter !== 'all' 
                                 ? 'Try adjusting your search or filter criteria.'
                                 : `${userRole === 'super_admin' ? 'Transactions' : 'Your transactions'} will appear here once payments are processed.`
@@ -369,10 +369,10 @@ export function TransactionsContent() {
             {/* Pagination Info */}
             {filteredTransactions.length > 0 && (
               <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
-                <div className="font-bold font-geist">
+                <div className="font-bold font-roboto">
                   Showing {filteredTransactions.length} of {transactions.length} transactions
                 </div>
-                <div className="text-xs font-geist">
+                <div className="text-xs font-roboto">
                   Last updated: {new Date().toLocaleTimeString()}
                 </div>
               </div>

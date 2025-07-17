@@ -6,10 +6,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-geist);
-  --font-geist: var(--font-geist);
+  --font-sans: var(--font-roboto);
+  --font-mono: var(--font-roboto-mono);
+  --font-heading: var(--font-roboto);
+  --font-roboto: var(--font-roboto);
+  --font-fascinate: var(--font-fascinate);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -93,6 +94,55 @@
   --violet-950: hsl(263, 69%, 8%);
 }
 
+/* Enhanced Toast Styles */
+[data-sonner-toaster] [data-type="success"] {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3), 0 4px 6px -2px rgba(16, 185, 129, 0.1) !important;
+}
+
+[data-sonner-toaster] [data-type="error"] {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.3), 0 4px 6px -2px rgba(239, 68, 68, 0.1) !important;
+}
+
+[data-sonner-toaster] [data-type="warning"] {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.3), 0 4px 6px -2px rgba(245, 158, 11, 0.1) !important;
+}
+
+[data-sonner-toaster] [data-type="info"] {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3), 0 4px 6px -2px rgba(59, 130, 246, 0.1) !important;
+}
+
+[data-sonner-toaster] [data-description] {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-sonner-toaster] [data-close-button] {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px !important;
+  border: none !important;
+}
+
+[data-sonner-toaster] [data-close-button]:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -149,67 +199,67 @@
   }
   
   /* Font Classes */
-  .font-geist {
-    font-family: var(--font-geist), system-ui, -apple-system, sans-serif;
+  .font-roboto {
+    font-family: var(--font-roboto), system-ui, -apple-system, sans-serif;
   }
   
   /* Professional Typography Hierarchy */
   h1 {
-    @apply text-3xl lg:text-4xl font-bold tracking-tight leading-tight font-geist;
+    @apply text-3xl lg:text-4xl font-bold tracking-tight leading-tight font-roboto;
   }
   
   h2 {
-    @apply text-2xl lg:text-3xl font-bold tracking-tight leading-tight font-geist;
+    @apply text-2xl lg:text-3xl font-bold tracking-tight leading-tight font-roboto;
   }
   
   h3 {
-    @apply text-xl lg:text-2xl font-semibold tracking-tight leading-tight font-geist;
+    @apply text-xl lg:text-2xl font-semibold tracking-tight leading-tight font-roboto;
   }
   
   h4 {
-    @apply text-lg font-semibold tracking-tight font-geist;
+    @apply text-lg font-semibold tracking-tight font-roboto;
   }
   
   h5 {
-    @apply text-base font-semibold tracking-tight font-geist;
+    @apply text-base font-semibold tracking-tight font-roboto;
   }
   
   h6 {
-    @apply text-sm font-semibold tracking-tight font-geist;
+    @apply text-sm font-semibold tracking-tight font-roboto;
   }
   
   /* Dashboard specific typography */
   .hero-title {
-    @apply text-4xl lg:text-5xl font-black tracking-tight leading-tight text-gray-900 dark:text-white font-geist;
+    @apply text-4xl lg:text-5xl font-black tracking-tight leading-tight text-gray-900 dark:text-white font-roboto;
   }
   
   .hero-subtitle {
-    @apply text-lg lg:text-xl font-medium text-gray-600 dark:text-gray-300 leading-relaxed font-geist;
+    @apply text-lg lg:text-xl font-medium text-gray-600 dark:text-gray-300 leading-relaxed font-roboto;
   }
   
   .section-title {
-    @apply text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 dark:text-white font-geist;
+    @apply text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto;
   }
   
   .card-title {
-    @apply text-lg font-bold tracking-tight text-gray-900 dark:text-white font-geist;
+    @apply text-lg font-bold tracking-tight text-gray-900 dark:text-white font-roboto;
   }
   
   .card-number {
-    @apply text-3xl lg:text-4xl font-black tracking-tight text-gray-900 dark:text-white font-geist;
+    @apply text-3xl lg:text-4xl font-black tracking-tight text-gray-900 dark:text-white font-roboto;
   }
   
   .card-description {
-    @apply text-sm font-medium text-gray-600 dark:text-gray-400 font-geist;
+    @apply text-sm font-medium text-gray-600 dark:text-gray-400 font-roboto;
   }
   
   /* Table typography */
   .table-header {
-    @apply font-bold text-sm tracking-wide uppercase text-violet-700 dark:text-violet-300 font-geist;
+    @apply font-bold text-sm tracking-wide uppercase text-violet-700 dark:text-violet-300 font-roboto;
   }
   
   .table-cell {
-    @apply text-sm font-medium text-gray-900 dark:text-gray-100 font-geist;
+    @apply text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto;
   }
 }
 
@@ -224,11 +274,11 @@
   }
   
   .enhanced-table th {
-    @apply h-12 px-4 text-left align-middle font-bold text-sm tracking-wide uppercase text-violet-700 dark:text-violet-300 whitespace-nowrap hover:bg-violet-100/50 dark:hover:bg-violet-800/30 transition-colors duration-200 font-geist;
+    @apply h-12 px-4 text-left align-middle font-bold text-sm tracking-wide uppercase text-violet-700 dark:text-violet-300 whitespace-nowrap hover:bg-violet-100/50 dark:hover:bg-violet-800/30 transition-colors duration-200 font-roboto;
   }
   
   .enhanced-table td {
-    @apply p-4 align-middle text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap border-r border-gray-200/20 dark:border-gray-600/20 last:border-r-0 font-geist;
+    @apply p-4 align-middle text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap border-r border-gray-200/20 dark:border-gray-600/20 last:border-r-0 font-roboto;
   }
   
   .enhanced-table tbody tr {
@@ -531,11 +581,11 @@
 }
 
 .checkout-input {
-  @apply h-12 font-geist bg-background border-border;
+  @apply h-12 font-roboto bg-background border-border;
 }
 
 .checkout-button {
-  @apply h-12 bg-violet-600 hover:bg-violet-700 text-white font-semibold font-geist transition-colors;
+  @apply h-12 bg-violet-600 hover:bg-violet-700 text-white font-semibold font-roboto transition-colors;
 }
 
 .checkout-amount-display {

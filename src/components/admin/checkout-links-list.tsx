@@ -192,7 +192,7 @@ export function CheckoutLinksList() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-geist">Checkout Links</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-roboto">Checkout Links</h1>
           <p className="text-muted-foreground">Create and manage payment checkout links for your customers.</p>
         </div>
       </div>
@@ -203,24 +203,24 @@ export function CheckoutLinksList() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search checkout links..."
-              className="w-full bg-background pl-8 h-11 font-geist"
+              className="w-full bg-background pl-8 h-11 font-roboto"
             />
           </div>
           <Select defaultValue="all">
-            <SelectTrigger className="w-[180px] h-11 font-geist">
+            <SelectTrigger className="w-[180px] h-11 font-roboto">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all" className="font-geist">All Status</SelectItem>
-              <SelectItem value="active" className="font-geist">Active</SelectItem>
-              <SelectItem value="inactive" className="font-geist">Inactive</SelectItem>
-              <SelectItem value="draft" className="font-geist">Draft</SelectItem>
+              <SelectItem value="all" className="font-roboto">All Status</SelectItem>
+              <SelectItem value="active" className="font-roboto">Active</SelectItem>
+              <SelectItem value="inactive" className="font-roboto">Inactive</SelectItem>
+              <SelectItem value="draft" className="font-roboto">Draft</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <Link href="/checkout-links/create">
-          <Button className="h-11 font-geist">
+          <Button className="h-11 font-roboto">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Link
           </Button>
@@ -228,7 +228,7 @@ export function CheckoutLinksList() {
       </div>
 
       <div className="border rounded-lg">
-        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto">
           <div className="w-1/3">Title</div>
           <div className="w-1/4">Countries</div>
           <div className="w-1/6">Status</div>
@@ -244,7 +244,7 @@ export function CheckoutLinksList() {
           checkoutLinks.map((link) => (
             <div key={link.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200">
               <div className="w-1/3">
-                <div className="font-medium font-geist">{link.title}</div>
+                <div className="font-medium font-roboto">{link.title}</div>
                 <div className="text-sm text-muted-foreground">/{link.slug}</div>
               </div>
               <div className="w-1/4">
@@ -259,7 +259,7 @@ export function CheckoutLinksList() {
                   <Badge 
                     variant="outline" 
                     className={cn(
-                      "font-geist",
+                      "font-roboto",
                       link.status === 'active' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
                       link.status === 'draft' && 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400',
                       link.status === 'inactive' && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'

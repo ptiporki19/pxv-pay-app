@@ -16,7 +16,8 @@ import {
   ChartBarIcon,
   ClockIcon,
   BoltIcon,
-  CubeIcon
+  CubeIcon,
+  BuildingStorefrontIcon
 } from '@heroicons/react/24/solid'
 import { useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -82,6 +83,8 @@ export function ActiveNavLink({ href, iconName, children, collapsed = false, onC
         return <ShieldCheckIcon className={iconClassName} /> // Using ShieldCheck as Crown alternative
       case 'Package':
         return <CubeIcon className={iconClassName} />
+      case 'Building2':
+        return <BuildingStorefrontIcon className={iconClassName} /> // Brand Management icon
       default:
         return <HomeIcon className={iconClassName} />
     }
@@ -92,7 +95,7 @@ export function ActiveNavLink({ href, iconName, children, collapsed = false, onC
       href={href}
       onClick={onClick}
       className={cn(
-        "group flex items-center rounded-xl px-3 py-3 text-sm font-bold font-geist transition-all duration-200 hover:scale-[1.02] transform-gpu tracking-wide",
+        "group flex items-center rounded-xl px-3 py-3 text-sm font-bold font-roboto transition-all duration-200 hover:scale-[1.02] transform-gpu tracking-wide",
         collapsed ? "justify-center" : "gap-3",
         isActive
           ? "bg-violet-500/80 dark:bg-violet-800/80 text-white shadow-lg backdrop-blur-sm border border-violet-400/30"
@@ -103,7 +106,7 @@ export function ActiveNavLink({ href, iconName, children, collapsed = false, onC
     >
       {renderIcon()}
       {!collapsed && (
-        <span className="transition-colors duration-200 font-bold font-geist tracking-wide">
+        <span className="transition-colors duration-200 font-bold font-roboto tracking-wide">
           {children}
         </span>
       )}

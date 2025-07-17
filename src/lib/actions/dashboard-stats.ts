@@ -272,22 +272,32 @@ export async function getProductsCount() {
       return { success: false, error: 'Not authenticated', count: 0 }
     }
 
-    // Get user's database ID for filtering
-    const { data: dbUser } = await supabase
+    // Get user profile to check role and ID
+    const { data: userProfile } = await supabase
       .from('users')
-      .select('id')
+      .select('role, id')
       .eq('email', session.user.email)
       .single()
 
-    if (!dbUser) {
+    if (!userProfile) {
       return { success: false, error: 'User not found', count: 0 }
     }
 
-    // Filter by current user's products only
-    const { count, error } = await supabase
+    const isSuperAdminEmail = session.user.email === 'admin@pxvpay.com' ||
+                              session.user.email === 'dev-admin@pxvpay.com' ||
+                              session.user.email === 'superadmin@pxvpay.com'
+    const isSuperAdmin = userProfile.role === 'super_admin' || isSuperAdminEmail
+
+    let query = supabase
       .from('product_templates')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', dbUser.id)
+
+    // Super admins see all products, merchants see only their own
+    if (!isSuperAdmin) {
+      query = query.eq('user_id', userProfile.id)
+    }
+
+    const { count, error } = await query
 
     if (error) {
       console.error('❌ Server: Products query failed:', error)

@@ -298,7 +298,7 @@ export default function SuperAdminTransactionsPage() {
               <div className="overflow-x-auto">
                 <div className="border rounded-lg">
                   {/* Table Header */}
-                  <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+                  <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
                     <div className="w-[120px]">Transaction ID</div>
                     <div className="w-[100px]">Date</div>
                     <div className="w-[140px]">Customer</div>
@@ -312,7 +312,7 @@ export default function SuperAdminTransactionsPage() {
                   {/* Table Body */}
                     {isLoading ? (
                     <div className="px-4 py-12 text-center">
-                      <div className="text-gray-500 font-geist">Loading transactions...</div>
+                      <div className="text-gray-500 font-roboto">Loading transactions...</div>
                     </div>
                     ) : filteredTransactions.length > 0 ? (
                       filteredTransactions.map((transaction) => (
@@ -322,44 +322,44 @@ export default function SuperAdminTransactionsPage() {
                               {transaction.id.slice(0, 8)}...
                             </div>
                             {transaction.reference && (
-                            <div className="text-xs text-gray-500 font-geist">
+                            <div className="text-xs text-gray-500 font-roboto">
                                 Ref: {transaction.reference}
                               </div>
                             )}
                         </div>
                         <div className="w-[100px]">
-                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {formatDate(transaction.created_at)}
                             </div>
                         </div>
                         <div className="w-[140px]">
-                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {transaction.customer_name || transaction.customer_email?.split('@')[0] || 'N/A'}
                             </div>
-                          <div className="text-xs text-gray-500 font-geist">
+                          <div className="text-xs text-gray-500 font-roboto">
                               {transaction.customer_email}
                             </div>
                         </div>
                         <div className="w-[140px]">
-                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {transaction.merchant_email?.split('@')[0] || 'N/A'}
                             </div>
-                          <div className="text-xs text-gray-500 font-geist">
+                          <div className="text-xs text-gray-500 font-roboto">
                               {transaction.merchant_email}
                             </div>
                         </div>
                         <div className="w-[100px]">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">
                               {formatAmount(transaction.amount, transaction.currency)}
                             </div>
                         </div>
                         <div className="w-[120px]">
-                          <div className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                          <div className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                               {transaction.payment_method}
                             </div>
                         </div>
                         <div className="w-[100px]">
-                          <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-geist")}>
+                          <Badge variant="outline" className={cn(getStatusBadgeClass(transaction.status), "font-roboto")}>
                               {transaction.status.replace('_', ' ')}
                             </Badge>
                         </div>
@@ -373,12 +373,12 @@ export default function SuperAdminTransactionsPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem asChild>
-                                <Link href={`/super-admin-transactions/${transaction.id}`} className="font-geist">
+                                <Link href={`/super-admin-transactions/${transaction.id}`} className="font-roboto">
                                   <Eye className="h-4 w-4 mr-2" />
                                   View Details
                                   </Link>
                                 </DropdownMenuItem>
-                              <DropdownMenuItem className="font-geist">
+                              <DropdownMenuItem className="font-roboto">
                                   <Download className="h-4 w-4 mr-2" />
                                   Download Receipt
                                 </DropdownMenuItem>
@@ -390,8 +390,8 @@ export default function SuperAdminTransactionsPage() {
                     ) : (
                     <div className="px-4 py-12 text-center">
                           <div className="text-gray-500">
-                        <div className="text-lg font-medium mb-2 font-geist">No transactions found</div>
-                        <div className="text-sm font-geist">
+                        <div className="text-lg font-medium mb-2 font-roboto">No transactions found</div>
+                        <div className="text-sm font-roboto">
                               {searchTerm || statusFilter !== 'all' 
                                 ? 'Try adjusting your search or filter criteria.'
                                 : 'Transactions will appear here once payments are processed.'

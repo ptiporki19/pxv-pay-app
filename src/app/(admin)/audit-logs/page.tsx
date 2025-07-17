@@ -239,7 +239,7 @@ export default async function AuditLogsPage() {
         <CardContent>
           <div className="border rounded-lg">
             {/* Table Header */}
-            <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist font-semibold text-sm">
+            <div className="flex items-center justify-between border-b px-4 py-3 font-medium bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto font-semibold text-sm">
               <div className="w-[180px]">Timestamp</div>
               <div className="w-[120px]">User</div>
               <div className="w-[120px]">Action</div>
@@ -252,18 +252,18 @@ export default async function AuditLogsPage() {
               auditLogs.map((log) => (
                 <div key={log.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
                   <div className="w-[180px]">
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-geist">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">
                       {new Date(log.created_at).toLocaleString()}
                     </span>
                   </div>
                   <div className="w-[120px]">
-                    <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                    <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                       {log.profiles?.full_name || `User ${log.user_id.slice(0, 8)}`}
                     </span>
                   </div>
                   <div className="w-[120px]">
                     <Badge variant="outline" className={cn(
-                      'font-geist',
+                      'font-roboto',
                       log.action === 'INSERT' && 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400',
                       log.action === 'UPDATE' && 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400',
                       log.action === 'DELETE' && 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400'
@@ -272,12 +272,12 @@ export default async function AuditLogsPage() {
                       </Badge>
                   </div>
                   <div className="w-[120px]">
-                    <span className="text-sm text-gray-900 dark:text-gray-100 font-geist">
+                    <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto">
                       {entityTypes[log.entity_type as keyof typeof entityTypes] || log.entity_type}
                     </span>
                   </div>
                   <div className="w-[300px]">
-                    <span className="text-sm text-gray-900 dark:text-gray-100 font-geist truncate block">
+                    <span className="text-sm text-gray-900 dark:text-gray-100 font-roboto truncate block">
                       {getChangeDescription(log)}
                     </span>
                   </div>
@@ -285,7 +285,7 @@ export default async function AuditLogsPage() {
                 ))
               ) : (
               <div className="px-4 py-12 text-center">
-                <p className="text-base font-medium text-muted-foreground font-geist">
+                <p className="text-base font-medium text-muted-foreground font-roboto">
                     No audit logs found
                 </p>
               </div>

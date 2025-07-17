@@ -1,0 +1,56 @@
+# Mobile Development Rules - PXV Pay
+
+This document defines the rules for implementing mobile pages using the `/m/` route structure and mobile-version templates.
+
+**Route Structure:**
+
+- Mobile pages use `/m/` prefix: `/m/admin/checkout-links`, `/m/admin/transactions`, etc.
+- Desktop routes remain unchanged: `/admin/checkout-links`, `/admin/transactions`, etc.
+- Device detection automatically redirects mobile users to `/m/` routes.
+- Users can manually switch between mobile/desktop versions.
+
+**Template Fidelity:**
+
+- Copy exact UI patterns from `/mobile-version/App.tsx` templates.
+- Use identical colors: `bg-purple-600`, `text-purple-600`, `border-purple-200`.
+- Follow mobile-first card layouts instead of tables.
+- Implement fixed header with logo, notifications, and user menu.
+- Use two-column stats cards and horizontal search/filter layouts.
+
+**Component Organization:**
+
+- Create new mobile components in `/src/components/mobile/` directory.
+- Reuse existing business logic, hooks, and API calls without modification.
+- Share validation schemas, types, and utility functions.
+- Never modify existing desktop components or routes.
+
+**Implementation Standards:**
+
+- Complete feature parity: Every desktop function must work on mobile.
+- Identical API integration: Same endpoints, same data handling.
+- Same authentication and permissions system.
+- Same real-time updates and notifications.
+- Performance: Mobile pages load under 2 seconds on 3G.
+
+**Quality Requirements:**
+
+- Touch-friendly interface: Minimum 44px tap targets.
+- Mobile-optimized forms: Single column, larger inputs.
+- Responsive breakpoints: Works on 320px to 768px screens.
+- Accessibility: Proper ARIA labels and keyboard navigation.
+
+**Forbidden Patterns:**
+
+- Modifying existing desktop components for mobile compatibility.
+- Creating responsive versions instead of separate mobile pages.
+- Duplicating business logic or API calls.
+- Breaking existing desktop functionality.
+- Using different data structures or validation rules.
+
+**Key Directives for AI:**
+
+- Start with `/m/admin/checkout-links` page as the foundation.
+- Copy template UI exactly, then integrate existing business logic.
+- Create device detection middleware for automatic routing.
+- Maintain strict separation between mobile and desktop codebases.
+- Test mobile pages on actual devices, not just browser dev tools. 

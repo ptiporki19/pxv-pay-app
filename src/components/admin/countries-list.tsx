@@ -87,7 +87,7 @@ export function CountriesList() {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight font-geist">Countries</h1>
+          <h1 className="text-3xl font-bold tracking-tight font-roboto">Countries</h1>
           <p className="text-muted-foreground">Manage supported countries for payments.</p>
         </div>
         <Link href="/countries/create">
@@ -111,7 +111,7 @@ export function CountriesList() {
       </div>
 
       <div className="border rounded-lg">
-        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-geist">
+        <div className="flex items-center justify-between bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 font-medium px-4 py-3 hover:bg-violet-100 dark:hover:bg-violet-900/30 transition-colors duration-200 font-roboto">
           <div className="w-1/4">Country Name</div>
           <div className="w-1/4">Country Code</div>
           <div className="w-1/4">Currency</div>
@@ -126,7 +126,7 @@ export function CountriesList() {
         ) : countries.length > 0 ? (
           countries.map((country) => (
             <div key={country.id} className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200">
-              <div className="w-1/4 font-geist">{country.name}</div>
+              <div className="w-1/4 font-roboto">{country.name}</div>
               <div className="w-1/4">{country.code}</div>
               <div className="w-1/4">
                 {country.currency ? (

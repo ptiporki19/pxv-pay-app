@@ -209,16 +209,16 @@ export function DashboardStatsGrid() {
     const shouldLink = !widget.requiresSuperAdmin || isSuperAdmin
     
     const cardContent = (
-      <Card className={`violet-glow hover:shadow-xl transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50 ${shouldLink ? 'cursor-pointer' : ''}`}>
+      <Card className={`transition-all duration-300 hover:scale-[1.02] border-violet-100 dark:border-violet-800/50 ${shouldLink ? 'cursor-pointer' : ''}`}>
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             {/* Content Section */}
             <div className="flex-1 min-w-0">
-              <div className="text-3xl lg:text-4xl font-black tracking-tight text-gray-900 dark:text-white font-geist mb-2">
+              <div className="text-3xl lg:text-4xl font-black tracking-tight text-gray-900 dark:text-white font-roboto mb-2">
                 {loading ? '...' : widget.value.toLocaleString()}
               </div>
-              <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white font-geist mb-1">{widget.title}</h3>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 font-geist">
+              <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white font-roboto mb-1">{widget.title}</h3>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 font-roboto">
                 {widget.description}
               </p>
             </div>

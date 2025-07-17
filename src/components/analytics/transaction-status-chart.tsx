@@ -66,7 +66,7 @@ export function TransactionStatusChart() {
             <div key={index} className="grid grid-cols-5 gap-2 text-sm py-2 border-b">
               <div className="font-medium">
                 <Badge variant="outline" className={cn(
-                  "font-bold font-geist",
+                  "font-bold font-roboto",
                   item.status === 'completed' && "bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
                   item.status === 'pending_verification' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
                   item.status === 'pending' && "bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",

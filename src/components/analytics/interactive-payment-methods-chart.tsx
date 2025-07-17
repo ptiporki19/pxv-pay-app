@@ -116,8 +116,8 @@ export function InteractivePaymentMethodsChart() {
       <ChartStyle id={id} config={chartConfig} />
       <CardHeader className="flex-row items-start space-y-0 pb-0">
         <div className="grid gap-1">
-          <CardTitle className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white font-geist">Payment Methods Analytics</CardTitle>
-          <CardDescription className="text-base font-medium text-gray-600 dark:text-gray-300 font-geist">
+          <CardTitle className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white font-roboto">Payment Methods Analytics</CardTitle>
+          <CardDescription className="text-base font-medium text-gray-600 dark:text-gray-300 font-roboto">
             Transaction distribution by payment method
           </CardDescription>
         </div>
