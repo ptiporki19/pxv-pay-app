@@ -148,6 +148,7 @@ export interface PaymentMethod {
   custom_fields?: CustomField[] | null // General custom fields (fallback)
   country_specific_details?: Record<string, CountrySpecificDetails> // Country-specific details
   display_order?: number // Order for displaying payment methods
+  image_url?: string | null // Payment method image URL
   user_id?: string
   created_at?: string
   updated_at?: string
@@ -612,6 +613,7 @@ export const paymentMethodsApi = {
       countries: item.countries,
       status: item.status,
       display_order: item.sort_order,
+      image_url: item.image_url,
       user_id: item.user_id,
       created_at: item.created_at,
       updated_at: item.updated_at
@@ -683,7 +685,8 @@ export const paymentMethodsApi = {
       account_details: method.custom_fields || null,
       countries: method.countries || [],
       status: method.status,
-      sort_order: method.display_order || 0
+      sort_order: method.display_order || 0,
+      image_url: method.image_url || null
     }
     
     const { data, error } = await supabase

@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useFieldArray } from "react-hook-form"
-import { ArrowLeftIcon, PlusIcon, CreditCardIcon, TrashIcon } from "@heroicons/react/24/solid"
+import { useForm } from "react-hook-form"
+import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid"
+import { Upload, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -12,7 +13,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import {
@@ -23,35 +23,40 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 import { z } from "zod"
-import { 
-  paymentMethodsApi, 
-  countriesApi, 
-  Country,
-  PaymentMethod 
-} from "@/lib/supabase/client-api"
-import { 
-  paymentMethodFormSchema, 
-  PaymentMethodFormValues 
-} from "@/lib/validations/admin-forms"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { paymentMethodsApi, countriesApi, CustomField, PaymentMethod } from "@/lib/supabase/client-api"
+
+// Schema matching create form
+const mobileEditPaymentMethodSchema = z.object({
+  name: z.string().min(1, "Payment method name is required"),
+  type: z.enum(["manual", "payment-link"]),
+  description: z.string().optional(),
+  status: z.enum(["active", "inactive", "pending"]),
+  instructions: z.string().optional(),
+  url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  image_url: z.string().url("Please enter a valid image URL").optional().or(z.literal("")),
+  countries: z.array(z.string()).min(1, "At least one country must be selected"),
+  custom_fields: z.array(z.object({
+    id: z.string(),
+    label: z.string().min(1, "Field name is required"),
+    value: z.string().min(1, "Field value is required"),
+    required: z.boolean(),
+    type: z.string(),
+    placeholder: z.string(),
+  })).optional(),
+})
+
+type MobileEditPaymentMethodValues = z.infer<typeof mobileEditPaymentMethodSchema>
+
+interface Country {
+  id: string
+  name: string
+  code: string
+}
 
 interface MobileEditPaymentMethodFormProps {
   initialData: PaymentMethod
@@ -60,112 +65,190 @@ interface MobileEditPaymentMethodFormProps {
 export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMethodFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [countries, setCountries] = useState<Country[]>([])
-  const [countriesLoading, setCountriesLoading] = useState(true)
-  const [countriesOpen, setCountriesOpen] = useState(false)
+  const [loadingCountries, setLoadingCountries] = useState(false)
+  const [customFields, setCustomFields] = useState<CustomField[]>([])
+  const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || '')
   const router = useRouter()
 
-  // Fetch countries
-  useEffect(() => {
-    const fetchCountries = async () => {
-      try {
-        setCountriesLoading(true)
-        const countriesList = await countriesApi.getAll()
-        setCountries(countriesList)
-      } catch (error) {
-        console.error("Error fetching countries:", error)
-        toast({ 
-          title: "Error", 
-          description: "Failed to fetch countries list", 
-          variant: "destructive" 
-        })
-      } finally {
-        setCountriesLoading(false)
-      }
-    }
-    
-    fetchCountries()
-  }, [])
-
-  // Initialize the form with existing data
-  const form = useForm<PaymentMethodFormValues>({
-    resolver: zodResolver(paymentMethodFormSchema),
+  const form = useForm<MobileEditPaymentMethodValues>({
+    resolver: zodResolver(mobileEditPaymentMethodSchema),
     defaultValues: {
       name: initialData.name || "",
       type: initialData.type || "manual",
-      countries: initialData.countries || [],
+      description: initialData.description || "",
       status: initialData.status || "active",
       instructions: initialData.instructions || "",
-      description: initialData.description || "",
-      custom_fields: initialData.custom_fields || [],
-      icon: initialData.icon || null,
       url: initialData.url || "",
+      image_url: initialData.image_url || "",
+      countries: initialData.countries || [],
+      custom_fields: [],
     },
   })
 
-  // Custom fields array management
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "custom_fields"
-  })
+  const paymentType = form.watch("type")
 
-  // Watch the 'type' field to conditionally render sections
-  const selectedType = form.watch("type")
+  useEffect(() => {
+    loadCountries()
+    // Initialize custom fields from existing data
+    if (initialData.custom_fields && Array.isArray(initialData.custom_fields)) {
+      setCustomFields(initialData.custom_fields)
+    }
+  }, [])
 
-  // Add custom field
-  const addCustomField = () => {
-    append({
-      label: "",
-      type: "text",
-      required: false,
-      placeholder: ""
-    })
+  // Update form when custom fields change
+  useEffect(() => {
+    const formattedFields = customFields.map(field => ({
+      id: field.id,
+      label: field.label || "",
+      value: field.value || "",
+      required: field.required || false,
+      type: field.type || "text",
+      placeholder: field.placeholder || "",
+    }))
+    form.setValue("custom_fields", formattedFields)
+  }, [customFields, form])
+
+  const loadCountries = async () => {
+    try {
+      setLoadingCountries(true)
+      const countriesData = await countriesApi.getAll()
+      const formattedCountries = countriesData
+        .filter(country => country.id && country.name && country.code)
+        .map(country => ({
+          id: country.id!,
+          name: country.name!,
+          code: country.code!,
+        }))
+      setCountries(formattedCountries)
+    } catch (error) {
+      console.error('Error loading countries:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load countries. Please refresh the page.",
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingCountries(false)
+    }
   }
 
-  // Submit handler
-  const onSubmit = async (values: PaymentMethodFormValues) => {
-    setIsLoading(true)
-    
+  const addCustomField = () => {
+    const newField: CustomField = {
+      id: Math.random().toString(36).substr(2, 9),
+      label: "",
+      value: "",
+      required: false,
+      type: "text",
+      placeholder: "",
+    }
+    setCustomFields([...customFields, newField])
+  }
+
+  const updateCustomField = (id: string, updates: Partial<CustomField>) => {
+    setCustomFields(customFields.map(field => 
+      field.id === id ? { ...field, ...updates } : field
+    ))
+  }
+
+  const removeCustomField = (id: string) => {
+    setCustomFields(customFields.filter(field => field.id !== id))
+  }
+
+  // Handle image upload
+  const handleImageUpload = async (file: File) => {
     try {
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user || !user.email) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
         toast({
           title: "Error",
-          description: "You must be logged in to edit payment methods",
-          variant: "destructive"
+          description: "Please select a valid image file",
+          variant: "destructive",
         })
         return
       }
 
-      // Update payment method
-      if (initialData.id) {
-        await paymentMethodsApi.update(initialData.id, values)
+      // Validate file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Image size must be less than 2MB",
+          variant: "destructive",
+        })
+        return
       }
-      
-      toast({
-        title: "Success",
-        description: "Payment method updated successfully"
+
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/payment-methods/upload-image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include', // Include cookies for authentication
+        headers: {
+          // Don't set Content-Type, let browser set it with boundary for FormData
+        }
       })
-      
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to upload image')
+      }
+
+      const result = await response.json()
+      setImagePreview(result.url)
+      form.setValue('image_url', result.url)
+
+      toast({
+        title: "Image Updated",
+        description: "Payment method image updated successfully",
+      })
+    } catch (error) {
+      console.error('Image upload error:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to upload image. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }
+
+  async function onSubmit(values: MobileEditPaymentMethodValues) {
+    try {
+      setIsLoading(true)
+
+      const payload = {
+        name: values.name,
+        type: values.type,
+        description: values.description || null,
+        status: values.status,
+        instructions: values.instructions || null,
+        url: values.type === "payment-link" ? values.url || null : null,
+        image_url: values.image_url || null,
+        countries: values.countries,
+        custom_fields: customFields.length > 0 ? customFields : null,
+      }
+
+      if (initialData.id) {
+        await paymentMethodsApi.update(initialData.id, payload)
+      }
+
+      toast({
+        title: "Payment Method Updated",
+        description: `${values.name} has been updated successfully. Changes are now live.`,
+      })
+
       router.push('/m/payment-methods')
     } catch (error) {
       console.error("Payment method update error:", error)
       
-      let errorMessage = "There was an error updating the payment method"
-      
+      let errorMessage = "Failed to update payment method. Please check your connection and try again."
       if (error instanceof Error) {
         errorMessage = error.message
-      } else if (typeof error === 'object' && error !== null) {
-        const supabaseError = error as any
-        if (supabaseError.message) {
-          errorMessage = supabaseError.message
-        }
       }
       
-      toast({ 
-        title: "Error", 
-        description: errorMessage, 
+      toast({
+        title: "Update Failed",
+        description: errorMessage,
         variant: "destructive"
       })
     } finally {
@@ -193,10 +276,19 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
         </div>
       </div>
 
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+            <span className="text-sm text-muted-foreground">Updating...</span>
+          </div>
+        </div>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           
-          {/* Payment Method Name */}
+          {/* Basic Information */}
           <FormField
             control={form.control}
             name="name"
@@ -205,12 +297,9 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
                 <FormLabel className="text-xs font-medium font-roboto">Payment Method Name</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder={
-                      selectedType === 'payment-link' ? 'PayPal Checkout' : 
-                      'Bank Transfer / Mobile Money / Crypto'
-                    }
-                    className="bg-background border border-border h-10"
+                    placeholder="Bank Transfer, PayPal, etc."
                     {...field}
+                    className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500"
                   />
                 </FormControl>
                 <FormMessage />
@@ -218,35 +307,30 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
             )}
           />
 
-          {/* Payment Type */}
           <FormField
             control={form.control}
             name="type"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xs font-medium font-roboto">Payment Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <SelectTrigger className="bg-background border border-border h-10">
-                      <SelectValue placeholder="Select payment type" />
+                    <SelectTrigger className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500">
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="manual">Manual Payment</SelectItem>
-                    <SelectItem value="payment-link">Payment Link</SelectItem>
+                    <SelectItem value="manual" className="text-xs">Manual Payment</SelectItem>
+                    <SelectItem value="payment-link" className="text-xs">Payment Link</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormDescription className="text-xs">
-                  {selectedType === 'manual' && "Create a custom payment method with your own fields"}
-                  {selectedType === 'payment-link' && "Redirect customers to an external payment URL"}
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Payment Link URL (only for payment-link type) */}
-          {selectedType === 'payment-link' && (
+          {/* Payment URL for payment-link type */}
+          {paymentType === "payment-link" && (
             <FormField
               control={form.control}
               name="url"
@@ -255,21 +339,40 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
                   <FormLabel className="text-xs font-medium font-roboto">Payment URL</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="https://paypal.me/youraccount"
-                      className="bg-background border border-border h-10"
+                      placeholder="https://payment-processor.com/pay"
                       {...field}
+                      className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500"
                     />
                   </FormControl>
-                  <FormDescription className="text-xs">
-                    The URL where customers will be redirected to complete payment
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
           )}
 
-          {/* Description */}
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium font-roboto">Status</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500">
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="active" className="text-xs">Active</SelectItem>
+                    <SelectItem value="inactive" className="text-xs">Inactive</SelectItem>
+                    <SelectItem value="pending" className="text-xs">Pending</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="description"
@@ -278,9 +381,9 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
                 <FormLabel className="text-xs font-medium font-roboto">Description</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Describe this payment method..."
-                    className="bg-background border border-border min-h-16 resize-none"
+                    placeholder="Brief description of this payment method"
                     {...field}
+                    className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500"
                   />
                 </FormControl>
                 <FormMessage />
@@ -288,223 +391,234 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
             )}
           />
 
-          {/* Countries Selection */}
+          {/* Countries */}
           <FormField
             control={form.control}
             name="countries"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="text-xs font-medium font-roboto">Supported Countries</FormLabel>
-                <Popover open={countriesOpen} onOpenChange={setCountriesOpen}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={countriesOpen}
-                        className="bg-background border border-border h-10 justify-between"
-                        disabled={countriesLoading}
-                      >
-                        {field.value.length > 0
-                          ? `${field.value.length} countries selected`
-                          : "Select countries..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput placeholder="Search countries..." />
-                      <CommandEmpty>No countries found.</CommandEmpty>
-                      <CommandGroup className="max-h-64 overflow-auto">
-                        {countries.map((country) => (
-                          <CommandItem
-                            key={country.code}
-                            onSelect={() => {
-                              const currentValue = field.value || []
-                              const newValue = currentValue.includes(country.code)
-                                ? currentValue.filter((code) => code !== country.code)
-                                : [...currentValue, country.code]
-                              field.onChange(newValue)
+              <FormItem>
+                <FormLabel className="text-xs font-medium font-roboto">Countries</FormLabel>
+                
+                <Select 
+                  onValueChange={(value) => {
+                    const currentValues = field.value || []
+                    if (!currentValues.includes(value)) {
+                      field.onChange([...currentValues, value])
+                    }
+                  }}
+                  disabled={loadingCountries}
+                >
+                  <FormControl>
+                    <SelectTrigger className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500">
+                      <SelectValue placeholder={loadingCountries ? "Loading..." : "Select countries"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {countries.map((country) => (
+                      <SelectItem key={country.id} value={country.code} className="text-xs">
+                        {country.name} ({country.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {/* Display selected countries */}
+                {field.value && field.value.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {field.value.map((countryCode) => {
+                      const country = countries.find(c => c.code === countryCode)
+                      return (
+                        <Badge key={countryCode} variant="secondary" className="text-xs gap-1">
+                          {country?.name} ({countryCode})
+                          <button
+                            type="button"
+                            onClick={() => {
+                              field.onChange(field.value.filter(code => code !== countryCode))
                             }}
+                            className="ml-1 hover:text-destructive"
                           >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                field.value?.includes(country.code) ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {country.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormDescription className="text-xs">
-                  Select the countries where this payment method is available
-                </FormDescription>
+                            ×
+                          </button>
+                        </Badge>
+                      )
+                    })}
+                  </div>
+                )}
+                
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          {/* Custom Fields (only for manual type) */}
-          {selectedType === 'manual' && (
+          {/* Payment Information (Custom Fields) */}
+          {paymentType === "manual" && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <FormLabel className="text-xs font-medium font-roboto">Account Details Fields</FormLabel>
+                <h3 className="text-xs font-medium text-foreground font-roboto">Payment Information</h3>
                 <Button
                   type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={addCustomField}
-                  className="h-8"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs"
                 >
                   <PlusIcon className="size-3 mr-1" />
                   Add Field
                 </Button>
               </div>
-              
-              {fields.map((field, index) => (
-                <div key={field.id} className="space-y-2 p-3 border border-border rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-muted-foreground">Field {index + 1}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => remove(index)}
-                      className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
-                    >
-                      <TrashIcon className="size-3" />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    <FormField
-                      control={form.control}
-                      name={`custom_fields.${index}.label`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="Field label"
-                              className="bg-background border border-border h-8 text-xs"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name={`custom_fields.${index}.type`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="bg-background border border-border h-8 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="text">Text</SelectItem>
-                              <SelectItem value="email">Email</SelectItem>
-                              <SelectItem value="number">Number</SelectItem>
-                              <SelectItem value="phone">Phone</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <FormField
-                    control={form.control}
-                    name={`custom_fields.${index}.placeholder`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            placeholder="Placeholder text"
-                            className="bg-background border border-border h-8 text-xs"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name={`custom_fields.${index}.required`}
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel className="text-xs font-normal">
-                            Required field
-                          </FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+
+              {customFields.length === 0 ? (
+                <div className="text-center py-4 border border-dashed rounded-lg">
+                  <p className="text-xs text-muted-foreground font-roboto">
+                    No payment information configured
+                  </p>
+                  <Button
+                    type="button"
+                    onClick={addCustomField}
+                    size="sm"
+                    variant="ghost"
+                    className="mt-2 text-xs"
+                  >
+                    <PlusIcon className="size-3 mr-1" />
+                    Add First Field
+                  </Button>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-3">
+                  {customFields.map((field) => (
+                    <div key={field.id} className="border border-border rounded-lg p-3">
+                      {/* Field Name and Value on same line */}
+                      <div className="grid grid-cols-2 gap-2 mb-2">
+                        <div>
+                          <label className="block text-xs font-medium text-foreground font-roboto mb-1">
+                            Field Name
+                          </label>
+                          <Input
+                            placeholder="Account Number"
+                            value={field.label}
+                            onChange={(e) => updateCustomField(field.id, { label: e.target.value })}
+                            className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-foreground font-roboto mb-1">
+                            Field Value
+                          </label>
+                          <Input
+                            placeholder="1234567890"
+                            value={field.value}
+                            onChange={(e) => updateCustomField(field.id, { value: e.target.value })}
+                            className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`required-${field.id}`}
+                            checked={field.required}
+                            onCheckedChange={(checked) => 
+                              updateCustomField(field.id, { required: checked as boolean })
+                            }
+                          />
+                          <label htmlFor={`required-${field.id}`} className="text-xs font-roboto">
+                            Required field
+                          </label>
+                        </div>
+                        <Button
+                          type="button"
+                          onClick={() => removeCustomField(field.id)}
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <TrashIcon className="size-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Status */}
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="bg-background border border-border h-10">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Instructions */}
           <FormField
             control={form.control}
             name="instructions"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Instructions for Customers</FormLabel>
+                <FormLabel className="text-xs font-medium font-roboto">Instructions for Users</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Instructions for customers on how to use this payment method..."
-                    className="bg-background border border-border min-h-20 resize-none"
+                    placeholder="Enter specific instructions for customers using this payment method..."
                     {...field}
+                    className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500"
                   />
                 </FormControl>
-                <FormDescription className="text-xs">
-                  These instructions will be shown to customers during checkout
-                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Image Upload - Exact Desktop Pattern */}
+          <FormField
+            control={form.control}
+            name="image_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium font-roboto">Payment Method Image</FormLabel>
+                <FormControl>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            await handleImageUpload(file)
+                          }
+                        }}
+                        className="hidden"
+                        id="image-upload-mobile-edit"
+                      />
+                      <label
+                        htmlFor="image-upload-mobile-edit"
+                        className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Image
+                      </label>
+                      {(field.value || imagePreview) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setImagePreview('')
+                            form.setValue('image_url', '')
+                            toast({
+                              title: "Image Removed",
+                              description: "Payment method image has been removed",
+                            })
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    {(field.value || imagePreview) && (
+                      <div className="mt-2">
+                        <img
+                          src={imagePreview || field.value}
+                          alt="Payment method preview"
+                          className="w-full h-32 object-cover rounded-md border"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -515,12 +629,12 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-violet-600 hover:bg-violet-700 text-white h-10"
+              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto"
             >
               {isLoading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  <span className="text-xs">Updating Payment Method...</span>
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+                  <span className="text-xs">Updating...</span>
                 </div>
               ) : (
                 <span className="text-xs">Update Payment Method</span>
@@ -531,4 +645,4 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
       </Form>
     </div>
   )
-} 
+}

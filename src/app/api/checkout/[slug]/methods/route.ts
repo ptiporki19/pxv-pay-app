@@ -103,6 +103,7 @@ export async function GET(
         instructions_for_checkout: method.instructions || '',
         url: finalUrl,
         icon_url: method.icon_url,
+        image_url: method.image_url,
         display_order: method.sort_order || 0,
         account_details: Array.isArray(accountDetails) ? accountDetails : [],
         additional_info: ''

@@ -89,6 +89,13 @@ const basePaymentMethodObjectSchema = z.object({
     z.null(),
     z.undefined()
   ]).optional().nullable(),
+  // Image URL field for payment method images
+  image_url: z.union([
+    z.string().url({ message: "Please enter a valid image URL" }),
+    z.literal(""),
+    z.null(),
+    z.undefined()
+  ]).optional().nullable(),
 })
 
 // Refined schema that makes URL mandatory for 'payment-link' type with enhanced validation

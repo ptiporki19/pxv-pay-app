@@ -50,6 +50,7 @@ interface PaymentMethod {
   instructions_for_checkout?: string
   url?: string
   icon_url?: string
+  image_url?: string
   display_order: number
   account_details?: Array<{
     id: string
@@ -659,20 +660,26 @@ export function ModernCheckoutForm({ slug }: ModernCheckoutFormProps) {
                             <div className="flex items-center gap-3">
                               <div className={cn(
                                 "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-                                selectedPaymentMethod?.id === method.id 
-                                  ? "border-foreground bg-foreground" 
+                                selectedPaymentMethod?.id === method.id
+                                  ? "border-foreground bg-foreground"
                                   : "border-muted-foreground"
                               )}>
                                 {selectedPaymentMethod?.id === method.id && (
                                   <div className="w-2 h-2 rounded-full bg-background"></div>
-              )}
-            </div>
-                              {method.icon_url && (
+                                )}
+                              </div>
+                              {method.image_url ? (
+                                <img src={method.image_url} alt={method.name} className="w-8 h-8 object-cover rounded"/>
+                              ) : method.icon_url ? (
                                 <img src={method.icon_url} alt={method.name} className="w-5 h-5 object-contain"/>
+                              ) : (
+                                <div className="w-8 h-8 bg-muted rounded flex items-center justify-center">
+                                  <span className="text-xs text-muted-foreground">{method.name.charAt(0)}</span>
+                                </div>
                               )}
-                <div>
+                              <div>
                                 <h4 className="font-medium text-sm text-foreground font-roboto">{method.name}</h4>
-                </div>
+                              </div>
                             </div>
                         </div>
                         ))}

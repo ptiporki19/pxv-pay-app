@@ -90,9 +90,27 @@ export function PaymentMethodCard({ paymentMethod, onDelete, onStatusChange }: P
     <div className="bg-card border border-border rounded-lg p-3 hover:shadow-md hover:border-violet-200 dark:hover:border-violet-800 transition-all duration-200 group">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          {/* Icon */}
-          <div className="size-8 rounded-full bg-violet-100 dark:bg-violet-950/30 flex items-center justify-center flex-shrink-0">
-            <CreditCardIcon className="size-4 text-violet-600 dark:text-violet-400" />
+          {/* Image */}
+          <div className="size-8 rounded-full bg-violet-100 dark:bg-violet-950/30 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {paymentMethod.image_url ? (
+              <img
+                src={paymentMethod.image_url}
+                alt={paymentMethod.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                  const parent = target.parentElement
+                  if (parent) {
+                    const icon = document.createElement('div')
+                    icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4 text-violet-600 dark:text-violet-400"><path d="M4.5 3.75a3 3 0 00-3 3v10.5a3 3 0 003 3h15a3 3 0 003-3V6.75a3 3 0 00-3-3h-15zm4.125 3a.75.75 0 01.75-.75h3.75a.75.75 0 010 1.5h-3.75a.75.75 0 01-.75-.75zM3 11.055c0-.47.38-.855.848-.855h15.304c.468 0 .848.385.848.855v.09c0 .47-.38.855-.848.855H3.848c-.468 0-.848-.385-.848-.855v-.09z"/></svg>'
+                    parent.appendChild(icon)
+                  }
+                }}
+              />
+            ) : (
+              <CreditCardIcon className="size-4 text-violet-600 dark:text-violet-400" />
+            )}
           </div>
           
           {/* Content */}

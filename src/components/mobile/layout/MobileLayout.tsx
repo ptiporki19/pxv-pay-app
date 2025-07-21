@@ -13,9 +13,9 @@ export function MobileLayout({ children, showNavigation = false }: MobileLayoutP
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="bg-background w-full max-w-[403px] min-h-screen mx-auto relative shadow-lg border-x border-border">
+      <div className="bg-background w-full min-h-screen relative">
         {/* Mobile Header */}
-        <MobileHeader 
+        <MobileHeader
           showNotifications={showNotifications}
           setShowNotifications={setShowNotifications}
         />

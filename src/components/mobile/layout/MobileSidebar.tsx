@@ -82,9 +82,9 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
       />
       
       {/* Sidebar */}
-      <div className="fixed left-0 top-0 bottom-0 w-64 bg-background border-r border-border z-50 flex flex-col">
+      <div className="fixed left-0 top-0 bottom-0 w-64 bg-background z-50 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">P</span>
@@ -128,7 +128,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         </div>
 
         {/* Sign Out */}
-        <div className="p-3 border-t border-border">
+        <div className="p-3">
           <button
             onClick={handleSignOut}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30"

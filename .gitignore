@@ -42,3 +42,13 @@ next-env.d.ts
 
 # Personal notes and ideas (never commit)
 .me
+
+# Backup directories
+pxv_pay_backup_*/
+pxv-pay-backups/
+pxv-pay/
+backup-system/
+storage_policies_backup_*/
+
+# Roo AI files
+.roo/

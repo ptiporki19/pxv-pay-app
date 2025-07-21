@@ -9,6 +9,40 @@ class StorageService {
   private supabase = createClient()
   private bucketName = 'product-images'
 
+  async uploadPaymentMethodImage(file: File, userId: string): Promise<UploadResult> {
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${userId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+
+      // Upload file to Supabase Storage
+      const { data, error } = await this.supabase.storage
+        .from('payment-method-images')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+
+      if (error) {
+        console.error('Upload error:', error)
+        throw new Error(`Failed to upload image: ${error.message}`)
+      }
+
+      // Get public URL
+      const { data: urlData } = this.supabase.storage
+        .from('payment-method-images')
+        .getPublicUrl(fileName)
+
+      return {
+        url: urlData.publicUrl,
+        path: fileName,
+      }
+    } catch (error) {
+      console.error('Storage service error:', error)
+      throw error
+    }
+  }
+
   async uploadProductImage(file: File, userId: string): Promise<UploadResult> {
     try {
       // Generate unique filename

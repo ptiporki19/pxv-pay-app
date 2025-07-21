@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid"
+import { Upload, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -28,6 +29,7 @@ import { toast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { paymentMethodsApi, countriesApi, CustomField } from "@/lib/supabase/client-api"
+import { ImageUpload } from "@/components/ui/image-upload"
 
 // Schema matching desktop functionality
 const mobilePaymentMethodSchema = z.object({
@@ -37,6 +39,7 @@ const mobilePaymentMethodSchema = z.object({
   status: z.enum(["active", "inactive", "pending"]),
   instructions: z.string().optional(),
   url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  image_url: z.string().url("Please enter a valid image URL").optional().or(z.literal("")),
   countries: z.array(z.string()).min(1, "At least one country must be selected"),
   custom_fields: z.array(z.object({
     id: z.string(),
@@ -61,6 +64,7 @@ export function MobileCreatePaymentMethodForm() {
   const [countries, setCountries] = useState<Country[]>([])
   const [loadingCountries, setLoadingCountries] = useState(false)
   const [customFields, setCustomFields] = useState<CustomField[]>([])
+  const [imagePreview, setImagePreview] = useState<string>('')
   const router = useRouter()
 
   const form = useForm<MobilePaymentMethodValues>({
@@ -72,6 +76,7 @@ export function MobileCreatePaymentMethodForm() {
       status: "active",
       instructions: "",
       url: "",
+      image_url: "",
       countries: [],
       custom_fields: [],
     },
@@ -85,7 +90,15 @@ export function MobileCreatePaymentMethodForm() {
 
   // Update form when custom fields change
   useEffect(() => {
-    form.setValue("custom_fields", customFields)
+    const formattedFields = customFields.map(field => ({
+      id: field.id,
+      label: field.label || "",
+      value: field.value || "",
+      required: field.required || false,
+      type: field.type || "text",
+      placeholder: field.placeholder || "",
+    }))
+    form.setValue("custom_fields", formattedFields)
   }, [customFields, form])
 
   const loadCountries = async () => {
@@ -134,6 +147,64 @@ export function MobileCreatePaymentMethodForm() {
     setCustomFields(customFields.filter(field => field.id !== id))
   }
 
+  // Handle image upload
+  const handleImageUpload = async (file: File) => {
+    try {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Please select a valid image file",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Validate file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Image size must be less than 2MB",
+          variant: "destructive",
+        })
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/payment-methods/upload-image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include', // Include cookies for authentication
+        headers: {
+          // Don't set Content-Type, let browser set it with boundary for FormData
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to upload image')
+      }
+
+      const result = await response.json()
+      setImagePreview(result.url)
+      form.setValue('image_url', result.url)
+
+      toast({
+        title: "Image Uploaded",
+        description: "Payment method image uploaded successfully",
+      })
+    } catch (error) {
+      console.error('Image upload error:', error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to upload image. Please try again.",
+        variant: "destructive"
+      })
+    }
+  }
+
   async function onSubmit(values: MobilePaymentMethodValues) {
     try {
       setIsLoading(true)
@@ -145,6 +216,7 @@ export function MobileCreatePaymentMethodForm() {
         status: values.status,
         instructions: values.instructions || null,
         url: values.type === "payment-link" ? values.url || null : null,
+        image_url: values.image_url || null,
         countries: values.countries,
         custom_fields: customFields.length > 0 ? customFields : null,
       }
@@ -152,21 +224,21 @@ export function MobileCreatePaymentMethodForm() {
       await paymentMethodsApi.create(payload)
 
       toast({
-        title: "Success",
-        description: "Payment method created successfully",
+        title: "Payment Method Created",
+        description: `${values.name} has been created successfully and is now available for checkout.`,
       })
 
       router.push('/m/payment-methods')
     } catch (error) {
       console.error("Payment method creation error:", error)
       
-      let errorMessage = "There was an error creating the payment method"
+      let errorMessage = "Failed to create payment method. Please check your connection and try again."
       if (error instanceof Error) {
         errorMessage = error.message
       }
       
       toast({
-        title: "Error",
+        title: "Creation Failed",
         description: errorMessage,
         variant: "destructive"
       })
@@ -194,6 +266,15 @@ export function MobileCreatePaymentMethodForm() {
           </p>
         </div>
       </div>
+
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+            <span className="text-sm text-muted-foreground">Creating...</span>
+          </div>
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
@@ -465,6 +546,69 @@ export function MobileCreatePaymentMethodForm() {
                     {...field}
                     className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500"
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Image Upload - Exact Desktop Pattern */}
+          <FormField
+            control={form.control}
+            name="image_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xs font-medium font-roboto">Payment Method Image</FormLabel>
+                <FormControl>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            await handleImageUpload(file)
+                          }
+                        }}
+                        className="hidden"
+                        id="image-upload-mobile"
+                      />
+                      <label
+                        htmlFor="image-upload-mobile"
+                        className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload Image
+                      </label>
+                      {(field.value || imagePreview) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setImagePreview('')
+                            form.setValue('image_url', '')
+                            toast({
+                              title: "Image Removed",
+                              description: "Payment method image has been removed",
+                            })
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                    {(field.value || imagePreview) && (
+                      <div className="mt-2">
+                        <img
+                          src={imagePreview || field.value}
+                          alt="Payment method preview"
+                          className="w-full h-32 object-cover rounded-md border"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>

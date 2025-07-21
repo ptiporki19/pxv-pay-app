@@ -144,7 +144,7 @@ export function MobileHeader({
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-background">
         <div className="flex items-center justify-between px-4 py-3">
           {/* Left side: Hamburger + Logo */}
           <div className="flex items-center gap-3">

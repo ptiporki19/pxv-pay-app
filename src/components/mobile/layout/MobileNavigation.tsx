@@ -51,7 +51,7 @@ export function MobileNavigation() {
   }
 
   return (
-    <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[403px] bg-background border-t border-border z-20">
+    <div className="fixed bottom-0 left-0 right-0 w-full bg-background z-20">
       <div className="flex items-center justify-around py-2">
         {navItems.map((item) => {
           const isActive = pathname === item.path || pathname.startsWith(item.path)

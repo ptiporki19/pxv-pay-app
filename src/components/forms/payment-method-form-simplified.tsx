@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
@@ -32,7 +32,7 @@ import {
   PaymentMethodFormValues,
   CustomFieldType
 } from "@/lib/validations/admin-forms"
-import { Check, ChevronsUpDown, Plus, Trash2, Settings, Globe, MapPin, Edit, X } from "lucide-react"
+import { Check, ChevronsUpDown, Plus, Trash2, Settings, Globe, MapPin, Edit, X, ImageIcon, Upload } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Command,
@@ -50,6 +50,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useNotificationActions } from "@/providers/notification-provider"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/use-toast"
+import { storageService } from "@/lib/supabase/storage"
+import { createClient } from "@/lib/supabase/client"
 
 interface PaymentMethodFormSimplifiedProps {
   initialData?: PaymentMethod
@@ -67,6 +69,8 @@ interface ConfiguredCountry {
 
 export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentMethodFormSimplifiedProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || '')
   const [countries, setCountries] = useState<Country[]>([])
   const [configuredCountries, setConfiguredCountries] = useState<ConfiguredCountry[]>([])
   const [selectedCountry, setSelectedCountry] = useState<string>("")
@@ -75,6 +79,7 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
   const [countryUrl, setCountryUrl] = useState<string>("")
   const [countryInstructions, setCountryInstructions] = useState<string>("")
   const [editingCountry, setEditingCountry] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   
   const router = useRouter()
   const closeModal = useAdminStore((state) => state.closeModal)
@@ -116,6 +121,7 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
       url: initialData?.url || "",
       instructions: "",
       instructions_for_checkout: "",
+      image_url: initialData?.image_url || "",
     },
   })
 
@@ -296,6 +302,74 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
     setEditingCountry(null)
   }
 
+  // Handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please select a valid image file",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Validate file size (2MB limit)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Image size must be less than 2MB",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      setUploadingImage(true)
+      
+      // Get current user
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      // Upload to Supabase Storage
+      const result = await storageService.uploadPaymentMethodImage(file, user.id)
+      
+      setImagePreview(result.url)
+      form.setValue('image_url', result.url)
+      
+      toast({
+        title: "Image Uploaded",
+        description: "Payment method image uploaded successfully",
+      })
+    } catch (error: any) {
+      console.error('Error uploading image:', error)
+      toast({
+        title: "Error",
+        description: error.message || 'Failed to upload image',
+        variant: "destructive",
+      })
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  // Handle image removal
+  const handleImageRemove = () => {
+    setImagePreview('')
+    form.setValue('image_url', "")
+    toast({
+      title: "Image Removed",
+      description: "Payment method image has been removed",
+    })
+  }
+
   // Submit form
   async function onSubmit(values: PaymentMethodFormValues) {
     if (configuredCountries.length === 0) {
@@ -395,14 +469,14 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
       if (initialData?.id) {
         await paymentMethodsApi.update(initialData.id, paymentMethodData)
         toast({
-          title: "Success",
-          description: "Payment method updated successfully",
+          title: "Payment Method Updated",
+          description: `${values.name} has been updated successfully. Changes are now live.`,
         })
       } else {
         await paymentMethodsApi.create(paymentMethodData)
         toast({
-          title: "Success", 
-          description: "Payment method created successfully",
+          title: "Payment Method Created",
+          description: `${values.name} has been created successfully and is now available for checkout.`,
         })
       }
       
@@ -413,9 +487,10 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
       router.push('/payment-methods')
     } catch (error) {
       console.error("Error saving payment method:", error)
+      const action = initialData?.id ? "update" : "create"
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to save payment method",
+        title: `Failed to ${action} payment method`,
+        description: error instanceof Error ? error.message : `Unable to ${action} payment method. Please check your connection and try again.`,
         variant: "destructive",
       })
     } finally {
@@ -488,12 +563,107 @@ export function PaymentMethodFormSimplified({ initialData, onSuccess }: PaymentM
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Brief description of this payment method..."
                         className="min-h-20"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="image_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      Payment Method Image
+                    </FormLabel>
+                    <FormControl>
+                      <div className="space-y-4">
+                        {/* Image Upload Area */}
+                        <div
+                          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          {imagePreview ? (
+                            <div className="space-y-3">
+                              <div className="relative inline-block">
+                                <img
+                                  src={imagePreview}
+                                  alt="Payment method preview"
+                                  className="h-32 w-32 object-cover rounded-lg mx-auto"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setImagePreview('')
+                                    form.setValue('image_url', '')
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                Click to change image
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">
+                                {uploadingImage ? (
+                                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+                                ) : (
+                                  <Upload className="h-6 w-6 text-gray-400" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">
+                                  {uploadingImage ? 'Uploading...' : 'Click to upload image'}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  PNG, JPG, WebP up to 2MB
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Hidden file input */}
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                          disabled={uploadingImage}
+                        />
+
+                        {/* Image URL Input */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Or enter image URL</label>
+                          <Input
+                            placeholder="https://example.com/image.jpg"
+                            value={imagePreview}
+                            onChange={(e) => {
+                              setImagePreview(e.target.value)
+                              form.setValue('image_url', e.target.value)
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Upload an image to display alongside this payment method on checkout pages. Recommended size: 200x200px.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

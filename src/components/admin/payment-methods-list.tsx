@@ -66,22 +66,25 @@ export function PaymentMethodsList() {
   }, [searchQuery, statusFilter])
 
   // Handle delete payment method
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this payment method?")) return
+  const handleDelete = async (id: string, methodName: string) => {
+    if (!confirm(`Are you sure you want to delete "${methodName}"? This action cannot be undone.`)) return
     
     setIsLoading(true)
     try {
       await paymentMethodsApi.delete(id)
-      toast({ title: "Success", description: "Payment method deleted successfully" })
+      toast({
+        title: "Payment Method Deleted",
+        description: `${methodName} has been permanently removed from your payment options.`
+      })
       // Refresh the list
       const data = await paymentMethodsApi.getAll()
       setPaymentMethods(data)
     } catch (error) {
       console.error("Error deleting payment method:", error)
-      toast({ 
-        title: "Error", 
-        description: error instanceof Error ? error.message : "Failed to delete payment method", 
-        variant: "destructive" 
+      toast({
+        title: "Delete Failed",
+        description: error instanceof Error ? error.message : "Failed to delete payment method. Please try again.",
+        variant: "destructive"
       })
     } finally {
       setIsLoading(false)
@@ -176,8 +179,14 @@ export function PaymentMethodsList() {
           paymentMethods.map((method) => (
             <div key={method.id} className="flex items-center justify-between px-4 py-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/10 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700/50 last:border-0">
               <div className="w-[200px] flex items-center space-x-3">
-                {method.icon && (
+                {method.image_url ? (
+                  <img src={method.image_url} alt={method.name} className="w-8 h-8 object-cover rounded" />
+                ) : method.icon ? (
                   <img src={method.icon} alt={method.name} className="w-6 h-6 object-contain" />
+                ) : (
+                  <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center">
+                    <span className="text-xs text-gray-500">{method.name.charAt(0)}</span>
+                  </div>
                 )}
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 font-roboto">{method.name}</span>
               </div>
@@ -213,8 +222,8 @@ export function PaymentMethodsList() {
                         <span>Edit</span>
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={() => method.id && handleDelete(method.id)}
+                    <DropdownMenuItem
+                      onClick={() => method.id && handleDelete(method.id, method.name)}
                       className="text-red-600 font-roboto"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
