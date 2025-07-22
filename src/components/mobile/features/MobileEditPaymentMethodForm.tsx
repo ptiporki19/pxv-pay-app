@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/solid"
-import { Upload, Trash2 } from "lucide-react"
+import { Upload, Trash2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -25,10 +25,13 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { toast } from "@/components/ui/use-toast"
+import { mobileToastMessages } from "@/lib/mobile-toast"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { paymentMethodsApi, countriesApi, CustomField, PaymentMethod } from "@/lib/supabase/client-api"
+import { storageService } from "@/lib/supabase/storage"
+import { createClient } from "@/lib/supabase/client"
+import { useRef } from "react"
 
 // Schema matching create form
 const mobileEditPaymentMethodSchema = z.object({
@@ -68,6 +71,8 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
   const [loadingCountries, setLoadingCountries] = useState(false)
   const [customFields, setCustomFields] = useState<CustomField[]>([])
   const [imagePreview, setImagePreview] = useState<string>(initialData?.image_url || '')
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
   const form = useForm<MobileEditPaymentMethodValues>({
@@ -122,11 +127,7 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
       setCountries(formattedCountries)
     } catch (error) {
       console.error('Error loading countries:', error)
-      toast({
-        title: "Error",
-        description: "Failed to load countries. Please refresh the page.",
-        variant: "destructive"
-      })
+      mobileToastMessages.general.loadError("countries")
     } finally {
       setLoadingCountries(false)
     }
@@ -154,62 +155,54 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
     setCustomFields(customFields.filter(field => field.id !== id))
   }
 
-  // Handle image upload
-  const handleImageUpload = async (file: File) => {
+  // Handle image upload - Using desktop working implementation
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      mobileToastMessages.paymentMethod.uploadError("Please select a valid image file")
+      return
+    }
+
+    // Validate file size (2MB limit)
+    if (file.size > 2 * 1024 * 1024) {
+      mobileToastMessages.paymentMethod.uploadError("Image size must be less than 2MB")
+      return
+    }
+
     try {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Error",
-          description: "Please select a valid image file",
-          variant: "destructive",
-        })
-        return
+      setUploadingImage(true)
+      
+      // Get current user
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('User not authenticated')
       }
 
-      // Validate file size (2MB limit)
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "Image size must be less than 2MB",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const formData = new FormData()
-      formData.append('file', file)
-
-      const response = await fetch('/api/payment-methods/upload-image', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include', // Include cookies for authentication
-        headers: {
-          // Don't set Content-Type, let browser set it with boundary for FormData
-        }
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to upload image')
-      }
-
-      const result = await response.json()
+      // Upload to Supabase Storage using the working desktop method
+      const result = await storageService.uploadPaymentMethodImage(file, user.id)
+      
       setImagePreview(result.url)
       form.setValue('image_url', result.url)
-
-      toast({
-        title: "Image Updated",
-        description: "Payment method image updated successfully",
-      })
-    } catch (error) {
-      console.error('Image upload error:', error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload image. Please try again.",
-        variant: "destructive"
-      })
+      
+      mobileToastMessages.paymentMethod.imageUploaded()
+    } catch (error: any) {
+      console.error('Error uploading image:', error)
+      mobileToastMessages.paymentMethod.uploadError(error.message || 'Failed to upload image')
+    } finally {
+      setUploadingImage(false)
     }
+  }
+
+  // Handle image removal
+  const handleImageRemove = () => {
+    setImagePreview('')
+    form.setValue('image_url', "")
+    mobileToastMessages.paymentMethod.imageRemoved()
   }
 
   async function onSubmit(values: MobileEditPaymentMethodValues) {
@@ -232,10 +225,7 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
         await paymentMethodsApi.update(initialData.id, payload)
       }
 
-      toast({
-        title: "Payment Method Updated",
-        description: `${values.name} has been updated successfully. Changes are now live.`,
-      })
+      mobileToastMessages.paymentMethod.updated()
 
       router.push('/m/payment-methods')
     } catch (error) {
@@ -246,11 +236,7 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
         errorMessage = error.message
       }
       
-      toast({
-        title: "Update Failed",
-        description: errorMessage,
-        variant: "destructive"
-      })
+      mobileToastMessages.paymentMethod.updateError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -561,7 +547,7 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
             )}
           />
 
-          {/* Image Upload - Exact Desktop Pattern */}
+          {/* Image Upload - Working Desktop Implementation */}
           <FormField
             control={form.control}
             name="image_url"
@@ -569,54 +555,81 @@ export function MobileEditPaymentMethodForm({ initialData }: MobileEditPaymentMe
               <FormItem>
                 <FormLabel className="text-xs font-medium font-roboto">Payment Method Image</FormLabel>
                 <FormControl>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0]
-                          if (file) {
-                            await handleImageUpload(file)
-                          }
-                        }}
-                        className="hidden"
-                        id="image-upload-mobile-edit"
-                      />
-                      <label
-                        htmlFor="image-upload-mobile-edit"
-                        className="cursor-pointer inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2"
-                      >
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload Image
-                      </label>
-                      {(field.value || imagePreview) && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setImagePreview('')
-                            form.setValue('image_url', '')
-                            toast({
-                              title: "Image Removed",
-                              description: "Payment method image has been removed",
-                            })
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                  <div className="space-y-4">
+                    {/* Image Upload Area */}
+                    <div
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {imagePreview ? (
+                        <div className="space-y-3">
+                          <div className="relative inline-block">
+                            <img
+                              src={imagePreview}
+                              alt="Payment method preview"
+                              className="h-32 w-32 object-cover rounded-lg mx-auto"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleImageRemove()
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Click to change image
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100">
+                            {uploadingImage ? (
+                              <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
+                            ) : (
+                              <Upload className="h-6 w-6 text-gray-400" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">
+                              {uploadingImage ? 'Uploading...' : 'Click to upload image'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              PNG, JPG, WebP up to 2MB
+                            </p>
+                          </div>
+                        </div>
                       )}
                     </div>
-                    {(field.value || imagePreview) && (
-                      <div className="mt-2">
-                        <img
-                          src={imagePreview || field.value}
-                          alt="Payment method preview"
-                          className="w-full h-32 object-cover rounded-md border"
-                        />
-                      </div>
-                    )}
+
+                    {/* Hidden file input */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={uploadingImage}
+                    />
+
+                    {/* Image URL Input */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Or enter image URL</label>
+                      <Input
+                        placeholder="https://example.com/image.jpg"
+                        value={imagePreview}
+                        onChange={(e) => {
+                          setImagePreview(e.target.value)
+                          form.setValue('image_url', e.target.value)
+                        }}
+                        className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500"
+                      />
+                    </div>
                   </div>
                 </FormControl>
                 <FormMessage />

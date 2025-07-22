@@ -14,13 +14,13 @@ import {
   X
 } from "lucide-react"
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { MobileInput } from '@/components/mobile/ui/MobileInput'
 import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { toast } from '@/components/ui/use-toast'
+import { mobileToastMessages } from '@/lib/mobile-toast'
 import {
   Form,
   FormControl,
@@ -29,6 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { Input } from '@/components/ui/input'
 
 interface UserProfile {
   id: string
@@ -151,11 +152,7 @@ export function MobileProfileContent() {
 
       if (error) {
         console.warn('Could not save profile:', error.message)
-        toast({
-          title: "Profile",
-          description: "Profile saved locally. Database save may have failed.",
-          variant: "default"
-        })
+        mobileToastMessages.profile.savedLocally()
       } else {
         // Update local profile state
         setProfile({
@@ -165,19 +162,11 @@ export function MobileProfileContent() {
           phone: data.phone,
         })
         setIsEditing(false)
-        toast({
-          title: "Success",
-          description: "Profile updated successfully",
-          variant: "default"
-        })
+        mobileToastMessages.profile.updated()
       }
     } catch (error) {
       console.error('Failed to update profile:', error)
-      toast({
-        title: "Error",
-        description: "Failed to save profile",
-        variant: "destructive"
-      })
+      mobileToastMessages.profile.updateError(error instanceof Error ? error.message : undefined)
     } finally {
       setIsSaving(false)
     }

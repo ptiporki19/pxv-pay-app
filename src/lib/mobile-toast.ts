@@ -135,5 +135,18 @@ export const mobileToastMessages = {
     networkError: () => mobileToast.error('Network error. Please try again'),
     validationError: (error?: string) => mobileToast.error('Validation error', error),
     loadError: (resource?: string) => mobileToast.error(`Failed to load ${resource || 'data'}`)
+  },
+  
+  // Profile
+  profile: {
+    updated: () => mobileToast.success('Profile updated successfully'),
+    savedLocally: () => mobileToast.info('Profile saved locally. Database save may have failed'),
+    updateError: (error?: string) => mobileToast.error('Failed to save profile', error)
+  },
+  
+  // Settings
+  settings: {
+    updated: () => mobileToast.success('Settings updated successfully'),
+    updateError: (error?: string) => mobileToast.error('Failed to update settings', error)
   }
 }

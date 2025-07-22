@@ -17,6 +17,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
+import { mobileToastMessages } from '@/lib/mobile-toast'
 import {
   Form,
   FormControl,
@@ -90,8 +91,10 @@ export function MobileSettingsContent() {
     try {
       // API call would go here
       console.log('Settings updated:', data)
+      mobileToastMessages.settings.updated()
     } catch (error) {
       console.error('Failed to update settings:', error)
+      mobileToastMessages.settings.updateError(error instanceof Error ? error.message : undefined)
     } finally {
       setIsLoading(false)
     }

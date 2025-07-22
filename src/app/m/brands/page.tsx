@@ -8,6 +8,7 @@ import { MobileStats } from "@/components/mobile/ui/MobileStats"
 import { MobileSearch } from "@/components/mobile/ui/MobileSearch"
 import { BrandCard } from "@/components/mobile/features/BrandCard"
 import { brandsApi, type Brand } from "@/lib/supabase/client-api"
+import { mobileToastMessages } from "@/lib/mobile-toast"
 
 export default function MobileBrandsPage() {
   const router = useRouter()
@@ -38,6 +39,7 @@ export default function MobileBrandsPage() {
       setBrands(data)
     } catch (error) {
       console.error("Failed to load brands:", error)
+      mobileToastMessages.general.loadError("brands")
     } finally {
       setIsLoading(false)
     }
@@ -73,18 +75,22 @@ export default function MobileBrandsPage() {
   const handleDelete = async (id: string) => {
     try {
       await brandsApi.delete(id)
+      mobileToastMessages.brand.deleted()
       await loadBrands()
     } catch (error) {
       console.error("Failed to delete brand:", error)
+      mobileToastMessages.brand.deleteError(error instanceof Error ? error.message : undefined)
     }
   }
 
   const handleStatusChange = async (id: string, isActive: boolean) => {
     try {
       await brandsApi.update(id, { is_active: isActive })
+      mobileToastMessages.brand.updated()
       await loadBrands()
     } catch (error) {
       console.error("Failed to update brand status:", error)
+      mobileToastMessages.brand.updateError(error instanceof Error ? error.message : undefined)
     }
   }
 

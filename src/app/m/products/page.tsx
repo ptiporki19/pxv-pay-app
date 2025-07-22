@@ -9,6 +9,7 @@ import { MobileSearch } from "@/components/mobile/ui/MobileSearch"
 import { ProductCard } from "@/components/mobile/features/ProductCard"
 import { productTemplatesApi } from "@/lib/supabase/product-templates-api"
 import type { ProductTemplate } from "@/types/content"
+import { mobileToastMessages } from "@/lib/mobile-toast"
 
 export default function MobileProductsPage() {
   const router = useRouter()
@@ -39,6 +40,7 @@ export default function MobileProductsPage() {
       setProducts(data)
     } catch (error) {
       console.error("Failed to load products:", error)
+      mobileToastMessages.general.loadError("products")
     } finally {
       setIsLoading(false)
     }
@@ -75,20 +77,24 @@ export default function MobileProductsPage() {
   const handleDelete = async (id: string) => {
     try {
       await productTemplatesApi.delete(id)
+      mobileToastMessages.product.deleted()
       await loadProducts()
     } catch (error) {
       console.error("Failed to delete product:", error)
+      mobileToastMessages.product.deleteError(error instanceof Error ? error.message : undefined)
     }
   }
 
   const handleStatusChange = async (id: string, field: 'is_active' | 'is_featured', value: boolean) => {
     try {
       if (field === 'is_active') {
-        await productTemplatesApi.toggleActive(id)
+        await productTemplatesApi.toggleActive(id, value)
       }
+      mobileToastMessages.product.updated()
       await loadProducts()
     } catch (error) {
       console.error("Failed to update product status:", error)
+      mobileToastMessages.product.updateError(error instanceof Error ? error.message : undefined)
     }
   }
 

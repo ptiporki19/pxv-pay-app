@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { PlusIcon, LinkIcon, CheckCircleIcon } from "@heroicons/react/24/solid"
 import { CheckoutLink } from "@/types/checkout"
 import { createClient } from "@/lib/supabase/client"
-import { toast } from "@/components/ui/use-toast"
+import { mobileToastMessages } from "@/lib/mobile-toast"
 import { useRouter } from "next/navigation"
 import { MobileStats } from "@/components/mobile/ui/MobileStats"
 import { MobileSearch } from "@/components/mobile/ui/MobileSearch"
@@ -34,11 +34,7 @@ export default function MobileCheckoutLinksPage() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (!user || !user.email) {
-          toast({ 
-            title: "Error", 
-            description: "You must be logged in to view checkout links", 
-            variant: "destructive" 
-          })
+          mobileToastMessages.general.authError()
           return
         }
 
@@ -51,11 +47,7 @@ export default function MobileCheckoutLinksPage() {
 
         if (userError || !dbUser) {
           console.error('Failed to get database user:', userError)
-          toast({
-            title: "Error",
-            description: "Unable to verify user account. Please try logging in again.",
-            variant: "destructive"
-          })
+          mobileToastMessages.general.authError()
           return
         }
 
@@ -88,11 +80,7 @@ export default function MobileCheckoutLinksPage() {
         setCheckoutLinks(filteredData as CheckoutLink[])
       } catch (error) {
         console.error("Error fetching checkout links:", error)
-        toast({ 
-          title: "Error", 
-          description: "Failed to fetch checkout links", 
-          variant: "destructive" 
-        })
+        mobileToastMessages.general.loadError("checkout links")
       } finally {
         setIsLoading(false)
       }
@@ -114,8 +102,10 @@ export default function MobileCheckoutLinksPage() {
 
       // Remove from local state
       setCheckoutLinks(prev => prev.filter(link => link.id !== id))
+      mobileToastMessages.checkoutLink.deleted()
     } catch (error) {
       console.error("Error deleting checkout link:", error)
+      mobileToastMessages.checkoutLink.deleteError(error instanceof Error ? error.message : undefined)
       throw error
     }
   }
@@ -136,20 +126,18 @@ export default function MobileCheckoutLinksPage() {
       if (error) throw error
 
       // Update local state
-      setCheckoutLinks(prev => 
-        prev.map(link => 
-          link.id === id 
+      setCheckoutLinks(prev =>
+        prev.map(link =>
+          link.id === id
             ? { ...link, status, is_active: status === 'active' }
             : link
         )
       )
+      
+      mobileToastMessages.checkoutLink.updated()
     } catch (error) {
       console.error("Error updating checkout link status:", error)
-      toast({
-        title: "Error",
-        description: "Failed to update status",
-        variant: "destructive"
-      })
+      mobileToastMessages.checkoutLink.updateError("Failed to update status")
     }
   }
 
