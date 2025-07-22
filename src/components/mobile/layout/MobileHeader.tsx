@@ -3,15 +3,11 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
-  BellIcon,
-  SunIcon,
-  MoonIcon,
   UserIcon,
   Cog6ToothIcon,
   Bars3Icon,
   ShieldCheckIcon
 } from "@heroicons/react/24/solid"
-import { useTheme } from "next-themes"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import {
@@ -21,16 +17,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MobileNotifications } from "@/components/mobile/ui/MobileNotifications"
+import { NotificationsPopover } from "@/components/NotificationsPopover"
+import { ThemeToggleButton } from "@/components/theme-toggle-button"
 import { MobileSidebar } from "./MobileSidebar"
 
-// Logo component for mobile
+// Mobile Logo component - using the same working logo as desktop
 const MobileLogo = () => (
-  <div className="flex items-center gap-2">
-    <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
-      <span className="text-white font-bold text-sm">P</span>
+  <div className="flex items-center space-x-2 group">
+    <div className="relative">
+      <img
+        src="/logo.svg"
+        alt="Company Logo"
+        className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 transition-all duration-300 group-hover:scale-105"
+      />
     </div>
-    <span className="text-lg font-bold text-foreground">PXV Pay</span>
+    <div className="transition-all duration-300">
+      <span className="text-lg sm:text-xl md:text-2xl font-bold text-foreground tracking-tight group-hover:text-violet-600 transition-colors duration-300">
+        PXV Pay
+      </span>
+    </div>
   </div>
 )
 
@@ -55,33 +60,16 @@ export function MobileHeader({
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
-  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const { theme, setTheme } = useTheme()
   const router = useRouter()
 
   // Close all other menus when one opens
-  const handleMenuToggle = (menuType: 'user' | 'notifications' | 'theme' | 'sidebar') => {
+  const handleMenuToggle = (menuType: 'user' | 'sidebar') => {
     if (menuType === 'user') {
-      setIsNotificationsOpen(false)
-      setIsThemeMenuOpen(false)
       setIsSidebarOpen(false)
       setIsUserMenuOpen(!isUserMenuOpen)
-    } else if (menuType === 'notifications') {
-      setIsUserMenuOpen(false)
-      setIsThemeMenuOpen(false)
-      setIsSidebarOpen(false)
-      setIsNotificationsOpen(!isNotificationsOpen)
-    } else if (menuType === 'theme') {
-      setIsUserMenuOpen(false)
-      setIsNotificationsOpen(false)
-      setIsSidebarOpen(false)
-      setIsThemeMenuOpen(!isThemeMenuOpen)
     } else if (menuType === 'sidebar') {
       setIsUserMenuOpen(false)
-      setIsNotificationsOpen(false)
-      setIsThemeMenuOpen(false)
       setIsSidebarOpen(!isSidebarOpen)
     }
   }
@@ -164,76 +152,15 @@ export function MobileHeader({
 
           {/* Right side actions */}
           <div className="flex items-center gap-2">
-            {/* Notifications */}
-            <div className="relative">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleMenuToggle('notifications')}
-                className="h-8 w-8 p-0 relative"
-              >
-                <BellIcon className="size-4" />
-                {/* Notification dot placeholder */}
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
-              </Button>
-              
-              {isNotificationsOpen && (
-                <div className="absolute right-0 top-full mt-1 z-50">
-                  <MobileNotifications />
-                </div>
-              )}
+            {/* Desktop Notifications Component */}
+            <div className="[&_button]:text-muted-foreground [&_button:hover]:bg-muted [&_button]:h-8 [&_button]:w-8">
+              <NotificationsPopover />
             </div>
-
-            {/* Theme Toggle */}
-            <DropdownMenu 
-              open={isThemeMenuOpen} 
-              onOpenChange={(open) => {
-                if (!open) setIsThemeMenuOpen(false)
-                else handleMenuToggle('theme')
-              }}
-            >
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  {theme === 'dark' ? (
-                    <MoonIcon className="size-4" />
-                  ) : (
-                    <SunIcon className="size-4" />
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-32">
-                <DropdownMenuItem 
-                  onClick={() => {
-                    setTheme("light")
-                    setIsThemeMenuOpen(false)
-                  }} 
-                  className="text-xs"
-                >
-                  <SunIcon className="mr-2 size-3" />
-                  Light
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => {
-                    setTheme("dark")
-                    setIsThemeMenuOpen(false)
-                  }} 
-                  className="text-xs"
-                >
-                  <MoonIcon className="mr-2 size-3" />
-                  Dark
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => {
-                    setTheme("system")
-                    setIsThemeMenuOpen(false)
-                  }} 
-                  className="text-xs"
-                >
-                  <Cog6ToothIcon className="mr-2 size-3" />
-                  System
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            
+            {/* Desktop Theme Toggle Component */}
+            <div className="[&_button]:text-muted-foreground [&_button:hover]:bg-muted [&_button]:h-8 [&_button]:w-8">
+              <ThemeToggleButton />
+            </div>
 
             {/* User Menu - Only Profile & Settings */}
             <DropdownMenu 

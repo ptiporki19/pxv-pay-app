@@ -109,7 +109,7 @@ export default function EditCheckoutLinkPage({ params }: EditCheckoutLinkPagePro
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-foreground mb-2">
+          <h2 className="text-lg font-normal text-foreground mb-2">
             Checkout link not found
           </h2>
           <p className="text-muted-foreground mb-4">

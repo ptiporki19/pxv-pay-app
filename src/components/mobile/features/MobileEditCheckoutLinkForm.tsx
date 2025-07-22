@@ -796,7 +796,7 @@ export function MobileEditCheckoutLinkForm({ checkoutLink }: MobileEditCheckoutL
             <Button
               type="submit"
               disabled={isLoading || countries.length === 0 || brands.length === 0}
-              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto"
+              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto font-normal"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">

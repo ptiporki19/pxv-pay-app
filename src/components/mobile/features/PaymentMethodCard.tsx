@@ -116,20 +116,20 @@ export function PaymentMethodCard({ paymentMethod, onDelete, onStatusChange }: P
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm text-card-foreground truncate font-roboto">
+              <h3 className="text-sm font-normal text-card-foreground truncate font-roboto">
                 {paymentMethod.name}
               </h3>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(paymentMethod.status)}`}>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-normal ${getStatusColor(paymentMethod.status)}`}>
                 {paymentMethod.status}
               </span>
             </div>
             
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="font-roboto">{paymentMethod.type}</span>
+              <span className="font-normal font-roboto">{paymentMethod.type}</span>
               <span>•</span>
-              <span className="font-roboto">
-                {paymentMethod.countries && paymentMethod.countries.length > 0 
-                  ? paymentMethod.countries.join(', ') 
+              <span className="font-normal font-roboto">
+                {paymentMethod.countries && paymentMethod.countries.length > 0
+                  ? paymentMethod.countries.join(', ')
                   : 'No countries'}
               </span>
             </div>
@@ -149,7 +149,7 @@ export function PaymentMethodCard({ paymentMethod, onDelete, onStatusChange }: P
               {/* Conditionally show View Link only for payment-link type */}
               {paymentMethod.type === 'payment-link' && paymentMethod.url && (
                 <>
-                  <DropdownMenuItem onClick={handleViewLink} className="text-xs font-roboto">
+                  <DropdownMenuItem onClick={handleViewLink} className="text-xs font-normal font-roboto">
                     <ArrowTopRightOnSquareIcon className="mr-2 size-3" />
                     View Link
                   </DropdownMenuItem>
@@ -157,7 +157,7 @@ export function PaymentMethodCard({ paymentMethod, onDelete, onStatusChange }: P
                 </>
               )}
               
-              <DropdownMenuItem onClick={handleEdit} className="text-xs font-roboto">
+              <DropdownMenuItem onClick={handleEdit} className="text-xs font-normal font-roboto">
                 <PencilIcon className="mr-2 size-3" />
                 Edit
               </DropdownMenuItem>
@@ -166,17 +166,17 @@ export function PaymentMethodCard({ paymentMethod, onDelete, onStatusChange }: P
               
               {/* Status Change Options */}
               {paymentMethod.status !== 'active' && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleStatusChange('active')}
-                  className="text-xs font-roboto"
+                  className="text-xs font-normal font-roboto"
                 >
                   Activate
                 </DropdownMenuItem>
               )}
               {paymentMethod.status !== 'inactive' && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleStatusChange('inactive')}
-                  className="text-xs font-roboto"
+                  className="text-xs font-normal font-roboto"
                 >
                   Deactivate
                 </DropdownMenuItem>
@@ -184,10 +184,10 @@ export function PaymentMethodCard({ paymentMethod, onDelete, onStatusChange }: P
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="text-xs font-roboto text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                className="text-xs font-normal font-roboto text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
               >
                 <TrashIcon className="mr-2 size-3" />
                 {isDeleting ? 'Deleting...' : 'Delete'}

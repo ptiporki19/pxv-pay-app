@@ -24,14 +24,14 @@ import { NotificationsPopover } from '@/components/NotificationsPopover'
 import { ThemeToggleButton } from '@/components/theme-toggle-button'
 import { useState } from 'react'
 
-// Company logo component with actual SVG logo
+// Desktop logo component with working SVG logo
 const DashboardBrand = ({ collapsed = false }: { collapsed?: boolean }) => (
   <div className="flex items-center space-x-2 group">
     <div className="relative">
-      <img 
-        src="/logo.svg" 
-        alt="Company Logo" 
-        className="w-30 h-30 transition-all duration-300 group-hover:scale-105"
+      <img
+        src="/logo.svg"
+        alt="Company Logo"
+        className="w-12 h-12 transition-all duration-300 group-hover:scale-105"
       />
     </div>
     {!collapsed && (

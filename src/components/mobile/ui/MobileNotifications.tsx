@@ -42,8 +42,19 @@ export function MobileNotifications() {
 
       if (error) {
         console.error('Error fetching notifications:', error)
+        // Set empty array on error to prevent crash
+        setNotifications([])
       } else {
-        setNotifications(data || [])
+        // Map the database fields to match our interface
+        const mappedNotifications = (data || []).map(item => ({
+          id: item.id,
+          title: item.title,
+          message: item.message,
+          type: item.type as 'info' | 'success' | 'warning' | 'error',
+          created_at: item.created_at,
+          read: item.is_read || false
+        }))
+        setNotifications(mappedNotifications)
       }
     } catch (error) {
       console.error('Error:', error)

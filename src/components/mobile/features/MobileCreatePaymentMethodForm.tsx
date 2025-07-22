@@ -25,7 +25,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
-import { toast } from "@/components/ui/use-toast"
+import { mobileToastMessages } from "@/lib/mobile-toast"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { paymentMethodsApi, countriesApi, CustomField } from "@/lib/supabase/client-api"
@@ -115,11 +115,7 @@ export function MobileCreatePaymentMethodForm() {
       setCountries(formattedCountries)
     } catch (error) {
       console.error('Error loading countries:', error)
-      toast({
-        title: "Error",
-        description: "Failed to load countries. Please refresh the page.",
-        variant: "destructive"
-      })
+      mobileToastMessages.general.loadError("countries")
     } finally {
       setLoadingCountries(false)
     }
@@ -152,21 +148,13 @@ export function MobileCreatePaymentMethodForm() {
     try {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Error",
-          description: "Please select a valid image file",
-          variant: "destructive",
-        })
+        mobileToastMessages.paymentMethod.uploadError("Please select a valid image file")
         return
       }
 
       // Validate file size (2MB limit)
       if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "Image size must be less than 2MB",
-          variant: "destructive",
-        })
+        mobileToastMessages.paymentMethod.uploadError("Image size must be less than 2MB")
         return
       }
 
@@ -191,17 +179,10 @@ export function MobileCreatePaymentMethodForm() {
       setImagePreview(result.url)
       form.setValue('image_url', result.url)
 
-      toast({
-        title: "Image Uploaded",
-        description: "Payment method image uploaded successfully",
-      })
+      mobileToastMessages.paymentMethod.imageUploaded()
     } catch (error) {
       console.error('Image upload error:', error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload image. Please try again.",
-        variant: "destructive"
-      })
+      mobileToastMessages.paymentMethod.uploadError(error instanceof Error ? error.message : undefined)
     }
   }
 
@@ -223,10 +204,7 @@ export function MobileCreatePaymentMethodForm() {
 
       await paymentMethodsApi.create(payload)
 
-      toast({
-        title: "Payment Method Created",
-        description: `${values.name} has been created successfully and is now available for checkout.`,
-      })
+      mobileToastMessages.paymentMethod.created()
 
       router.push('/m/payment-methods')
     } catch (error) {
@@ -237,11 +215,7 @@ export function MobileCreatePaymentMethodForm() {
         errorMessage = error.message
       }
       
-      toast({
-        title: "Creation Failed",
-        description: errorMessage,
-        variant: "destructive"
-      })
+      mobileToastMessages.paymentMethod.createError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -258,10 +232,10 @@ export function MobileCreatePaymentMethodForm() {
           <ArrowLeftIcon className="size-4 text-muted-foreground" />
         </button>
         <div className="text-right">
-          <h1 className="text-lg font-semibold text-foreground font-roboto">
+          <h1 className="text-lg font-normal text-foreground font-roboto">
             Create Payment Method
           </h1>
-          <p className="text-xs text-muted-foreground font-roboto">
+          <p className="text-xs font-normal text-muted-foreground font-roboto">
             Set up a new payment option
           </p>
         </div>
@@ -285,7 +259,7 @@ export function MobileCreatePaymentMethodForm() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Payment Method Name</FormLabel>
+                <FormLabel className="text-xs font-normal font-roboto">Payment Method Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Bank Transfer, PayPal, etc."
@@ -303,7 +277,7 @@ export function MobileCreatePaymentMethodForm() {
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Payment Type</FormLabel>
+                <FormLabel className="text-xs font-normal font-roboto">Payment Type</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500">
@@ -327,7 +301,7 @@ export function MobileCreatePaymentMethodForm() {
               name="url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-medium font-roboto">Payment URL</FormLabel>
+                  <FormLabel className="text-xs font-normal font-roboto">Payment URL</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="https://payment-processor.com/pay"
@@ -346,7 +320,7 @@ export function MobileCreatePaymentMethodForm() {
             name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Status</FormLabel>
+                <FormLabel className="text-xs font-normal font-roboto">Status</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="text-xs bg-background border border-border focus:bg-background focus:ring-2 focus:ring-violet-500">
@@ -369,7 +343,7 @@ export function MobileCreatePaymentMethodForm() {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Description</FormLabel>
+                <FormLabel className="text-xs font-normal font-roboto">Description</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Brief description of this payment method"
@@ -388,7 +362,7 @@ export function MobileCreatePaymentMethodForm() {
             name="countries"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Countries</FormLabel>
+                <FormLabel className="text-xs font-normal font-roboto">Countries</FormLabel>
                 
                 <Select 
                   onValueChange={(value) => {
@@ -445,7 +419,7 @@ export function MobileCreatePaymentMethodForm() {
           {paymentType === "manual" && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-medium text-foreground font-roboto">Payment Information</h3>
+                <h3 className="text-xs font-normal text-foreground font-roboto">Payment Information</h3>
                 <Button
                   type="button"
                   onClick={addCustomField}
@@ -460,7 +434,7 @@ export function MobileCreatePaymentMethodForm() {
 
               {customFields.length === 0 ? (
                 <div className="text-center py-4 border border-dashed rounded-lg">
-                  <p className="text-xs text-muted-foreground font-roboto">
+                  <p className="text-xs font-normal text-muted-foreground font-roboto">
                     No payment information configured
                   </p>
                   <Button
@@ -481,7 +455,7 @@ export function MobileCreatePaymentMethodForm() {
                       {/* Field Name and Value on same line */}
                       <div className="grid grid-cols-2 gap-2 mb-2">
                         <div>
-                          <label className="block text-xs font-medium text-foreground font-roboto mb-1">
+                          <label className="block text-xs font-normal text-foreground font-roboto mb-1">
                             Field Name
                           </label>
                           <Input
@@ -492,7 +466,7 @@ export function MobileCreatePaymentMethodForm() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-foreground font-roboto mb-1">
+                          <label className="block text-xs font-normal text-foreground font-roboto mb-1">
                             Field Value
                           </label>
                           <Input
@@ -513,7 +487,7 @@ export function MobileCreatePaymentMethodForm() {
                               updateCustomField(field.id, { required: checked as boolean })
                             }
                           />
-                          <label htmlFor={`required-${field.id}`} className="text-xs font-roboto">
+                          <label htmlFor={`required-${field.id}`} className="text-xs font-normal font-roboto">
                             Required field
                           </label>
                         </div>
@@ -539,7 +513,7 @@ export function MobileCreatePaymentMethodForm() {
             name="instructions"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Instructions for Users</FormLabel>
+                <FormLabel className="text-xs font-normal font-roboto">Instructions for Users</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Enter specific instructions for customers using this payment method..."
@@ -558,7 +532,7 @@ export function MobileCreatePaymentMethodForm() {
             name="image_url"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium font-roboto">Payment Method Image</FormLabel>
+                <FormLabel className="text-xs font-normal font-roboto">Payment Method Image</FormLabel>
                 <FormControl>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
@@ -589,10 +563,7 @@ export function MobileCreatePaymentMethodForm() {
                           onClick={() => {
                             setImagePreview('')
                             form.setValue('image_url', '')
-                            toast({
-                              title: "Image Removed",
-                              description: "Payment method image has been removed",
-                            })
+                            mobileToastMessages.paymentMethod.imageRemoved()
                           }}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -620,17 +591,17 @@ export function MobileCreatePaymentMethodForm() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto"
+              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto font-normal"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-                  <span className="text-xs">Creating...</span>
+                  <span className="text-xs font-normal">Creating...</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <PlusIcon className="size-3" />
-                  <span className="text-xs">Create Payment Method</span>
+                  <span className="text-xs font-normal">Create Payment Method</span>
                 </div>
               )}
             </Button>

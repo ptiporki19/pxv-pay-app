@@ -360,7 +360,7 @@ export function MobileCreateProductForm() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto"
+              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto font-normal"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">

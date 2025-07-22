@@ -98,7 +98,7 @@ export function MobileSettingsContent() {
   }
 
   return (
-    <div className="px-4 py-3 pb-20 pt-12">
+    <div className="px-4 py-3 pb-20 pt-20">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <button
@@ -108,7 +108,7 @@ export function MobileSettingsContent() {
           <ArrowLeftIcon className="size-4 text-muted-foreground" />
         </button>
         <div className="text-right">
-          <h1 className="text-lg font-semibold text-foreground font-roboto">
+          <h1 className="text-lg font-normal text-foreground font-roboto">
             Settings
           </h1>
         </div>
@@ -129,7 +129,7 @@ export function MobileSettingsContent() {
           {/* Essential Settings */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium font-roboto">Email Notifications</Label>
+              <Label className="text-xs font-normal font-roboto">Email Notifications</Label>
               <Switch
                 checked={form.watch('notifications.email')}
                 onCheckedChange={(checked) => form.setValue('notifications.email', checked)}
@@ -137,7 +137,7 @@ export function MobileSettingsContent() {
             </div>
             
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium font-roboto">Push Notifications</Label>
+              <Label className="text-xs font-normal font-roboto">Push Notifications</Label>
               <Switch
                 checked={form.watch('notifications.push')}
                 onCheckedChange={(checked) => form.setValue('notifications.push', checked)}
@@ -145,7 +145,7 @@ export function MobileSettingsContent() {
             </div>
             
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium font-roboto flex items-center">
+              <Label className="text-xs font-normal font-roboto flex items-center">
                 <MoonIcon className="mr-2 h-3 w-3" />
                 Dark Mode
               </Label>
@@ -156,7 +156,7 @@ export function MobileSettingsContent() {
             </div>
             
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium font-roboto flex items-center">
+              <Label className="text-xs font-normal font-roboto flex items-center">
                 <ShieldCheckIcon className="mr-2 h-3 w-3" />
                 Two-Factor Auth
               </Label>
@@ -185,7 +185,7 @@ export function MobileSettingsContent() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto"
+              className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto font-normal"
             >
               {isLoading ? (
                 <div className="flex items-center gap-2">

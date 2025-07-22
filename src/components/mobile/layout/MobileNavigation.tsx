@@ -67,7 +67,7 @@ export function MobileNavigation() {
               }`}
             >
               <item.icon className="size-4 mb-1" />
-              <span className="text-xs font-medium font-roboto">
+              <span className="text-xs font-normal font-roboto">
                 {item.label}
               </span>
             </button>

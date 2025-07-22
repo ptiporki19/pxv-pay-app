@@ -232,7 +232,7 @@ export function MobileProfileContent() {
 
   if (!profile) {
     return (
-      <div className="px-4 py-3 pb-20 pt-12">
+      <div className="px-4 py-3 pb-20 pt-20">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <p className="text-base font-medium">Profile not found</p>
@@ -254,7 +254,7 @@ export function MobileProfileContent() {
           <ArrowLeft className="size-4 text-muted-foreground" />
         </button>
         <div className="text-right">
-          <h1 className="text-lg font-semibold text-foreground font-roboto">
+          <h1 className="text-lg font-normal text-foreground font-roboto">
             Profile
           </h1>
         </div>
@@ -282,7 +282,7 @@ export function MobileProfileContent() {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h2 className="text-base font-semibold text-foreground font-roboto">
+              <h2 className="text-base font-normal text-foreground font-roboto">
                 {getDisplayName()}
               </h2>
               <p className="text-xs text-muted-foreground font-roboto">{profile.email}</p>
@@ -306,7 +306,7 @@ export function MobileProfileContent() {
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-medium font-roboto">First Name</FormLabel>
+                  <FormLabel className="text-xs font-normal font-roboto">First Name</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -324,7 +324,7 @@ export function MobileProfileContent() {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-medium font-roboto">Last Name</FormLabel>
+                  <FormLabel className="text-xs font-normal font-roboto">Last Name</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -342,7 +342,7 @@ export function MobileProfileContent() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-medium font-roboto">Email</FormLabel>
+                  <FormLabel className="text-xs font-normal font-roboto">Email</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
@@ -361,7 +361,7 @@ export function MobileProfileContent() {
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-xs font-medium font-roboto">Phone</FormLabel>
+                  <FormLabel className="text-xs font-normal font-roboto">Phone</FormLabel>
                   <FormControl>
                     <Input
                       type="tel"
@@ -383,7 +383,7 @@ export function MobileProfileContent() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-xs font-medium font-roboto">Email Notifications</Label>
+                  <Label className="text-xs font-normal font-roboto">Email Notifications</Label>
                   <p className="text-xs text-muted-foreground font-roboto">Receive updates via email</p>
                 </div>
                 <Switch
@@ -395,7 +395,7 @@ export function MobileProfileContent() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-xs font-medium font-roboto">SMS Notifications</Label>
+                  <Label className="text-xs font-normal font-roboto">SMS Notifications</Label>
                   <p className="text-xs text-muted-foreground font-roboto">Receive updates via SMS</p>
                 </div>
                 <Switch
@@ -407,7 +407,7 @@ export function MobileProfileContent() {
               
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-xs font-medium font-roboto">Push Notifications</Label>
+                  <Label className="text-xs font-normal font-roboto">Push Notifications</Label>
                   <p className="text-xs text-muted-foreground font-roboto">Receive push notifications</p>
                 </div>
                 <Switch
@@ -450,7 +450,7 @@ export function MobileProfileContent() {
               <Button
                 type="submit"
                 disabled={isSaving}
-                className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto"
+                className="w-full h-10 bg-violet-600 hover:bg-violet-700 text-white font-roboto font-normal"
               >
                 {isSaving ? (
                   <div className="flex items-center gap-2">

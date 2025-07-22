@@ -1,25 +1,32 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ShieldCheckIcon, ClockIcon, CheckCircleIcon } from "@heroicons/react/24/solid"
+import { DocumentChartBarIcon, CheckCircleIcon, ArrowLeftIcon } from "@heroicons/react/24/solid"
 import { MobileStats } from "@/components/mobile/ui/MobileStats"
 import { MobileSearch } from "@/components/mobile/ui/MobileSearch"
 import { PaymentVerificationCard } from "@/components/mobile/features/PaymentVerificationCard"
+import { Button } from "@/components/ui/button"
 import { paymentsApi, type Payment } from "@/lib/supabase/client-api"
 import { mobileToastMessages } from "@/lib/mobile-toast"
 
-export default function MobileVerificationPage() {
+export default function MobileTransactionsPage() {
   const [payments, setPayments] = useState<Payment[]>([])
   const [filteredPayments, setFilteredPayments] = useState<Payment[]>([])
+  const [displayedPayments, setDisplayedPayments] = useState<Payment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("pending_verification")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
+
+  const ITEMS_PER_PAGE = 20
 
   const filterOptions = [
-    { id: "pending_verification", label: "Pending" },
-    { id: "completed", label: "Approved" },
-    { id: "failed", label: "Rejected" },
     { id: "all", label: "All Status" },
+    { id: "completed", label: "Completed" },
+    { id: "failed", label: "Failed" },
+    { id: "pending", label: "Pending" },
+    { id: "pending_verification", label: "Pending Verification" },
   ]
 
   useEffect(() => {
@@ -29,6 +36,10 @@ export default function MobileVerificationPage() {
   useEffect(() => {
     filterPayments()
   }, [payments, searchQuery, statusFilter])
+
+  useEffect(() => {
+    updateDisplayedPayments()
+  }, [filteredPayments, currentPage])
 
   const loadPayments = async () => {
     try {
@@ -62,6 +73,20 @@ export default function MobileVerificationPage() {
     }
 
     setFilteredPayments(filtered)
+    setCurrentPage(1) // Reset to first page when filters change
+  }
+
+  const updateDisplayedPayments = () => {
+    const startIndex = 0
+    const endIndex = currentPage * ITEMS_PER_PAGE
+    const displayed = filteredPayments.slice(startIndex, endIndex)
+    
+    setDisplayedPayments(displayed)
+    setHasMore(endIndex < filteredPayments.length)
+  }
+
+  const handleLoadMore = () => {
+    setCurrentPage(prev => prev + 1)
   }
 
   const handleVerifyPayment = async (paymentId: string, newStatus: 'completed' | 'failed') => {
@@ -84,32 +109,36 @@ export default function MobileVerificationPage() {
   }
 
   const totalPayments = payments.length
-  const pendingPayments = payments.filter(p => p.status === 'pending_verification').length
   const approvedPayments = payments.filter(p => p.status === 'completed').length
 
   return (
     <div className="px-4 py-3 pb-20 pt-16">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="text-lg font-normal text-foreground font-roboto">
-          Payment Verification
-        </h1>
-        <p className="text-sm text-muted-foreground font-roboto">
-          Review and verify customer payments
-        </p>
+      <div className="mb-4 flex items-center">
+        <Button variant="ghost" size="sm" className="mr-2 p-0 h-auto" onClick={() => window.history.back()}>
+          <ArrowLeftIcon className="h-5 w-5 text-foreground" />
+        </Button>
+        <div className="flex-1 text-right">
+          <h1 className="text-lg font-normal text-foreground font-roboto">
+            My Transactions
+          </h1>
+          <p className="text-sm text-muted-foreground font-roboto">
+            View and manage all your transactions
+          </p>
+        </div>
       </div>
 
       {/* Stats Cards */}
       <MobileStats
         stats={[
           {
-            title: "Pending",
-            value: pendingPayments.toString(),
-            icon: ClockIcon,
-            color: "yellow"
+            title: "Total Transactions",
+            value: totalPayments.toString(),
+            icon: DocumentChartBarIcon,
+            color: "blue"
           },
           {
-            title: "Approved", 
+            title: "Approved Transactions", 
             value: approvedPayments.toString(),
             icon: CheckCircleIcon,
             color: "green"
@@ -121,39 +150,54 @@ export default function MobileVerificationPage() {
       <MobileSearch
         searchValue={searchQuery}
         onSearchChange={setSearchQuery}
-        placeholder="Search payments..."
+        placeholder="Search transactions..."
         filterOptions={filterOptions}
         activeFilter={statusFilter}
         onFilterChange={setStatusFilter}
       />
 
-      {/* Payment Verification List */}
+      {/* Transaction List */}
       <div className="space-y-3">
         {isLoading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto"></div>
           </div>
-        ) : filteredPayments.length === 0 ? (
+        ) : displayedPayments.length === 0 ? (
           <div className="text-center py-8">
-            <ShieldCheckIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-2 text-sm font-medium text-muted-foreground">No payments found</h3>
+            <DocumentChartBarIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-2 text-sm font-medium text-muted-foreground">No transactions found</h3>
             <p className="mt-1 text-sm text-muted-foreground">
               {searchQuery || statusFilter !== "all" 
                 ? "Try adjusting your search or filter" 
-                : "No payment verifications yet"
+                : "No transactions yet"
               }
             </p>
           </div>
         ) : (
-          filteredPayments.map((payment) => (
-            <PaymentVerificationCard
-              key={payment.id}
-              payment={payment}
-              onVerifyPayment={handleVerifyPayment}
-            />
-          ))
+          <>
+            {displayedPayments.map((payment) => (
+              <PaymentVerificationCard
+                key={payment.id}
+                payment={payment}
+                onVerifyPayment={handleVerifyPayment}
+              />
+            ))}
+            
+            {/* Load More Button */}
+            {hasMore && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleLoadMore}
+                  className="text-sm font-normal"
+                >
+                  View More Transactions
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
   )
-} 
+}

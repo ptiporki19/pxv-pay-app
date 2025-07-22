@@ -108,7 +108,7 @@ export function PaymentVerificationCard({ payment, onVerifyPayment }: PaymentVer
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm text-card-foreground truncate font-roboto font-semibold">
+              <h3 className="text-sm text-card-foreground truncate font-roboto font-normal">
                 {formatAmount(payment.amount, payment.currency)}
               </h3>
               <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
@@ -117,7 +117,7 @@ export function PaymentVerificationCard({ payment, onVerifyPayment }: PaymentVer
             </div>
             
             <div className="mb-1">
-              <p className="text-sm font-medium text-card-foreground font-roboto">
+              <p className="text-sm font-normal text-card-foreground font-roboto">
                 {payment.payment_method}
               </p>
             </div>

@@ -110,20 +110,20 @@ export function CheckoutLinkCard({ link, onDelete, onStatusChange }: CheckoutLin
           {/* Content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm text-card-foreground truncate font-roboto">
+              <h3 className="text-sm text-card-foreground truncate font-roboto font-normal">
                 {link.title}
               </h3>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(link.status)}`}>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-normal ${getStatusColor(link.status)}`}>
                 {link.status}
               </span>
             </div>
             
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="font-roboto">{link.slug}</span>
+              <span className="font-roboto font-normal">{link.slug}</span>
               <span>•</span>
-              <span className="font-roboto">
-                {link.active_country_codes && link.active_country_codes.length > 0 
-                  ? link.active_country_codes.join(', ') 
+              <span className="font-roboto font-normal">
+                {link.active_country_codes && link.active_country_codes.length > 0
+                  ? link.active_country_codes.join(', ')
                   : 'No countries'}
               </span>
             </div>
@@ -151,12 +151,12 @@ export function CheckoutLinkCard({ link, onDelete, onStatusChange }: CheckoutLin
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem onClick={handleViewCheckout} className="text-xs font-roboto">
+              <DropdownMenuItem onClick={handleViewCheckout} className="text-xs font-roboto font-normal">
                 <ArrowTopRightOnSquareIcon className="mr-2 size-3" />
                 View checkout link
               </DropdownMenuItem>
               
-              <DropdownMenuItem onClick={handleEdit} className="text-xs font-roboto">
+              <DropdownMenuItem onClick={handleEdit} className="text-xs font-roboto font-normal">
                 <PencilIcon className="mr-2 size-3" />
                 Edit
               </DropdownMenuItem>
@@ -165,17 +165,17 @@ export function CheckoutLinkCard({ link, onDelete, onStatusChange }: CheckoutLin
               
               {/* Status Change Options */}
               {link.status !== 'active' && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleStatusChange('active')}
-                  className="text-xs font-roboto"
+                  className="text-xs font-roboto font-normal"
                 >
                   Activate
                 </DropdownMenuItem>
               )}
               {link.status !== 'inactive' && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleStatusChange('inactive')}
-                  className="text-xs font-roboto"
+                  className="text-xs font-roboto font-normal"
                 >
                   Deactivate
                 </DropdownMenuItem>
@@ -183,10 +183,10 @@ export function CheckoutLinkCard({ link, onDelete, onStatusChange }: CheckoutLin
               
               <DropdownMenuSeparator />
               
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="text-xs font-roboto text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
+                className="text-xs font-roboto font-normal text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
               >
                 <TrashIcon className="mr-2 size-3" />
                 {isDeleting ? 'Deleting...' : 'Delete'}

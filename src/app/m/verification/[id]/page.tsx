@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { 
-  ArrowLeftIcon, 
-  CheckIcon, 
+import {
+  ArrowLeftIcon,
+  CheckIcon,
   XMarkIcon,
   DocumentIcon,
   PhotoIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  InformationCircleIcon
 } from "@heroicons/react/24/solid"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -21,6 +22,7 @@ export default function MobileTransactionDetailsPage() {
   const [payment, setPayment] = useState<Payment | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showImageModal, setShowImageModal] = useState(false)
 
   useEffect(() => {
     if (params.id) {
@@ -175,11 +177,17 @@ export default function MobileTransactionDetailsPage() {
     }
   }
 
+  const handleViewImage = () => {
+    if (payment?.payment_proof_url && isImageFile(payment.payment_proof_url)) {
+      setShowImageModal(true)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="px-4 py-3 pb-20 pt-16">
         <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto"></div>
         </div>
       </div>
     )
@@ -189,7 +197,7 @@ export default function MobileTransactionDetailsPage() {
     return (
       <div className="px-4 py-3 pb-20 pt-16">
         <div className="text-center py-12">
-          <h3 className="text-lg font-medium text-muted-foreground">Payment not found</h3>
+          <h3 className="text-base font-medium text-muted-foreground">Payment not found</h3>
         </div>
       </div>
     )
@@ -206,7 +214,7 @@ export default function MobileTransactionDetailsPage() {
           <ArrowLeftIcon className="size-4 text-muted-foreground" />
         </button>
         <div className="text-right">
-          <h1 className="text-lg font-semibold text-foreground font-roboto">
+          <h1 className="text-base font-normal text-foreground font-roboto">
             Payment Details
           </h1>
           <p className="text-xs text-muted-foreground font-roboto">
@@ -220,7 +228,7 @@ export default function MobileTransactionDetailsPage() {
         {/* Amount and Status */}
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold text-card-foreground font-roboto">
+            <h2 className="text-base font-normal text-card-foreground font-roboto">
               {formatAmount(payment.amount, payment.currency)}
             </h2>
             <Badge variant={getStatusVariant(payment.status)} className={getStatusColor(payment.status)}>
@@ -234,7 +242,7 @@ export default function MobileTransactionDetailsPage() {
 
         {/* Customer Information */}
         <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-card-foreground mb-3 font-roboto">Customer Information</h3>
+          <h3 className="text-sm font-normal text-card-foreground mb-3 font-roboto">Customer Information</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground font-roboto">Name:</span>
@@ -253,7 +261,7 @@ export default function MobileTransactionDetailsPage() {
 
         {/* Transaction Details */}
         <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-card-foreground mb-3 font-roboto">Transaction Details</h3>
+          <h3 className="text-sm font-normal text-card-foreground mb-3 font-roboto">Transaction Details</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground font-roboto">Transaction ID:</span>
@@ -279,7 +287,7 @@ export default function MobileTransactionDetailsPage() {
         {/* Payment Proof */}
         {payment.payment_proof_url && (
           <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-card-foreground mb-3 font-roboto">Payment Proof</h3>
+            <h3 className="text-sm font-normal text-card-foreground mb-3 font-roboto">Payment Proof</h3>
             
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -292,15 +300,26 @@ export default function MobileTransactionDetailsPage() {
                   {isImageFile(payment.payment_proof_url) ? 'Image File' : isPdfFile(payment.payment_proof_url) ? 'PDF Document' : 'File'}
                 </span>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadProof}
-                className="text-xs"
-              >
-                <ArrowDownTrayIcon className="size-3 mr-1" />
-                Download
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleViewImage}
+                  className="p-1 h-6 w-6"
+                  title="View larger image"
+                >
+                  <InformationCircleIcon className="size-4 text-violet-600" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadProof}
+                  className="text-xs"
+                >
+                  <ArrowDownTrayIcon className="size-3 mr-1" />
+                  Download
+                </Button>
+              </div>
             </div>
 
             {isImageFile(payment.payment_proof_url) && (
@@ -322,7 +341,7 @@ export default function MobileTransactionDetailsPage() {
               variant="destructive"
               onClick={() => handleVerifyPayment('failed')}
               disabled={isProcessing}
-              className="flex-1 h-10 font-roboto"
+              className="flex-1 h-10 font-normal"
             >
               <XMarkIcon className="size-4 mr-2" />
               {isProcessing ? 'Processing...' : 'Reject Payment'}
@@ -331,7 +350,7 @@ export default function MobileTransactionDetailsPage() {
               variant="default"
               onClick={() => handleVerifyPayment('completed')}
               disabled={isProcessing}
-              className="flex-1 h-10 bg-emerald-600 hover:bg-emerald-700 font-roboto"
+              className="flex-1 h-10 bg-emerald-600 hover:bg-emerald-700 font-normal"
             >
               <CheckIcon className="size-4 mr-2" />
               {isProcessing ? 'Processing...' : 'Approve Payment'}
@@ -339,6 +358,29 @@ export default function MobileTransactionDetailsPage() {
           </div>
         )}
       </div>
+
+      {/* Image Modal */}
+      {showImageModal && payment?.payment_proof_url && isImageFile(payment.payment_proof_url) && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowImageModal(false)}
+        >
+          <div className="relative max-w-full max-h-full">
+            <img
+              src={payment.payment_proof_url}
+              alt="Payment proof enlarged"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75"
+            >
+              <XMarkIcon className="size-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

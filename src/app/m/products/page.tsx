@@ -100,7 +100,7 @@ export default function MobileProductsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground font-roboto">
+          <h1 className="text-lg font-normal text-foreground font-roboto">
             Products
           </h1>
           <p className="text-sm text-muted-foreground font-roboto">
@@ -149,7 +149,7 @@ export default function MobileProductsPage() {
       <div className="space-y-3">
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto"></div>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-8">

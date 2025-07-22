@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { PlusIcon, CreditCardIcon, CheckCircleIcon } from "@heroicons/react/24/solid"
 import { PaymentMethod, paymentMethodsApi } from "@/lib/supabase/client-api"
 import { createClient } from "@/lib/supabase/client"
-import { toast } from "@/components/ui/use-toast"
+import { mobileToastMessages } from "@/lib/mobile-toast"
 import { useRouter } from "next/navigation"
 import { MobileStats } from "@/components/mobile/ui/MobileStats"
 import { MobileSearch } from "@/components/mobile/ui/MobileSearch"
@@ -34,11 +34,7 @@ export default function MobilePaymentMethodsPage() {
         const { data: { user } } = await supabase.auth.getUser()
         
         if (!user || !user.email) {
-          toast({ 
-            title: "Error", 
-            description: "You must be logged in to view payment methods", 
-            variant: "destructive" 
-          })
+          mobileToastMessages.general.authError()
           return
         }
 
@@ -61,11 +57,7 @@ export default function MobilePaymentMethodsPage() {
         setPaymentMethods(filteredData as PaymentMethod[])
       } catch (error) {
         console.error("Error fetching payment methods:", error)
-        toast({ 
-          title: "Error", 
-          description: "Failed to fetch payment methods", 
-          variant: "destructive" 
-        })
+        mobileToastMessages.general.loadError("payment methods")
       } finally {
         setIsLoading(false)
       }
@@ -78,20 +70,13 @@ export default function MobilePaymentMethodsPage() {
   const handleDelete = async (id: string) => {
     try {
       await paymentMethodsApi.delete(id)
-      toast({ 
-        title: "Success", 
-        description: "Payment method deleted successfully" 
-      })
+      mobileToastMessages.paymentMethod.deleted()
       
       // Remove from local state
       setPaymentMethods(prev => prev.filter(method => method.id !== id))
     } catch (error) {
       console.error("Error deleting payment method:", error)
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete payment method",
-        variant: "destructive"
-      })
+      mobileToastMessages.paymentMethod.deleteError(error instanceof Error ? error.message : undefined)
     }
   }
 
@@ -111,17 +96,10 @@ export default function MobilePaymentMethodsPage() {
         )
       )
       
-      toast({
-        title: "Success",
-        description: "Payment method status updated"
-      })
+      mobileToastMessages.paymentMethod.statusUpdated()
     } catch (error) {
       console.error("Error updating payment method status:", error)
-      toast({
-        title: "Error",
-        description: "Failed to update status",
-        variant: "destructive"
-      })
+      mobileToastMessages.paymentMethod.updateError("Failed to update status")
     }
   }
 
@@ -133,7 +111,7 @@ export default function MobilePaymentMethodsPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground font-roboto">
+          <h1 className="text-lg font-normal text-foreground font-roboto">
             Payment Methods
           </h1>
           <p className="text-sm text-muted-foreground font-roboto">
@@ -182,7 +160,7 @@ export default function MobilePaymentMethodsPage() {
       <div className="space-y-3">
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto"></div>
           </div>
         ) : paymentMethods.length === 0 ? (
           <div className="text-center py-8">

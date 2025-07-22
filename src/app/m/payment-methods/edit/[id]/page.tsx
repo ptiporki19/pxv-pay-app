@@ -50,7 +50,7 @@ export default function MobileEditPaymentMethodPage() {
     return (
       <div className="px-4 py-3 pb-20 pt-12">
         <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-violet-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto"></div>
         </div>
       </div>
     )
