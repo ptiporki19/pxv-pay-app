@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Roboto, Roboto_Mono, Inter, Fascinate } from "next/font/google";
+import { Roboto, Roboto_Mono, Inter, Fascinate, Lato } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { NotificationProvider } from "@/providers/notification-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -34,6 +34,13 @@ const fascinate = Fascinate({
   weight: ["400"],
 });
 
+const lato = Lato({
+  variable: "--font-lato",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "700", "900"],
+});
+
 export const metadata: Metadata = {
   title: "PXV Pay | Beyond Boundaries",
   description: "Empower your business with PXV Pay's customizable payment platform. Accept payments worldwide with transparent pricing and complete control.",
@@ -59,7 +66,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${roboto.variable} ${robotoMono.variable} ${inter.variable} ${fascinate.variable} antialiased text-foreground bg-background font-sans`}
+        className={`${roboto.variable} ${robotoMono.variable} ${inter.variable} ${fascinate.variable} ${lato.variable} antialiased text-foreground bg-background font-sans`}
       >
         <ThemeProvider defaultTheme="system" storageKey="pxv-theme">
           <NotificationProvider>

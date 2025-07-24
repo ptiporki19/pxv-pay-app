@@ -24,14 +24,16 @@ interface RichTextEditorProps {
   placeholder?: string
   className?: string
   maxHeight?: string
+  outputFormat?: 'html' | 'text'
 }
 
-export function RichTextEditor({ 
-  content, 
-  onChange, 
+export function RichTextEditor({
+  content,
+  onChange,
   placeholder = "Write your content...",
   className,
-  maxHeight = "300px"
+  maxHeight = "300px",
+  outputFormat = 'text'
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -51,7 +53,12 @@ export function RichTextEditor({
     ],
     content: content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML())
+      if (outputFormat === 'html') {
+        onChange(editor.getHTML())
+      } else {
+        // Get plain text without HTML tags
+        onChange(editor.getText())
+      }
     },
     editorProps: {
       attributes: {

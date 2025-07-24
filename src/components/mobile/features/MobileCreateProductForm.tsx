@@ -298,9 +298,10 @@ export function MobileCreateProductForm() {
               Description (Optional)
             </label>
             <RichTextEditor
-              value={description}
+              content={description}
               onChange={setDescription}
               placeholder="Enter product description..."
+              outputFormat="text"
             />
             {descriptionError && (
               <p className="text-xs text-destructive mt-1">{descriptionError}</p>

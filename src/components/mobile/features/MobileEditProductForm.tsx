@@ -335,10 +335,11 @@ export function MobileEditProductForm({ productId }: MobileEditProductFormProps)
                 Description
               </label>
               <RichTextEditor
-                value={description}
+                content={description}
                 onChange={setDescription}
                 placeholder="Enter product description..."
                 className="min-h-[120px]"
+                outputFormat="text"
               />
               {descriptionError && (
                 <p className="text-sm text-red-600 mt-1">{descriptionError}</p>

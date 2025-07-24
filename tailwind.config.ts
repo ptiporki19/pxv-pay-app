@@ -22,6 +22,8 @@ const config: Config = {
         sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
         heading: ["var(--font-inter)", "system-ui", "sans-serif"],
         mono: ["var(--font-geist-mono)", "monospace"],
+        lato: ["var(--font-lato)", "system-ui", "sans-serif"],
+        roboto: ["Roboto", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

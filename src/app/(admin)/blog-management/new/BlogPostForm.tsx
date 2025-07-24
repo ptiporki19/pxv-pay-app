@@ -292,6 +292,7 @@ export default function BlogPostForm({ user }: BlogPostFormProps) {
                   onChange={(content) => setFormData(prev => ({ ...prev, content }))}
                   placeholder="Write your blog post content here..."
                   maxHeight="400px"
+                  outputFormat="html"
                 />
                 <p className="text-sm text-muted-foreground mt-1">
                   Use the toolbar above to format your content with headings, lists, links, and more

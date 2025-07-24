@@ -61,6 +61,11 @@ const enhancedCheckoutLinkFormSchema = z.object({
   max_amount: z.number({ coerce: true, invalid_type_error: "Maximum amount must be a number" }).optional(),
   country_codes: z.array(z.string()).min(1, "At least one country must be selected"),
   status: z.enum(["active", "inactive", "draft"]),
+  // Mobile-specific fields
+  custom_text: z.string().max(150, "Custom text must be less than 150 characters").optional(),
+  redirect_url: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  redirect_button_text: z.string().max(100, "Button text must be less than 100 characters").optional(),
+  redirect_message: z.string().max(200, "Redirect message must be less than 200 characters").optional(),
 })
 .superRefine((data, ctx) => {
   // Product checkout validation
@@ -274,6 +279,10 @@ export function EnhancedCreateCheckoutLinkForm() {
       country_codes: [],
       status: "draft",
       custom_price: 0,
+      custom_text: "",
+      redirect_url: "",
+      redirect_button_text: "",
+      redirect_message: "",
     },
   })
 
@@ -408,7 +417,7 @@ export function EnhancedCreateCheckoutLinkForm() {
       const { data: dbUser, error: userError } = await supabase
         .from('users')
         .select('id, email, role')
-        .eq('email', user.email)
+        .eq('email', user.email!)
         .single()
 
       if (userError || !dbUser) {
@@ -480,6 +489,10 @@ export function EnhancedCreateCheckoutLinkForm() {
         checkout_page_heading: "Complete Your Payment",
         payment_review_message: "Thank you for your payment. We will review and confirm within 24 hours.",
         checkout_type: values.checkout_type,
+        custom_text: values.custom_text || null,
+        redirect_url: values.redirect_url || null,
+        redirect_button_text: values.redirect_button_text || null,
+        redirect_message: values.redirect_message || null,
       }
 
       if (values.checkout_type === 'product') {
@@ -1192,6 +1205,124 @@ export function EnhancedCreateCheckoutLinkForm() {
                         </FormItem>
                       )}
                     />
+                  </CardContent>
+                </Card>
+
+                {/* Mobile Customization */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Mobile Customization</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Customize the mobile checkout experience with personalized text and redirect options
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="custom_text"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Custom Brand Text</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., Best shoe service in town. Complete your payment now!"
+                              {...field}
+                              maxLength={150}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Custom text to display on checkout pages instead of default text. Leave empty to use default text. ({field.value?.length || 0}/150 characters)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="redirect_url"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Redirect URL (Optional)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="url"
+                                placeholder="https://wa.me/1234567890 or https://yoursite.com"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              URL to redirect users after payment confirmation
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="redirect_button_text"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Button Text (Optional)</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="Continue to WhatsApp"
+                                {...field}
+                                maxLength={100}
+                              />
+                            </FormControl>
+                            <FormDescription>
+                              Text for the redirect button
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="redirect_message"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Redirect Message (Optional)</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Thank you for your payment! Click below to continue."
+                              {...field}
+                              maxLength={200}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Additional message to show before the redirect button ({field.value?.length || 0}/200 characters)
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Preview of redirect configuration */}
+                    {(form.watch("redirect_url") || form.watch("redirect_button_text") || form.watch("redirect_message")) && (
+                      <div className="p-4 bg-muted/50 border rounded-lg">
+                        <h4 className="text-sm font-medium mb-2">Redirect Preview:</h4>
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          {form.watch("redirect_message") && (
+                            <p>Message: "{form.watch("redirect_message")}"</p>
+                          )}
+                          {form.watch("redirect_button_text") && form.watch("redirect_url") && (
+                            <div className="flex items-center gap-2">
+                              <span>Button:</span>
+                              <div className="px-3 py-1 bg-primary text-primary-foreground rounded text-xs">
+                                {form.watch("redirect_button_text")}
+                              </div>
+                              <span>→ {form.watch("redirect_url")}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 

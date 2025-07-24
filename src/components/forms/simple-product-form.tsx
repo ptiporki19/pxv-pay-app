@@ -364,6 +364,7 @@ export function SimpleProductForm({ initialData, onSuccess }: SimpleProductFormP
                           }}
                           placeholder="Describe your product in detail. What makes it special? What will customers get?"
                           maxHeight="200px"
+                          outputFormat="text"
                         />
                         {descriptionError && (
                           <p className="text-sm text-red-600">{descriptionError}</p>
